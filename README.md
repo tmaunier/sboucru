@@ -5,7 +5,7 @@ Django : Version 2.0.3
 
 Virtualenv :
 
-  Programming language : Python3
+  Programming language : Python 3.6
 
   Pip packages :
                   amqp==2.2.2
