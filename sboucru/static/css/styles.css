@@ -1,0 +1,28 @@
+/* Fonts */
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+
+/* Reset */
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* Helpers */
+
+.wrapper {
+  width: 1440px;
+  max-width: 90%;
+  margin: 0 auto;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Main Styles */
+
+body {
+  background-color: #f2f2f2;
+  font-family: 'Open Sans', Helvetica, sans-serif;
+}
