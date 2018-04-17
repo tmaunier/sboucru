@@ -1,4 +1,4 @@
-from django.shortcuts import render 
+from django.shortcuts import render
 
 
 def home(request):
@@ -6,6 +6,3 @@ def home(request):
 
 def about(request):
     return render (request, "pages/about.html")
-
-def contact(request):
-    return render (request, "pages/contact.html")

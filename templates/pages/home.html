@@ -1,8 +1,16 @@
 {%extends 'layouts/base.html'%}
+{% load staticfiles %}
 
-{%block content%}
-<h1> Welcome to the OUCRU's Serum Bank Manager </h1>
-<p>Visit About page
-<a href="about" >here</a>
-</p>
-{%endblock content%}
+<head>
+  {% block styles %}
+      <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  {% endblock %}
+</head>
+<body>
+  {%block content%}
+  <h1> Welcome to the OUCRU's Serum Bank Manager </h1>
+  <p>Visit About page
+  <a href="about" >here</a>
+  </p>
+  {%endblock content%}
+</body>

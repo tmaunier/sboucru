@@ -25,21 +25,23 @@ SECRET_KEY = '%r_5ub9iu!-fe*tu=d*f+v&@d@)y*kj=#b&7fzr9$lirg6$l8x'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"] #Do not let the * for the deployment !!!
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    #preinstalled
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    #added packages
     'django_extensions',
-
+    'bootstrapform',
+    #apps
     'sboapp',
 ]
 
@@ -131,3 +133,6 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
+
+FILE_UPLOAD_HANDLERS = ("django_excel.ExcelMemoryFileUploadHandler",
+                        "django_excel.TemporaryExcelFileUploadHandler")

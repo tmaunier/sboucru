@@ -17,13 +17,18 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.conf.urls import handler404, handler500
+
 
 from . import views
 
 urlpatterns = [
     path('', views.home, name='home'),
     path('about/', views.about, name='about'),
-    path('contact/', views.contact, name='contact'),
-    path('sboapp/', include('sboapp.urls')),
+    path('sboapp/', include('sboapp.urls', namespace="sboapp")),
     path('admin/', admin.site.urls),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+
+handler404 = 'sboapp.views.error_404_view'
+#handler500 = 'sboapp.views.error_500_view'
