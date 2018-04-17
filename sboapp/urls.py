@@ -7,6 +7,8 @@ app_name = "sboapp"
 urlpatterns = [
     path('dbtest/',views.databasetest, name='dbtest'),
     path('staff/', views.staff, name='staff'),
+    path('staff/query', views.query, name ='query'),
+    path('staff/query/display_export', views.display_export, name ='display_export'),
     path('import_data/',views.import_data, name='import_data'),
     path('import_data/display_import',views.display_import, name='display_import'),
      # ex: /sboapp/

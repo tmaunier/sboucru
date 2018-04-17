@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {%extends 'layouts/base.html'%}
-{% load staticfiles %}
+{% load static %}
 
 {%block title%} Serum Bank OUCRU app {%endblock%}
 
@@ -31,7 +31,6 @@
             <input class="form-check-input" type="radio" name="results" id="results" value="results" onclick="test(this,this.id)">
             <label class="form-check-label" for="results">Results</label>
             <fieldset class="conditional">
-            </div>
               <!-- display results table content : disease_name - test_name -->
               <!-- choose among the different combinaison -->
               <div class="form-row align-items-center">
@@ -48,7 +47,9 @@
               <option value="7">Influenza - Elisa</option>
               </select>
               </div>
+              </div>
   					</fieldset>
+            </div>
             <div class="text-center">
               <input type="submit"
               value="Confirm"

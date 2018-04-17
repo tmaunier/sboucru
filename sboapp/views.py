@@ -20,6 +20,19 @@ def databasetest(request):
 def staff(request):
     return render (request, "sboapp/pages/staff.html")
 
+def query(request):
+    # filter by parameters
+    dataserum = Serum.objects.all()
+    datasite = Site.objects.all()
+    dataward = Ward.objects.all()
+    datafreezer = Freezer.objects.all()
+    args = {"serum_nb": dataserum,"site_nb": datasite,"ward_nb": dataward,"freezer_nb": datafreezer}
+    return render (request, "sboapp/pages/query.html", args)
+
+def display_export(request):
+    # display query answer and export button
+    return render (request, "sboapp/pages/display_export.html")
+
 def import_data(request):
     if "GET" == request.method:
         return render(request, "sboapp/pages/import_data.html", {})

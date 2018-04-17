@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+{%extends 'layouts/base.html'%}
+
+{%block title%} Serum Bank OUCRU app {%endblock%}
+
+{%block content%}
+<html>
+    <head>
+        <title>
+            Page where I display Query answer & Export button
+        </title>
+    </head>
+    <body>
+  <p>This is the page export page</p>
+  <form action="{% url "sboapp:query" %}" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="text-center">
+      <input type="submit"
+             value="Go back to Query page"
+             style="border: 1px solid green; padding:5px; border-radius: 2px; cursor: pointer;">
+      </div>
+
+  </form>
+    </body>
+</html>
+{%endblock content%}
