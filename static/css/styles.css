@@ -84,10 +84,11 @@ body {
   width:50px;
   height:50px;
   overflow:hidden;
-  border-radius: 47%;
+  border-radius: 20%;
   box-shadow: 6px 3px 4px #007cb6;
 }
 
+/* FORMS  */
 .control:checked
 ~ .conditional,
 			#serums:checked
@@ -165,6 +166,8 @@ body {
       .slider::-moz-range-thumb:hover {
           background: #2989d8;
       }
+
+      /* Temporary box home page  */
       .box{
     	width:200px;
     	height:200px;
@@ -177,8 +180,8 @@ body {
       left: 50%;
       /* bring your own prefixes */
       transform: translate(-50%, -50%);
-    }
-    .box:hover {
+      }
+      .box:hover {
         opacity: 1; /* Fully shown on mouse-over */
 
-    }
+      }

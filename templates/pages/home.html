@@ -13,6 +13,8 @@
   {%block content%}
   <div class="text-center">
     <h1> Welcome to the OUCRU's Serum Bank Manager </h1>
+    
+    <!-- Temporary login box -->
     <div class="box">
   <form method="post" action="{% url "sboapp:staff" %}" enctype="multipart/form-data">
   {% csrf_token %}

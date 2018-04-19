@@ -4,11 +4,15 @@
 {%block title%} Serum Bank OUCRU app {%endblock%}
 
 {%block content%}
+<a href = "{% url "sboapp:staff"%}">Go back to your Dashboard</a>
+<div class="text-center">
 <h1>*Display database tables*</h1>
+</div>
     <p>
       <p>
         <p>
-          Serum Table
+          <h2>Serum Table</h2>
+          <br>
           <p>local_sample_id -- site_id -- coll_num -- sample_id -- age_min -- age_max -- original_age -- gender_1ismale_value --
             coll_date -- day_value -- month_value -- year -- ward_id -- results_file_id</p>
           <ul>
@@ -29,16 +33,22 @@
           --{{ serum.results_file_id}}</li>
           {% endfor %}
           </ul>
-
-          Site Table
+          <br>
+          <h2>
+            Site Table
+          </h2>
+          <br>
           <p>site_id -- site_name</p>
           <ul>{% for site in site_nb %}
             <li>{{ site.site_id}}
               --
               {{ site.site_name}}</li>
             {% endfor %}</ul>
-
-          Ward Table
+          <br>
+          <h2>
+            Ward Table
+          </h2>
+          <br>
           <p>ward_id -- ward_name -- khoa</p>
           <ul>{% for ward in ward_nb %}
             <li>{{ ward.ward_id}}
@@ -47,8 +57,11 @@
               --
               {{ ward.khoa}}</li>
             {% endfor %}</ul>
-
-          Freezer Table
+            <br>
+            <h2>
+              Freezer Table
+            </h2>
+            <br>
           <p>sample_auto_id -- study_code -- site_id -- sample_id -- original_age -- gender_1ismale_value -- coll_date --
           ward_id -- sample_type -- aliquot_no -- volume -- freezer_section_name -- subdivision_1_position
         -- subdivision_2_position -- subdivision_3_position -- subdivision_4_position</p>
@@ -73,7 +86,7 @@
         </p>
       </p>
     </p>
-  <a href="/">Go back Home</a>
+<br>
 
 
 {%endblock content%}

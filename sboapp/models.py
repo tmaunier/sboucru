@@ -12,7 +12,7 @@ class Serum(models.Model):
     site = models.ForeignKey('Site',on_delete=models.PROTECT)
     coll_num = models.SmallIntegerField()
     sample_id = models.CharField(primary_key=True, max_length=8)
-    birth_date = models.IntegerField()
+    birth_year = models.IntegerField()
     age_min = models.DecimalField(max_digits=5, decimal_places=2)
     age_max = models.DecimalField(max_digits=5, decimal_places=2)
     gender_1ismale_value = models.PositiveIntegerField()
@@ -28,7 +28,7 @@ class Serum(models.Model):
 
     def __str__ (self):
         #Method used to display a serum object
-        return "sample id :{}, birth date :{}, gender (1 is male value) :{}".format(self.sample_id, self.birth_date, self.gender_1ismale_value)
+        return "Sample_ID : {}".format(self.sample_id)
 
 
 
