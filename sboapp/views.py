@@ -255,22 +255,6 @@ def import_location(request):
         form = UploadFileForm()
     return render(request,'sboapp/pages/import_location.html', {'form': form })
 
-# class ElisaPathogen(FormView):
-#     template_name = 'import_elisa_choices.html'
-#     form_class = PathogenForm
-#     success_url = 'sboapp/staff/import_elisa/choices/'
-#
-#     def form_valid(self, form):
-#         # This method is called when valid form data has been POSTed.
-#         # It should return an HttpResponse.
-#         form.set_pathogen()
-#         return super().form_valid(form)
-
-# def get_elisa_pathogens(request):
-#     args = get_data(request)
-#     pathogens = Elisa.objects.values('pathogen').distinct()
-#     args["pathogens"]= pathogens
-#     return render (request, "sboapp/pages/import_elisa_choices.html", args)
 
 def init_elisa(request):
     ER1 = Elisa.objects.create(result_id='ElisaChik_1', pathogen='chikungunya', sample=Serum.objects.get(sample_id='AG020001'), elisa_day='25', elisa_month='02', elisa_year='2010')
@@ -281,35 +265,55 @@ def init_elisa(request):
     ER3.save()
     ER4 = Elisa.objects.create(result_id='ElisaChik_4', pathogen='chikungunya', sample=Serum.objects.get(sample_id='AG020004'), elisa_day='25', elisa_month='02', elisa_year='2010')
     ER4.save()
+    ER5 = Elisa.objects.create(result_id='ElisaChik_5', pathogen='dengue', sample=Serum.objects.get(sample_id='AG020005'), elisa_day='25', elisa_month='02', elisa_year='2010')
+    ER5.save()
+    ER6 = Elisa.objects.create(result_id='ElisaChik_6', pathogen='rickettsia', sample=Serum.objects.get(sample_id='AG020006'), elisa_day='25', elisa_month='02', elisa_year='2010')
+    ER6.save()
     return redirect('import_elisa_choices')
 
 def import_elisa_choices(request):
-    # get_elisa_pathogens(request)
     if request.method == "POST":
         form = PathogenForm(request.POST)
-        # form.widget.choices = ()
-        # form.choices = (('1', 'First and only',),('2', 'Baguette du fromage',),)
         if form.is_valid():
-            pathogen = "Chikungunya"
+            pathogen = form.cleaned_data.get('pathogen')
+            if pathogen == "chikungunya":
+                return redirect('import_chik_elisa', pathogen)
+            elif pathogen == "dengue":
+                return redirect('import_dengue_elisa', pathogen)
+            elif pathogen == "rickettsia":
+                return redirect('import_rickettsia_elisa', pathogen)
             #pathogen = form.save() ???? refund from cleaned_data ?
-            #if pathogen == chik
-            return redirect('import_chik_elisa', pathogen)
-            #if pathogen == dengue
-            # return redirect('import_dengue_elisa', pathogen)
-            #if pathogen == rickettsia
-            # return redirect('import_rickettsia_elisa', pathogen)
+            else:
+                render (request, "sboapp/pages/import_elisa_choices.html", {'error_note':'Please select a pathogen'})
 
     else:
         form = PathogenForm()
-        # form.widget.choices = ()
-        # form.choices = (('1', 'First and only',),('2', 'Baguette du fromage',),)
-    #Depending on the form response, send the user to import_chik_elisa, import_dengue_elisa or import_rickettsia_elisa
     return render (request, "sboapp/pages/import_elisa_choices.html", {'form':form})
 
 def import_chik_elisa(request):
     #import function
-    #When you fill each line you have to add 'chikungunya' to the pathogen value
-    return render (request, "sboapp/pages/import_chik_elisa.html")
+    if request.method == "POST":
+        form = UploadFileForm(request.POST,request.FILES)
+        if form.is_valid():
+            #When you fill each line you have to add 'chikungunya' to the pathogen value
+            # else:
+            #     headings_error = 'File\'s header error, no match for sample_id, site_id or ward_id \n These data can\'t be imported'
+
+            if len(sample_exist_list) != 0 or len(no_match_site) !=0 or len(no_match_ward) !=0:
+                headings_error=''
+                sample_exist_warning = 'Warning ! These following samples already exist in the serum bank, they were not imported : \n'
+                site_exist_warning = 'Warning ! The site_id of these samples doesn\'t match with any of those existing in the database, they were not imported : \n'
+                ward_exist_warning = 'Warning ! The ward_id of these samples doesn\'t match with any of those existing in the database, they were not imported : \n'
+                args = {'form': form, 'success':'Congratulations, your data have been imported successfully !', 'context':sheet_array,'sheet':sheet, 'db_list': db_list, 'sample_exist':sample_exist_list, 'sample_exist_warning':sample_exist_warning, 'site_exist':no_match_site, 'site_exist_warning':site_exist_warning, 'ward_exist':no_match_ward, 'ward_exist_warning':ward_exist_warning, 'headings_error':headings_error}
+            else:
+                args = {'form': form,'success':'Congratulations, your data have been imported successfully !', 'context':sheet_array, 'db_list': db_list}
+                return render (request, "sboapp/pages/import_chik_elisa.html", args)
+        else:
+            warning = 'WARNING !\n import has failed \n the form is not valid'
+            return render (request, "sboapp/pages/import_chik_elisa.html",{'warning':warning})
+    else:
+        form = UploadFileForm()
+    return render (request, "sboapp/pages/import_chik_elisa.html", {'form': form })
 
 def import_dengue_elisa(request):
     #import function
