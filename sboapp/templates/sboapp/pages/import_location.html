@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+{%extends 'layouts/base.html'%}
+{% load static %}
+{%block title%} Serum Bank OUCRU app {%endblock%}
+
+<html>
+    <head>
+      {% block javascript %}
+      <script type="text/javascript" src="{% static 'bootstrap/js/bootstrap.js' %}"></script>
+      <script type="text/javascript" src="{% static 'js/import_data.js' %}"></script>
+      <link rel="stylesheet" href="{% static 'css/table.css' %}">
+      <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+      {% endblock %}
+        <title>
+            Import Location
+        </title>
+    </head>
+    <body>
+      {%block content%}
+      <a href = "{% url "sboapp:staff"%}">Go back to your Dashboard</a>
+      <div class=text-center>  <h2>Serum's location Import page</h2> <br>
+        <h1>Please, select a freezer file</h1>
+        <br>
+      </div>
+      <form action="" method="post" enctype="multipart/form-data">
+        <table>
+          {{form.as_table}}
+        </table>
+        {% csrf_token %}
+        <br>
+        <div class="text-center">
+          <input type="submit"
+          value="Upload"
+          style="border: 1px solid green; padding:5px; border-radius: 2px; cursor: pointer;">
+        </div>
+          <fieldset>
+            <div class="text-center">
+              <h1>Errors Report </h1>
+            </div>
+          <br>
+          {{headings_error}}
+          <br>
+          {{sample_doesnt_exist_warning}}
+          <br>
+          {{sample_doesnt_exist}}
+          <br>
+          {{sample_exist_in_freezer_warning}}
+          <br>
+          {{sample_exist_in_freezer_list}}
+          <br>
+          </fieldset>
+          <fieldset>
+            <div class="text-center">
+              <h1>Data imported</h1>
+              {{success}}
+            </div>
+            <table class="data-table">
+          		<thead>
+                <th>study</th>
+                <th>sample</th>
+                <th>type</th>
+                <th>aliquot</th>
+                <th>volume</th>
+                <th>freezer</th>
+                <th>shelf</th>
+                <th>rack</th>
+                <th>box</th>
+                <th>tube</th>
+          			</tr>
+          		</thead>
+          		<tbody>
+                {% for row in db_list %}
+                  {% if forloop.first == False %}
+                  <!-- Headers are not displayed -->
+              		  <tr>
+                      {% for value in row %}
+                          <td>{{ value }}</td>
+                      {% endfor %}
+                    </tr>
+                  {% endif %}
+                {% endfor %}
+          		</tbody>
+          	</table>
+          </fieldset>
+      </form>
+      {{warning}}
+      {%endblock content%}
+    </body>
+</html>

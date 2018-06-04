@@ -18,7 +18,7 @@
       {%block content%}
       <a href = "{% url "sboapp:staff"%}">Go back to your Dashboard</a>
       <div class="text-center">
-        <p>This is the query page </p>
+        <!-- <p>This is the query page </p> -->
       </div>
     <form method="post" action="{% url "sboapp:query" %}" enctype="multipart/form-data">
     <fieldset>
@@ -86,7 +86,30 @@
 
       </p>
       <br>
-      <div class="slidecontainer">
+      <p>
+
+        <label for="birth_year">Exact_age :</label>
+
+        <input type="text" name="age" id="age" placeholder="Ex : 15" size="8" maxlength="3" />
+
+      </p>
+      <br>
+      <div class="form-row align-items-center">
+      <div class="col-auto my-1">
+      <label class="mr-sm-2" for="inlineFormCustomSelect">Age_min :</label>
+      <select class="custom-select mr-sm-2" id="inlineFormCustomSelect">
+      <option selected>-- </option>
+      </select>
+      </div>
+      <div class="col-auto my-1">
+      <label class="mr-sm-2" for="inlineFormCustomSelect">Age_max :</label>
+      <select class="custom-select mr-sm-2" id="inlineFormCustomSelect">
+      <option selected>-- </option>
+      </select>
+      </div>
+      </div>
+      <br>
+      <!-- <div class="slidecontainer">
       <label for="age_min">age_min :</label>
       <input type="range" min="0" max="100" value="50" class="slider" id="age_min">
       <p>Value: <span id="demo"></span></p>
@@ -94,7 +117,7 @@
       <label for="age_max">age_max :</label>
       <input type="range" min="0" max="100" value="50" class="slider" id="age_max">
       <p>Value: <span id="demokd"></span></p>
-      </div>
+      </div> -->
 
       <br>
       <div class="form-check form-check-inline">
@@ -137,7 +160,7 @@
       </div>
       </div>
 
-      <br>
+      <!-- <br>
       <div class="form-row align-items-center">
       <div class="col-auto my-1">
       <label class="mr-sm-2" for="inlineFormCustomSelect">Year of collect (TEST) :</label>
@@ -148,7 +171,7 @@
       {% endfor %}
       </select>
       </div>
-      </div>
+      </div> -->
       <br>
       <div class="form-check">
         <p>Ward :</p>
@@ -160,70 +183,90 @@
       <br>
       <div class="form-check">
       <p>Freezer location : </p>
-      <p>(including freezer_section_name, subdivision 1,2,3 and 4 position)</p>
       <input class="form-check-input" type="checkbox" name="location" value="location" onclick="test(this,this.id)">
-      <label for="location">I want to display this information</label>
+      <label for="location">freezer name, shelf, rack, box, tube</label>
+      <br>
+      <input class="form-check-input" type="checkbox" name="location" value="location" onclick="test(this,this.id)">
+      <label for="location">sample_type, aliquot_no and volume</label>
       </div>
       <br>
-      <div class="form-check">
-      <p>Freezer additional information : </p>
-      <p>(including sample_type, aliquot_no and volume)</p>
-      <input class="form-check-input" type="checkbox" name="location" value="location" onclick="test(this,this.id)">
-      <label for="location">I want to display this information</label>
-      </div>
-      <br>
-      <div class="form-check form-check-inline">
-        <p>Results :</p>
-      <input class="form-check-input" type="checkbox" name="results" id="results" value="results" onclick="test(this,this.id)">
-      <label class="form-check-label" for="results">ELISA</label>
-      <fieldset class="conditional">
-        <div class="form-row align-items-center">
-        <div class="col-auto my-1">
-        <label class="mr-sm-2" for="inlineFormCustomSelect">Disease - ELISA</label>
-        <select class="custom-select mr-sm-2" id="inlineFormCustomSelect">
-        <option selected>Choose...</option>
-        <option value="1">Chikungunya</option>
-        <option value="2">Dengue</option>
-        <option value="3">Rickettsia</option>
-        </select>
-        </div>
-        </div>
-      </fieldset>
-      <input class="form-check-input" type="checkbox" name="results" id="results" value="results" onclick="test(this,this.id)">
-      <label class="form-check-label" for="results">PMA</label>
-      <fieldset class="conditional">
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
-          <label class="form-check-label" for="disease_pma">CHIKV.E1.mutant</label><br>
-          <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
-          <label class="form-check-label" for="disease_pma">CHIKV.E2</label><br>
-          <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
-          <label class="form-check-label" for="disease_pma">DV1...NS1</label><br>
-          <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
-          <label class="form-check-label" for="disease_pma">DV2...NS1</label><br>
-          <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
-          <label class="form-check-label" for="disease_pma">DV3...NS1</label><br>
-          <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
-          <label class="form-check-label" for="disease_pma">DV4...NS1</label><br>
-          <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
-          <label class="form-check-label" for="disease_pma">JEV...NS1</label><br>
-          <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
-          <label class="form-check-label" for="disease_pma">SLEV...NS1</label><br>
-          <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
-          <label class="form-check-label" for="disease_pma">TBEV...NS1</label><br>
-          <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
-          <label class="form-check-label" for="disease_pma">WNV...NS1</label><br>
-          <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
-          <label class="form-check-label" for="disease_pma">YFV...NS1</label><br>
-          <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
-          <label class="form-check-label" for="disease_pma">ZIKV.Brasil...NS1</label><br>
-          <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
-          <label class="form-check-label" for="disease_pma">ZIKV...NS1</label><br>
-        </div>
-      </fieldset>
-    </div>
+      <div class="form-check form-check-inline"><label for="sorted_results">Results sorted by : </label> <br>
+        <input class="form-check-input" type="checkbox" name="results" id="results" value="results" onclick="test(this,this.id)">
+        <label class="form-check-label" for="sorted_results">Test</label>
+        <fieldset class="conditional">
+          <input class="form-check-input" type="checkbox" name="results" id="results" value="results" onclick="test(this,this.id)">
+          <label class="form-check-label" for="results">ELISA</label>
+            <fieldset class="conditional">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+                <label class="form-check-label" for="disease_pma">Chikungunya</label><br>
+                <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+                <label class="form-check-label" for="disease_pma">Dengue</label><br>
+                <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+                <label class="form-check-label" for="disease_pma">Rickettsia</label><br>
+              </div>
+            </fieldset>
+          <input class="form-check-input" type="checkbox" name="results" id="results" value="results" onclick="test(this,this.id)">
+          <label class="form-check-label" for="results">PMA</label>
+            <fieldset class="conditional">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+                <label class="form-check-label" for="disease_pma">CHIKV.E1.mutant</label><br>
+                <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+                <label class="form-check-label" for="disease_pma">CHIKV.E2</label><br>
+                <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+                <label class="form-check-label" for="disease_pma">DV1...NS1</label><br>
+                <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+                <label class="form-check-label" for="disease_pma">DV2...NS1</label><br>
+                <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+                <label class="form-check-label" for="disease_pma">DV3...NS1</label><br>
+                <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+                <label class="form-check-label" for="disease_pma">DV4...NS1</label><br>
+                <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+                <label class="form-check-label" for="disease_pma">JEV...NS1</label><br>
+                <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+                <label class="form-check-label" for="disease_pma">SLEV...NS1</label><br>
+                <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+                <label class="form-check-label" for="disease_pma">TBEV...NS1</label><br>
+                <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+                <label class="form-check-label" for="disease_pma">WNV...NS1</label><br>
+                <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+                <label class="form-check-label" for="disease_pma">YFV...NS1</label><br>
+                <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+                <label class="form-check-label" for="disease_pma">ZIKV.Brasil...NS1</label><br>
+                <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+                <label class="form-check-label" for="disease_pma">ZIKV...NS1</label><br>
+              </div>
+            </fieldset>
+        </fieldset>
+        <br>
+        <input class="form-check-input" type="checkbox" name="results" id="results" value="results" onclick="test(this,this.id)">
+        <label class="form-check-label" for="sorted_results">Pathogen</label>
+          <fieldset class="conditional">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+              <label class="form-check-label" for="disease_pma">Chikungunya</label><br>
+              <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+              <label class="form-check-label" for="disease_pma">Dengue</label><br>
+              <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+              <label class="form-check-label" for="disease_pma">Rickettsia</label><br>
+              <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+              <label class="form-check-label" for="disease_pma">Zika</label><br>
+              <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+              <label class="form-check-label" for="disease_pma">Japanese Encephalitis</label><br>
+              <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+              <label class="form-check-label" for="disease_pma">Saint Louis Encephalitis</label><br>
+              <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+              <label class="form-check-label" for="disease_pma">Tick-borne Encephalitis</label><br>
+              <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+              <label class="form-check-label" for="disease_pma">West Nile</label><br>
+              <input class="form-check-input" type="checkbox" name=disease_pma id=disease_pma value=disease_pma onclick="test(this,this.id)">
+              <label class="form-check-label" for="disease_pma">Yellow Fever</label><br>
+            </div>
+          </fieldset>
     </fieldset>
-
+    <br>
+    </div>
     </form>
     <form action="{% url "sboapp:display_export" %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}

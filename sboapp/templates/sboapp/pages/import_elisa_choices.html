@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+{%extends 'layouts/base.html'%}
+{% load static %}
+{%block title%} Serum Bank OUCRU app {%endblock%}
+
+<html>
+    <head>
+      {% block javascript %}
+      <script type="text/javascript" src="{% static 'bootstrap/js/bootstrap.js' %}"></script>
+      <script type="text/javascript" src="{% static 'js/import_data.js' %}"></script>
+      <link rel="stylesheet" href="{% static 'css/table.css' %}">
+      <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+      {% endblock %}
+        <title>
+          Pathogen choice -  Import Elisa results
+        </title>
+    </head>
+    <body>
+      {%block content%}
+      <a href = "{% url "sboapp:staff"%}">Go back to your Dashboard</a>
+      <a href="init_elisa">Init Elisa results</a>
+      <div class=text-center>  <h2>Elisa results Import page</h2> <br>
+        <h1>Please choose the pathogen corresponding to the file you want to import</h1>
+        <br>
+      </div>
+      <div class="text-center">
+      <!-- <form method="post">{% csrf_token %}
+        <div class="form-row align-items-center">
+          <div class="col-auto my-1">
+            <label class="mr-sm-2" for="inlineFormCustomSelect">Pathogen :</label>
+            <select class="custom-select mr-sm-2" id="inlineFormCustomSelect" >
+              <option selected>Choose...</option>
+              <option value=0>Chikungunya</option>
+              <option value=1>Dengue</option>
+              <option value=2>Rickettsia</option>
+
+            </select>
+          </div>
+        </div>
+        <br>
+        <input type="submit" value="Confirm Pathogen" />
+      </form> -->
+      <form action="staff/import_elisa_choices" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Submit" />
+      </form>
+    </div>
+
+
+      <!-- <br>
+      <br>
+      <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <br>
+          <input type="submit"
+          value="Upload"
+          style="border: 1px solid green; padding:5px; border-radius: 2px; cursor: pointer;">
+          -->
+      {% endblock %}
+    </body>
+</html>

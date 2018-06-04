@@ -13,14 +13,21 @@
   {%block content%}
   <div class="text-center">
     <h1> Welcome to the OUCRU's Serum Bank Manager </h1>
-    
+
     <!-- Temporary login box -->
-    <div class="box">
-  <form method="post" action="{% url "sboapp:staff" %}" enctype="multipart/form-data">
-  {% csrf_token %}
-  <br>
+  <div class="box">
+  <form method="post" action="sboapp/staff/">
+    {% csrf_token %}
+    {{ staff }}
+    <br>
+    <label for="staff">User name : </label>
+    <br>
+    <input type="text" name="staff" id="staff" placeholder="Login" size="10" maxlength="8" value="{{ staff }}" required/>
+    <input type="submit" value="Log">
+  </form>
+  <!-- <br>
     <p>
-      <input type="text" name="login" id="login" placeholder="Login" size="10" maxlength="8" />
+    <input id="staff" type="text" name="staff" placeholder="Login" size="10" maxlength="8" value="{{ user_name }}" required>
     </p>
     <br>
     <p>
@@ -37,8 +44,14 @@
       value="Log"
       style="border: 1px solid green; padding:5px; border-radius: 2px; cursor: pointer;">
     </div>
-  </form>
+  </form> -->
 </div>
 </div>
   {%endblock content%}
 </body>
+
+<!-- <form action="/your-name/" method="post">
+    <label for="your_name">Your name: </label>
+    <input id="your_name" type="text" name="your_name" value="{{ current_name }}">
+    <input type="submit" value="OK">
+</form> -->

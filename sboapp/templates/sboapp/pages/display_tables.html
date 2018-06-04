@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+{%extends 'layouts/base.html'%}
+{% load static %}
+
+{%block title%} Serum Bank OUCRU app {%endblock%}
+<head>
+  {% block styles %}
+      <link rel="stylesheet" href="{% static 'css/table.css' %}">
+  {% endblock %}
+</head>
+<body>
+{%block content%}
+<a href = "{% url "sboapp:staff"%}">Go back to your Dashboard</a>
+<div class="text-center">
+
+    <h1>Site Table </h1>
+  <br>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>site id</th>
+        <th>site name</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for site in site_nb %}
+      <tr>
+        <td>{{ site.site_id}}</td>
+        <td>{{ site.site_name}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <br>
+  <h1>Ward Table</h1>
+  <br>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ward id</th>
+        <th>ward name</th>
+        <th>khoa</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ward in ward_nb %}
+      <tr>
+        <td>{{ ward.ward_id}}</td>
+        <td>{{ ward.ward_name}}</td>
+        <td>{{ ward.khoa}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <h1>Serum Table</h1>
+<br>
+	<table class="data-table">
+		<thead>
+			  <th>local_sample_id</th>
+				<th>site_id</th>
+				<th>coll_num</th>
+				<th>sample_id</th>
+        <th>birth_year</th>
+				<th>age</th>
+				<th>age_min</th>
+				<th>age_max</th>
+				<th>gender</th>
+				<th>coll_date</th>
+				<th>day</th>
+				<th>month</th>
+				<th>year</th>
+				<th>ward_id</th>
+			</tr>
+		</thead>
+		<tbody>
+      {% for serum in serum_sample_list %}
+		  <tr>
+        <td>{{ serum.local_sample_id}}</td>
+        <td>{{ serum.site_id}}</td>
+        <td>{{ serum.coll_num}}</td>
+        <td>{{ serum.sample_id}}</td>
+        <td>{{ serum.birth_year}}</td>
+        <td>{{ serum.age}}</td>
+        <td>{{ serum.age_min}}</td>
+        <td>{{ serum.age_max}}</td>
+        <td>{{ serum.gender_1ismale_value}}</td>
+        <td>{{ serum.coll_date}}</td>
+        <td>{{ serum.day_value}}</td>
+        <td>{{ serum.month_value}}</td>
+        <td>{{ serum.year}}</td>
+        <td>{{ serum.ward_id}}</td>
+      </tr>
+      {% endfor %}
+		</tbody>
+	</table>
+
+<br>
+<br>
+<h1>Freezer Table</h1>
+<br>
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>study</th>
+      <th>sample</th>
+      <th>type</th>
+      <th>aliquot</th>
+      <th>volume</th>
+      <th>freezer</th>
+      <th>shelf</th>
+      <th>rack</th>
+      <th>box</th>
+      <th>tube</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for freezer in freezer_sample_list %}
+    <tr>
+      <td>{{ freezer.study_code}}</td>
+      <td>{{ freezer.sample_id}}</td>
+      <td>{{ freezer.sample_type}}</td>
+      <td>{{ freezer.aliquot_no}}</td>
+      <td>{{ freezer.volume}}</td>
+      <td>{{ freezer.freezer_section_name}}</td>
+      <td>{{ freezer.subdivision_1_position}}</td>
+      <td>{{ freezer.subdivision_2_position}}</td>
+      <td>{{ freezer.subdivision_3_position}}</td>
+      <td>{{ freezer.subdivision_4_position}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}
+</body>
