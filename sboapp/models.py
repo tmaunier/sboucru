@@ -55,7 +55,7 @@ class Ward(models.Model):
 
 class Freezer(models.Model):
     study_code = models.CharField(max_length=10, blank=True, null=True)
-    sample = models.OneToOneField('Serum',on_delete=models.PROTECT, primary_key=True)
+    sample = models.OneToOneField('Serum',on_delete=models.CASCADE, primary_key=True)
     sample_type = models.CharField(max_length=30, blank=True, null=True)
     aliquot_no = models.PositiveIntegerField(blank=True, null=True)
     volume = models.SmallIntegerField(blank=True, null=True)
@@ -75,7 +75,7 @@ class Freezer(models.Model):
 class Elisa(models.Model):
     result_id = models.CharField(primary_key=True, max_length=25)
     pathogen = models.CharField(max_length=25)
-    sample = models.OneToOneField('Serum',on_delete=models.PROTECT)
+    sample = models.ForeignKey('Serum',on_delete=models.CASCADE)
     elisa_day = models.IntegerField()
     elisa_month = models.IntegerField()
     elisa_year = models.IntegerField()
@@ -85,10 +85,10 @@ class Elisa(models.Model):
 
     def __str__ (self):
         #Method used to display an elisa object
-        return "Sample_ID : {}, Result_ID : {}".format(self.sample_id, self.result_id)
+        return "{}".format(self.result_id)
 
 class Chik_elisa(models.Model):
-    result_id = models.OneToOneField('Elisa',on_delete=models.PROTECT, primary_key=True)
+    elisa = models.OneToOneField('Elisa',on_delete=models.CASCADE, primary_key=True, db_column='elisa')
     sample_absorbance = models.DecimalField(max_digits=5, decimal_places=3, null=True)
     negative_absorbance = models.DecimalField(max_digits=5, decimal_places=3, null=True)
     cut_off_1_absorbance = models.DecimalField(max_digits=5, decimal_places=3, null=True)
@@ -96,17 +96,17 @@ class Chik_elisa(models.Model):
     positive_absorbance = models.DecimalField(max_digits=5, decimal_places=3, null=True)
     cut_off = models.DecimalField(max_digits=5, decimal_places=3, null=True)
     novatech_units = models.DecimalField(max_digits=5, decimal_places=3, null=True)
-    result = models.IntegerField(null=True)
+    result_chik = models.IntegerField(null=True)
 
     class Meta:
         db_table = 'Chik_elisa'
 
     def __str__ (self):
         #Method used to display a serum object
-        return "Result_CHIK_ID : {}".format(self.result_id)
+        return "{}".format(self.elisa)
 
 class Dengue_elisa(models.Model):
-    result_id = models.OneToOneField('Elisa',on_delete=models.PROTECT, primary_key=True)
+    elisa = models.OneToOneField('Elisa',on_delete=models.CASCADE, primary_key=True, db_column='elisa')
     sample_absorbance = models.DecimalField(max_digits=5, decimal_places=3, null=True)
     negative_absorbance = models.DecimalField(max_digits=5, decimal_places=3, null=True)
     positive_absorbance = models.DecimalField(max_digits=5, decimal_places=3, null=True)
@@ -118,17 +118,17 @@ class Dengue_elisa(models.Model):
     positive_cut_off_ratio = models.DecimalField(max_digits=5, decimal_places=3, null=True)
     dengue_index = models.DecimalField(max_digits=5, decimal_places=3, null=True)
     panbio_unit = models.DecimalField(max_digits=5, decimal_places=3, null=True)
-    result = models.IntegerField(null=True)
+    result_dengue = models.IntegerField(null=True)
 
     class Meta:
         db_table = 'Dengue_elisa'
 
     def __str__ (self):
         #Method used to display a serum object
-        return "Result_DENGUE_ID : {}".format(self.result_id)
+        return "{}".format(self.elisa)
 
 class Rickettsia_elisa(models.Model):
-    result_id = models.OneToOneField('Elisa',on_delete=models.PROTECT, primary_key=True)
+    elisa = models.OneToOneField('Elisa',on_delete=models.CASCADE, primary_key=True, db_column='elisa')
     scrub_typhus = models.DecimalField(max_digits=5, decimal_places=3, null=True)
     typhus = models.DecimalField(max_digits=5, decimal_places=3, null=True)
 
@@ -137,7 +137,7 @@ class Rickettsia_elisa(models.Model):
 
     def __str__ (self):
         #Method used to display a serum object
-        return "Result_RICKETTSIA_ID : {}".format(self.result_id)
+        return "{}".format(self.elisa)
 #
 # class Pma(models.Model):
 #     ag_array_id = models.CharField(primary_key=True, max_length=25)

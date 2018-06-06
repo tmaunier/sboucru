@@ -21,19 +21,7 @@
       <div class=text-center>  <h2>Rickettsia Elisa results Import page</h2> <br>
         <h1>Please, select a Rickettsia Elisa results file</h1>
         <br>
-      <br>
-      <div class="form-row align-items-center">
-      <div class="col-auto my-1">
-      <label class="mr-sm-2" for="inlineFormCustomSelect">Pathogen :</label>
-      <select class="custom-select mr-sm-2" id="inlineFormCustomSelec" >
-      <option selected>Choose...</option>
-      {% for elisa in elisa_nb %}
-      <option id = "counter" name = "counter" value=0>{{elisa.pathogen}}</option>
-      {% endfor %}
-      </select>
-      </div>
-      </div>
-      </div>
+      {{success}}
       <br>
       <form action="" method="post" enctype="multipart/form-data">
         <table>

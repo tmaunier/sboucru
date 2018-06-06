@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, render, redirect #render is mainly used with templates while HttpResponse is used for data (for example)
 from django.http import HttpResponse, HttpResponseBadRequest
-from sboapp.models import Serum, Site, Ward, Freezer, Elisa
+from sboapp.models import Serum, Site, Ward, Freezer, Elisa, Chik_elisa, Dengue_elisa, Rickettsia_elisa
 from django import forms
 from .forms import NameForm, PathogenForm
 from django.views.generic.edit import FormView
@@ -80,21 +80,28 @@ def sample_id_exists(sample_test_id): #Check if the serum_id exists in the Serum
 
 def ward_id_exists(ward_test_id): #Check if the ward_id exists in the Ward table, return Boolean
     exist_count = Ward.objects.filter(ward_id = int(ward_test_id)).count()
-    if exist_count == 1:
+    if exist_count >= 1:
         return True
     else:
         return False
 
 def site_id_exists(site_test_id): #Check if the site_id exists in the Site table, return Boolean
     exist_count = Site.objects.filter(site_id= site_test_id).count()
-    if exist_count == 1:
+    if exist_count >= 1:
         return True
     else:
         return False
 
 def sample_id_exists_in_freezer(sample_test_id): #Check if the sample_id exists in the Freezer table, return Boolean
     exist_count = Freezer.objects.filter(sample= sample_test_id).count()
-    if exist_count == 1:
+    if exist_count >= 1:
+        return True
+    else:
+        return False
+
+def sample_id_exists_in_elisa(sample_test_id): #Check if the sample_test_id exists in Elisa table, return Boolean
+    exist_count = Elisa.objects.filter(sample= sample_test_id).count()
+    if exist_count >= 1:
         return True
     else:
         return False
@@ -107,7 +114,7 @@ def index_finder(headers_list, header_test_list):
     # print ('Index finder failed, no match for this header : ', header_test_list)
     return None
 
-def regex_serum(input_list, output_list, match_index):
+def extract_value(input_list, output_list, match_index):
     if match_index is None:
         output_list.append("")
     else:
@@ -166,19 +173,19 @@ def import_serum(request):
                         no_match_ward.append(tmp)
                     else:
                         tmp=[]
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'local_sample_id']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'local_sample_id']))
                         site_instance_converter(sheet_array[j],tmp,site_id_index) #Need to convert in Site instance
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'coll_num']))
-                        regex_serum(sheet_array[j],tmp,sample_id_index)
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'birth year']))
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'original age',r'age_original']))#special regex
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'age_min']))
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'age_max']))
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'gender_1ismale_value']))
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'coll_date']))
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'day_value']))
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'month_value']))
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'year',r'year_value']))#special regex
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'coll_num']))
+                        extract_value(sheet_array[j],tmp,sample_id_index)
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'birth year']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'original age',r'age_original']))#special regex
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'age_min']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'age_max']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'gender_1ismale_value']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'coll_date']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'day_value']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'month_value']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'year',r'year_value']))#special regex
                         ward_instance_converter(sheet_array[j],tmp,ward_id_index) #Need to convert in Ward instance
                         db_list.append(tmp)
                 #save list to database
@@ -222,17 +229,17 @@ def import_location(request):
                         sample_exist_in_freezer_list.append(sheet_array[j][sample_id_index])
                     else:
                         tmp=[]
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'StudyCode']))
-                        # regex_serum(sheet_array[j],tmp,sample_id_index)
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'StudyCode']))
+                        # extract_value(sheet_array[j],tmp,sample_id_index)
                         serum_instance_converter(sheet_array[j],tmp,sample_id_index) #Need to convert in Serum instance
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'SampleType']))
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'AliquotNo']))
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'Volume']))
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'freezer section name']))
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'subdivision_1_position']))
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'subdivision_2_position']))
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'subdivision_3_position']))
-                        regex_serum(sheet_array[j],tmp,index_finder(sheet_array[0],[r'subdivision_4_position']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'SampleType']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'AliquotNo']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'Volume']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'freezer section name']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'subdivision_1_position']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'subdivision_2_position']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'subdivision_3_position']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'subdivision_4_position']))
                         db_list.append(tmp)
 
                 #save list to database
@@ -257,18 +264,24 @@ def import_location(request):
 
 
 def init_elisa(request):
-    ER1 = Elisa.objects.create(result_id='ElisaChik_1', pathogen='chikungunya', sample=Serum.objects.get(sample_id='AG020001'), elisa_day='25', elisa_month='02', elisa_year='2010')
-    ER1.save()
-    ER2 = Elisa.objects.create(result_id='ElisaChik_2', pathogen='chikungunya', sample=Serum.objects.get(sample_id='AG020002'), elisa_day='25', elisa_month='02', elisa_year='2010')
-    ER2.save()
-    ER3 = Elisa.objects.create(result_id='ElisaChik_3', pathogen='chikungunya', sample=Serum.objects.get(sample_id='AG020003'), elisa_day='25', elisa_month='02', elisa_year='2010')
-    ER3.save()
-    ER4 = Elisa.objects.create(result_id='ElisaChik_4', pathogen='chikungunya', sample=Serum.objects.get(sample_id='AG020004'), elisa_day='25', elisa_month='02', elisa_year='2010')
-    ER4.save()
-    ER5 = Elisa.objects.create(result_id='ElisaChik_5', pathogen='dengue', sample=Serum.objects.get(sample_id='AG020005'), elisa_day='25', elisa_month='02', elisa_year='2010')
-    ER5.save()
-    ER6 = Elisa.objects.create(result_id='ElisaChik_6', pathogen='rickettsia', sample=Serum.objects.get(sample_id='AG020006'), elisa_day='25', elisa_month='02', elisa_year='2010')
-    ER6.save()
+    # ER1 = Elisa.objects.create(result_id='ElisaChik_AG000000_2', pathogen='chikungunya', sample=Serum.objects.get(sample_id='AG020001'), elisa_day='25', elisa_month='02', elisa_year='2010')
+    # ER1.save()
+    # ER2 = Elisa.objects.create(result_id='ElisaChik_2', pathogen='chikungunya', sample=Serum.objects.get(sample_id='AG020002'), elisa_day='25', elisa_month='02', elisa_year='2010')
+    # ER2.save()
+    # ER3 = Elisa.objects.create(result_id='ElisaChik_3', pathogen='chikungunya', sample=Serum.objects.get(sample_id='AG020003'), elisa_day='25', elisa_month='02', elisa_year='2010')
+    # ER3.save()
+    # ER4 = Elisa.objects.create(result_id='ElisaChik_4', pathogen='chikungunya', sample=Serum.objects.get(sample_id='AG020004'), elisa_day='25', elisa_month='02', elisa_year='2010')
+    # ER4.save()
+    # ER5 = Elisa.objects.create(result_id='ElisaChik_5', pathogen='dengue', sample=Serum.objects.get(sample_id='AG020005'), elisa_day='25', elisa_month='02', elisa_year='2010')
+    # ER5.save()
+    # ER6 = Elisa.objects.create(result_id='ElisaChik_6', pathogen='rickettsia', sample=Serum.objects.get(sample_id='AG020006'), elisa_day='25', elisa_month='02', elisa_year='2010')
+    # ER6.save()
+    # ER7 = Chik_elisa.objects.create(elisa=Elisa.objects.get(result_id='ElisaChik_AG000000_2'), sample_absorbance='0.165', negative_absorbance='0.185', cut_off_1_absorbance='0.280', cut_off_2_absorbance='0.287',positive_absorbance='0.731', cut_off='0.284', novatech_units='5.820', result_chik='2')
+    # ER7.save()
+    # ER8 = Dengue_elisa.objects.create(elisa=Elisa.objects.get(result_id='ElisaChik_AG000000_2'), sample_absorbance='0', negative_absorbance='0', positive_absorbance='0', calibrator_1_absorbance='0', calibrator_2_absorbance='0', calibrator_3_absorbance='0', cal_factor='0', cut_off='0', positive_cut_off_ratio='0', dengue_index='0')
+    # ER8.save()
+    # ER9 = Rickettsia_elisa.objects.create(elisa=Elisa.objects.get(result_id='ElisaChik_AG000000_2'), scrub_typhus='0', typhus='0')
+    # ER9.save()
     return redirect('import_elisa_choices')
 
 def import_elisa_choices(request):
@@ -277,12 +290,11 @@ def import_elisa_choices(request):
         if form.is_valid():
             pathogen = form.cleaned_data.get('pathogen')
             if pathogen == "chikungunya":
-                return redirect('import_chik_elisa', pathogen)
+                return redirect('import_elisa/Chikungunya')
             elif pathogen == "dengue":
-                return redirect('import_dengue_elisa', pathogen)
+                return redirect('import_elisa/Dengue')
             elif pathogen == "rickettsia":
-                return redirect('import_rickettsia_elisa', pathogen)
-            #pathogen = form.save() ???? refund from cleaned_data ?
+                return redirect('import_elisa/Rickettsia')
             else:
                 render (request, "sboapp/pages/import_elisa_choices.html", {'error_note':'Please select a pathogen'})
 
@@ -295,35 +307,98 @@ def import_chik_elisa(request):
     if request.method == "POST":
         form = UploadFileForm(request.POST,request.FILES)
         if form.is_valid():
-            #When you fill each line you have to add 'chikungunya' to the pathogen value
-            # else:
-            #     headings_error = 'File\'s header error, no match for sample_id, site_id or ward_id \n These data can\'t be imported'
+            sheet = request.FILES['file'].get_sheet(sheet_name=None, name_columns_by_row=0)
+            sheet_array = sheet.get_array()
+            sample_doesnt_exist_list = []
+            chik_import_list = []
+            db_elisa_list = [['result_id','pathogen','sample','elisa_day','elisa_month','elisa_year']]
+            db_chik_list = [['elisa','sample_absorbance','negative_absorbance','cut_off_1_absorbance', 'cut_off_2_absorbance', 'positive_absorbance', 'cut_off', 'novatech_units', 'result_chik']]
+            sample_id_index = index_finder(sheet_array[0], [r'sample_id'])
+            if sample_id_index is not None:
+                for j in range(1,len(sheet_array)):
+                    if sample_id_exists(sheet_array[j][sample_id_index]) == False:
+                        sample_doesnt_exist_list.append(sheet_array[j][sample_id_index])
+                        # print ('sample exists already')
+                    elif sample_id_exists_in_elisa(sheet_array[j][sample_id_index]) == True:
+                        tmp_elisa_not_first = []
+                        nb = Elisa.objects.filter(sample = sheet_array[j][sample_id_index]).count()
+                        result_id = 'Elisa'+'Chik'+'_'+str(sheet_array[j][sample_id_index])+'_'+str(nb+1)
+                        tmp_elisa_not_first.append(result_id)
+                        chik_import_list.append(result_id)
+                        pathogen = 'chikungunya'
+                        tmp_elisa_not_first.append(pathogen)
+                        serum_instance_converter(sheet_array[j],tmp_elisa_not_first,sample_id_index) #Need to convert in Serum instance
+                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_day',r'processedday']))
+                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_month',r'processedmonth']))
+                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_year',r'processedyear']))
+                        db_elisa_list.append(tmp_elisa_not_first)
 
-            if len(sample_exist_list) != 0 or len(no_match_site) !=0 or len(no_match_ward) !=0:
-                headings_error=''
-                sample_exist_warning = 'Warning ! These following samples already exist in the serum bank, they were not imported : \n'
-                site_exist_warning = 'Warning ! The site_id of these samples doesn\'t match with any of those existing in the database, they were not imported : \n'
-                ward_exist_warning = 'Warning ! The ward_id of these samples doesn\'t match with any of those existing in the database, they were not imported : \n'
-                args = {'form': form, 'success':'Congratulations, your data have been imported successfully !', 'context':sheet_array,'sheet':sheet, 'db_list': db_list, 'sample_exist':sample_exist_list, 'sample_exist_warning':sample_exist_warning, 'site_exist':no_match_site, 'site_exist_warning':site_exist_warning, 'ward_exist':no_match_ward, 'ward_exist_warning':ward_exist_warning, 'headings_error':headings_error}
+                    else:
+                        tmp_elisa_first=[]
+                        result_id = str('Elisa'+'Chik'+'_'+sheet_array[j][sample_id_index]+'_'+'1')
+                        tmp_elisa_first.append(result_id)
+                        chik_import_list.append(result_id)
+                        pathogen = 'chikungunya'
+                        tmp_elisa_first.append(pathogen)
+                        serum_instance_converter(sheet_array[j],tmp_elisa_first,sample_id_index) #Need to convert in Serum instance
+                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_day',r'processedday']))
+                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_month',r'processedmonth']))
+                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_year',r'processedyear']))
+                        db_elisa_list.append(tmp_elisa_first)
+                #save list to database
+                pyexcel.save_as(array=db_elisa_list,name_columns_by_row=0, dest_model=Elisa, dest_initializer=None, dest_mapdict=None, dest_batch_size=None)
             else:
-                args = {'form': form,'success':'Congratulations, your data have been imported successfully !', 'context':sheet_array, 'db_list': db_list}
-                return render (request, "sboapp/pages/import_chik_elisa.html", args)
+                headings_error = 'File\'s header error, no match for sample_id, site_id or ward_id \n These data can\'t be imported'
+
+            # if len(chik_import_list) !=0 :
+            #     for k in range(len(chik_import_list)):
+            #         elisa_obj = Elisa.objects.get(result_id=chik_import_list[k])
+            #         for j in range(1,len(sheet_array)):
+            #             if sheet_array[j] == elisa_obj.get(sample): #comparaison avec le sample_id correspondant au result_id stocke dans chik_import_list
+            #                 tmp_chik_elisa=[]
+            #                 elisa = Elisa.objects.get(result_id=elisa_obj[k])
+            #                 tmp_chik_elisa.append(result)
+            #                 extract_value(sheet_array[j],tmp_chik_elisa,index_finder(sheet_array[0],[r'sample_absorbance']))
+            #                 extract_value(sheet_array[j],tmp_chik_elisa,index_finder(sheet_array[0],[r'negative_absorbance']))
+            #                 extract_value(sheet_array[j],tmp_chik_elisa,index_finder(sheet_array[0],[r'cut_off_1_absorbance']))
+            #                 extract_value(sheet_array[j],tmp_chik_elisa,index_finder(sheet_array[0],[r'cut_off_2_absorbance']))
+            #                 extract_value(sheet_array[j],tmp_chik_elisa,index_finder(sheet_array[0],[r'positive_absorbance']))
+            #                 extract_value(sheet_array[j],tmp_chik_elisa,index_finder(sheet_array[0],[r'cut_off']))
+            #                 extract_value(sheet_array[j],tmp_chik_elisa,index_finder(sheet_array[0],[r'novatech_units']))
+            #                 extract_value(sheet_array[j],tmp_chik_elisa,index_finder(sheet_array[0],[r'result']))
+            #                 db_chik_list.append(tmp_chik_elisa)
+            #
+            #     #save list to database
+            #     pyexcel.save_as(array=db_chik_list,name_columns_by_row=0, dest_model=Chik_elisa, dest_initializer=None, dest_mapdict=None, dest_batch_size=None)
+            # else :
+            #     serums_error = 'None of the samples included in this file exist in the serum bank.'
+            #penser a ajouter serums_error dans les args
+
+            if len(sample_doesnt_exist_list) != 0 :
+                headings_error=''
+                sample_doesnt_exist_warning = 'Warning ! These following samples don\'t exist in the serum bank, you can\'t add their location before to add them in the serum bank: \n'
+                args = {'form': form, 'success':'Congratulations, your data have been imported successfully !', 'context':sheet_array,'sheet':sheet, 'db_chik_list': db_chik_list, 'db_elisa_list':db_elisa_list, 'sample_doesnt_exist':sample_doesnt_exist_list, 'sample_doesnt_exist_warning':sample_doesnt_exist_warning, 'headings_error':headings_error}
+            else:
+                args = {'form': form,'success':'Congratulations, your data have been imported successfully !', 'context':sheet_array, 'db_chik_list': db_chik_list, 'db_elisa_list': db_elisa_list, 'headings_error':headings_error}
+            return render (request, "sboapp/pages/import_chik_elisa.html", args)
         else:
             warning = 'WARNING !\n import has failed \n the form is not valid'
             return render (request, "sboapp/pages/import_chik_elisa.html",{'warning':warning})
     else:
         form = UploadFileForm()
-    return render (request, "sboapp/pages/import_chik_elisa.html", {'form': form })
+    return render (request, "sboapp/pages/import_chik_elisa.html", {'form': form})
 
 def import_dengue_elisa(request):
     #import function
     #When you fill each line you have to add 'dengue' to the pathogen value
-    return render (request, "sboapp/pages/import_dengue_elisa.html")
+    # return render (request, "sboapp/pages/import_dengue_elisa.html")
+    return render (request, "sboapp/pages/import_chik_elisa.html", {'success': 'welcome to dengue page' })
 
 def import_rickettsia_elisa(request):
     #import function
     #When you fill each line you have to add 'rickettsia' to the pathogen value
-    return render (request, "sboapp/pages/import_rickettsia_elisa.html")
+    # return render (request, "sboapp/pages/import_rickettsia_elisa.html")
+    return render (request, "sboapp/pages/import_chik_elisa.html", {'success': 'welcome to rickettsia page' })
 
     # def import_pma(request):
     #     return render (request, "sboapp/pages/staff.html")

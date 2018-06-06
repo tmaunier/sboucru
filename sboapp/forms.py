@@ -7,7 +7,7 @@ def get_choices():
     count=query.count()
     choices=[]
     for i in range(count):
-        choices.append((i,query[i][0],))
+        choices.append((query[i][0],query[i][0],))
     return choices
 
 class NameForm(forms.Form):

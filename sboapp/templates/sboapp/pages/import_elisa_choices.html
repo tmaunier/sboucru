@@ -21,10 +21,10 @@
       <a href="init_elisa">Init Elisa results</a>
       <div class=text-center>  <h2>Elisa results Import page</h2> <br>
         <h1>Please choose the pathogen corresponding to the file you want to import</h1>
+        {{error_note}}
         <br>
       </div>
       <div class="text-center">
-        {{error_note}}
       <!-- <form method="post">{% csrf_token %}
         <div class="form-row align-items-center">
           <div class="col-auto my-1">
@@ -41,7 +41,7 @@
         <br>
         <input type="submit" value="Confirm Pathogen" />
       </form> -->
-      <form action="staff/import_elisa_choices" method="post">
+      <form action="import_elisa_choices" method="post">
         {% csrf_token %}
         {{ form }}
         <input type="submit" value="Submit" />
