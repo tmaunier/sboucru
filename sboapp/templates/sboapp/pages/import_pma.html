@@ -12,16 +12,17 @@
       <link rel="stylesheet" href="{% static 'css/styles.css' %}">
       {% endblock %}
         <title>
-            Import Elisa results
+            Import Pma results
         </title>
     </head>
     <body>
       {%block content%}
       <a href = "{% url "sboapp:staff"%}">Go back to your Dashboard</a>
-      <div class=text-center>  <h2>Dengue Elisa results Import page</h2> <br>
-        <h1>Please, select a Dengue Elisa results file</h1>
+      <div class=text-center>  <h2> Pma results Import page</h2> <br>
+        <h1>Please, select a Pma results file</h1>
         <br>
         {{success}}
+      </div>
       <br>
       <form action="" method="post" enctype="multipart/form-data">
         <table>
@@ -55,22 +56,56 @@
             <table class="data-table">
           		<thead>
                 <th>result_id</th>
-                <th>sample absorbance</th>
-                <th>negative absorbance</th>
-                <th>positive absorbance</th>
-                <th>calibrator 1 absorbance</th>
-                <th>calibrator 2 absorbance</th>
-                <th>calibrator 3 absorbance</th>
-                <th>cal factor</th>
-                <th>cut off</th>
-                <th>positive cut off ratio</th>
-                <th>index</th>
+                <th>ag array id</th>
+                <th>tray</th>
+                <th>batch id</th>
+                <th>sample id</th>
+                <th>start dilution</th>
+                <th>file name</th>
+                <th>processed day</th>
+                <th>processed month</th>
+                <th>processed year</th>
+                <th>batch sent id</th>
+                <th>scanned day</th>
+                <th>scanned month</th>
+                <th>scanned year</th>
                 <th>panbio unit</th>
-                <th>result</th>
           			</tr>
           		</thead>
           		<tbody>
-                {% for row in db_dengue_list %}
+                {% for row in db_pma_list %}
+                  {% if forloop.first == False %}
+                  <!-- Headers are not displayed -->
+              		  <tr>
+                      {% for value in row %}
+                          <td>{{ value }}</td>
+                      {% endfor %}
+                    </tr>
+                  {% endif %}
+                {% endfor %}
+          		</tbody>
+          	</table>
+            <br>
+            <table class="data-table">
+          		<thead>
+                <th>result_id</th>
+                <th>chikv_e1_mutant</th>
+                <th>chikv_e2</th>
+                <th>dv1_ns1</th>
+                <th>dv2_ns1</th>
+                <th>dv3_ns1</th>
+                <th>dv4_ns1</th>
+                <th>jev_ns1</th>
+                <th>slev_ns1</th>
+                <th>tbev_ns1</th>
+                <th>wnv_ns1</th>
+                <th>yfv_ns1</th>
+                <th>zikv_brasil_ns1</th>
+                <th>zikv_ns1</th>
+          			</tr>
+          		</thead>
+          		<tbody>
+                {% for row in db_pma_result_list %}
                   {% if forloop.first == False %}
                   <!-- Headers are not displayed -->
               		  <tr>

@@ -20,12 +20,4 @@ class PathogenForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(PathogenForm, self).__init__(*args, **kwargs)
         self.fields['pathogen'] = forms.ChoiceField(widget=forms.Select,choices=get_choices())
-    # error_css_class = 'error'
-    # required_css_class = 'required'
-    # pathogen = forms.ChoiceField(widget=forms.Select, choices=get_choices())
-    # pathogen = forms.ChoiceField(widget=forms.Select, choices=CHOICES)
-    # choices = (('1', 'First',), ('2', 'Second',))
-
-    # def set_pathogen(self):
-    #     # return pathogen value using the self.cleaned_data dictionary
-    #     pass
+    

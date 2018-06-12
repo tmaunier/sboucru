@@ -12,17 +12,16 @@
       <link rel="stylesheet" href="{% static 'css/styles.css' %}">
       {% endblock %}
         <title>
-            Import Elisa results
+            Modify Location
         </title>
     </head>
     <body>
       {%block content%}
       <a href = "{% url "sboapp:staff"%}">Go back to your Dashboard</a>
-      <div class=text-center>  <h2>Dengue Elisa results Import page</h2> <br>
-        <h1>Please, select a Dengue Elisa results file</h1>
+      <div class=text-center>  <h2>Modify serums location page</h2> <br>
+        <h1>Please, select a freezer file</h1>
         <br>
-        {{success}}
-      <br>
+      </div>
       <form action="" method="post" enctype="multipart/form-data">
         <table>
           {{form.as_table}}
@@ -40,37 +39,26 @@
               <h1>Errors Report </h1>
             </div>
           <br>
-          {{headings_error}}
+          {{sample_doesnt_exist_in_freezer_warning}}
           <br>
-          {{sample_doesnt_exist_warning}}
-          <br>
-          {{sample_doesnt_exist}}
+          {{sample_doesnt_exist_in_freezer_list}}
           <br>
           </fieldset>
           <fieldset>
             <div class="text-center">
-              <h1>Data imported</h1>
+              <h1>Data modified</h1>
               {{success}}
             </div>
             <table class="data-table">
           		<thead>
-                <th>result_id</th>
-                <th>sample absorbance</th>
-                <th>negative absorbance</th>
-                <th>positive absorbance</th>
-                <th>calibrator 1 absorbance</th>
-                <th>calibrator 2 absorbance</th>
-                <th>calibrator 3 absorbance</th>
-                <th>cal factor</th>
-                <th>cut off</th>
-                <th>positive cut off ratio</th>
-                <th>index</th>
-                <th>panbio unit</th>
-                <th>result</th>
+                <th>sample</th>
+                <th>column</th>
+                <th>old value</th>
+                <th>new value</th>
           			</tr>
           		</thead>
           		<tbody>
-                {% for row in db_dengue_list %}
+                {% for row in report_list %}
                   {% if forloop.first == False %}
                   <!-- Headers are not displayed -->
               		  <tr>

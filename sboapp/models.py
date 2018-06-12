@@ -14,8 +14,8 @@ class Serum(models.Model):
     sample_id = models.CharField(primary_key=True, max_length=8)
     birth_year = models.IntegerField(blank=True, null=True)
     age = models.IntegerField(blank=True, null=True)
-    age_min = models.DecimalField(max_digits=5, decimal_places=2)
-    age_max = models.DecimalField(max_digits=5, decimal_places=2)
+    age_min = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    age_max = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     gender_1ismale_value = models.PositiveIntegerField()
     coll_date = models.CharField(max_length=10)
     day_value = models.IntegerField()
@@ -28,7 +28,7 @@ class Serum(models.Model):
 
     def __str__ (self):
         #Method used to display a serum object
-        return "Sample_ID : {}".format(self.sample_id)
+        return "{}".format(self.sample_id)
 
 
 
@@ -70,7 +70,7 @@ class Freezer(models.Model):
 
     def __str__ (self):
         #Method used to display a freezer object
-        return "sample id :{}, freezer section name :{}".format(self.sample_id, self.freezer_section_name)
+        return "{},{}".format(self.sample_id, self.freezer_section_name)
 
 class Elisa(models.Model):
     result_id = models.CharField(primary_key=True, max_length=25)
@@ -128,7 +128,7 @@ class Dengue_elisa(models.Model):
         return "{}".format(self.elisa)
 
 class Rickettsia_elisa(models.Model):
-    elisa = models.OneToOneField('Elisa',on_delete=models.CASCADE, primary_key=True, db_column='elisa')
+    elisa = models.OneToOneField('Elisa',on_delete=models.CASCADE, primary_key=True, db_column='elisa' )
     scrub_typhus = models.DecimalField(max_digits=5, decimal_places=3, null=True)
     typhus = models.DecimalField(max_digits=5, decimal_places=3, null=True)
 
@@ -138,51 +138,52 @@ class Rickettsia_elisa(models.Model):
     def __str__ (self):
         #Method used to display a serum object
         return "{}".format(self.elisa)
-#
-# class Pma(models.Model):
-#     ag_array_id = models.CharField(primary_key=True, max_length=25)
-#     tray = models.CharField(max_length=5)
-#     batch_id = models.CharField(max_length=4)
-#     sample = models.OneToOneField('Serum',on_delete=models.PROTECT)
-#     start_dilution = models.SmallIntegerField(blank=True, null=True)
-#     file_name = models.CharField(max_length=20)
-#     processed_day = models.IntegerField()
-#     processed_month = models.IntegerField()
-#     processed_year = models.IntegerField()
-#     batch_sent_id = models.IntegerField()
-#     scanned_day = models.IntegerField()
-#     scanned_month= models.IntegerField()
-#     scanned_year = models.IntegerField()
-#     panbio_unit = models.DecimalField(max_digits=5, decimal_places=3, null=True)
-#
-#
-#     class Meta:
-#         db_table = 'Pma'
-#
-#     def __str__ (self):
-#         #Method used to display a serum object
-#         return "Sample_ID : {}, agArray_ID : {}".format(self.sample_id,self.ag_array_id)
-#
-# class Pma_result(models.Model):
-#     ag_array = models.OneToOneField('Pma',on_delete=models.PROTECT, primary_key=True)
-#     chikv_e1_mutant = models.DecimalField(max_digits=12, decimal_places=10, null=True)
-#     chikv_e2 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
-#     dv1_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
-#     dv2_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
-#     dv3_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
-#     dv4_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
-#     jev_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
-#     slev_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
-#     tbev_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
-#     wnv_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
-#     yfv_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
-#     zikv_brasil_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
-#     zikv_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
-#
-#
-#     class Meta:
-#         db_table = 'Pma_result'
-#
-#     def __str__ (self):
-#         #Method used to display a serum object
-#         return "agArray_ID : {}".format(self.ag_array_id)
+
+class Pma(models.Model):
+    result_id = models.CharField(primary_key=True, max_length=25) # type Pma_AG000023_1
+    ag_array_id = models.CharField(max_length=25)
+    tray = models.CharField(max_length=5)
+    batch_id = models.CharField(max_length=4)
+    sample = models.ForeignKey('Serum',on_delete=models.CASCADE)
+    start_dilution = models.SmallIntegerField(blank=True, null=True)
+    file_name = models.CharField(max_length=20, null=True)
+    processed_day = models.IntegerField(null=True)
+    processed_month = models.IntegerField(null=True)
+    processed_year = models.IntegerField(null=True)
+    batch_sent_id = models.IntegerField(null=True)
+    scanned_day = models.IntegerField(null=True)
+    scanned_month= models.IntegerField(null=True)
+    scanned_year = models.IntegerField(null=True)
+    panbio_unit = models.DecimalField(max_digits=5, decimal_places=3, null=True)
+
+
+    class Meta:
+        db_table = 'Pma'
+
+    def __str__ (self):
+        #Method used to display a serum object
+        return "{}".format(self.result_id)
+
+class Pma_result(models.Model):
+    pma = models.OneToOneField('Pma',on_delete=models.CASCADE, primary_key=True, db_column='pma')
+    chikv_e1_mutant = models.DecimalField(max_digits=12, decimal_places=10, null=True)
+    chikv_e2 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
+    dv1_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
+    dv2_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
+    dv3_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
+    dv4_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
+    jev_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
+    slev_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
+    tbev_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
+    wnv_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
+    yfv_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
+    zikv_brasil_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
+    zikv_ns1 = models.DecimalField(max_digits=12, decimal_places=10, null=True)
+
+
+    class Meta:
+        db_table = 'Pma_result'
+
+    def __str__ (self):
+        #Method used to display a serum object
+        return "{}".format(self.pma)
