@@ -13,7 +13,7 @@ body {font-family: "Lato", sans-serif;}
     border: 1px solid #ccc;
     background-color: #f1f1f1;
     width: 20%;
-    height: 300px;
+    height: auto;
 }
 
 /* Style the buttons inside the tab */
@@ -33,12 +33,13 @@ body {font-family: "Lato", sans-serif;}
 
 /* Change background color of buttons on hover */
 .tab button:hover {
-    background-color: #ddd;
+    background-color: #fbb838;
 }
 
 /* Create an active/current "tab button" class */
 .tab button.active {
-    background-color: #ccc;
+    /* background-color: #c15216; */
+    background-color: #dd601d;
 }
 
 /* Style the tab content */
@@ -49,7 +50,7 @@ body {font-family: "Lato", sans-serif;}
     background-color: #f2f2f2;
     width: 80%;
     border-left: none;
-    height: 300px;
+    /* height: 500px; */
 }
 </style>
 {% endblock %}
@@ -100,16 +101,17 @@ function drawChart() {
   <br>
   <div class="text-center">
   <h2>Statistics : </h2>
-  <h2>Note : no pie charts, only histogram </h2>
-  <ul>
+  <br>
+  <p>histograms</p>
+  <!-- <h2>Note : no pie charts, only histogram </h2> -->
+  <!-- <ul>
     <li>How many serums in the bank ?</li>
     <li>How many serums for each year ?</li>
     <li>How many serums for each site ?</li>
-  </ul>
+  </ul> -->
   </div>
   <br>
-  <p>Note : add an update button to avoid loading of the query each time you go through the welcome page</p>
-  <div id="piechart"></div>
+  <!-- <p>Note : add an update button to avoid loading of the query each time you go through the welcome page</p> -->
 </div>
 
 <div id="Import" class="tabcontent">
@@ -125,17 +127,13 @@ function drawChart() {
   <h3>Data Manager</h3>
   <p>Serum location modification function</p>
   <a href="modify_location">Modify serums location</a>
-  <p>Filter Data</p>
-  <p>Display Data</p>
-  <p>Export Data</p>
+  <p>Sort & Export Data</p>
   <a href="query">Make a Query</a>
 </div>
 
 <div id="Tables" class="tabcontent">
   <h3>Tables</h3>
-  <p>Display Tables</p>
   <p>Fixed tables : Site, Ward</p>
-  <p>Linked tables (samples) : Serum, Freezer</p>
   <a href = "tables">Display Tables</a>
 </div>
 

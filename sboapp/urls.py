@@ -18,14 +18,13 @@ urlpatterns = [
         #Modify Location
     path('staff/modify_location',views.modify_location, name='modify_location'),
         #Query + Export
-    path('staff/query', views.query, name ='query'),
-    path('staff/query/display_export', views.display_export, name ='display_export'),
         #Display Tables
     path('staff/tables/',views.display_tables, name='tables'),
 
 
     #WORK IN PROGRESS
-    path('staff/init_elisa',views.init_elisa, name='init_elisa'),
+    path('staff/query', views.query, name ='query'),
+    path('staff/query/display_export', views.display_export, name ='display_export'),
 
 
     # # ex: /sboapp/
@@ -34,6 +33,7 @@ urlpatterns = [
     # path('<sample_id>/', views.detail, name='detail'),
     # # ex: /sboapp/5/vote/
     # path('<sample_id>/vote/', views.vote, name='vote'),
+    path('staff/init_elisa',views.init_elisa, name='init_elisa'), #Delete this with the corresponding view once you import the whole db
 
     #import django-excel
     path('handson_view/', views.handson_table, name="handson_view"),
