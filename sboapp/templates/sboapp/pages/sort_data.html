@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 {%extends 'layouts/base.html'%}
 
-<!-- {% load widget_tweaks %} -->
-{% load staticfiles %}
+{% load widget_tweaks %}
+<!-- {% load staticfiles %} -->
 
 {%block title%} Serum Bank OUCRU app {%endblock%}
 
@@ -12,8 +12,8 @@
             Sort data from db through queries
         </title>
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous"> -->
-        <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.css' %}">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+        <!-- <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.css' %}"> -->
     </head>
     <body>
     {%block content%}
@@ -101,10 +101,13 @@
     {% endfor %}
 
     <div class="form-group">
-      <button type="submit" class="btn btn-success">
-        <span class="glyphicon glyphicon-ok"></span> Save
+      <div class="text-center">
+      <button type="submit" class="btn btn-outline-success">
+        <span class="glyphicon glyphicon-ok"></span> Send Query
       </button>
     </div>
+    </div>
+    <br>
   <!-- <input type="submit"
          value="Submit Query"
          style="border: 1px solid green; padding:5px; border-radius: 2px; cursor: pointer;"> -->
