@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+{%extends 'layouts/base.html'%}
+
+{%block title%} Serum Bank OUCRU app {%endblock%}
+
+<html>
+    <head>
+        <title>
+            Validate or modify query
+        </title>
+    </head>
+    <body>
+    {%block content%}
+      <p>This is the validate_query page</p><br>
+      <p>Query result ---> Serum count + HighCharts (Serum = f (Year x Site))</p><br>
+      <p>buttons : modify query (return to sort_data page) + export (go to display_export page)</p><br>
+      <form action="{% url "sboapp:display_export" %}" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <div class="text-center">
+          <input type="submit"
+                 value="Submit Query"
+                 style="border: 1px solid green; padding:5px; border-radius: 2px; cursor: pointer;">
+          </div>
+
+      </form>
+    {%endblock content%}
+    </body>
+</html>

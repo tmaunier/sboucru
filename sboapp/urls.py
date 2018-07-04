@@ -24,7 +24,11 @@ urlpatterns = [
 
     #WORK IN PROGRESS
     path('staff/query', views.query, name ='query'),
-    path('staff/query/display_export', views.display_export, name ='display_export'),
+    path('staff/query/display_exp', views.display_exp, name ='display_exp'),
+
+    path('staff/sort_data', views.sort_data, name ='sort_data'),
+    path('staff/sort_data/validate_query', views.validate_query, name ='validate_query'),
+    path('staff/sort_data/display_export', views.display_export, name ='display_export'),
 
 
     # # ex: /sboapp/

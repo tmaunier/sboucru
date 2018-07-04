@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404, render, redirect #render is main
 from django.http import HttpResponse, HttpResponseBadRequest
 from sboapp.models import Serum, Site, Ward, Freezer, Elisa, Chik_elisa, Dengue_elisa, Rickettsia_elisa, Pma, Pma_result
 from django import forms
-from .forms import NameForm, PathogenForm
+from .forms import NameForm, PathogenForm, ExportFormatForm, DisplayDataForm, SortDataForm
 from django.views.generic.edit import FormView
 from django.db.models import Count
 import openpyxl
@@ -29,16 +29,11 @@ def get_data(request):
     dataward = Ward.objects.all()
     datafreezer = Freezer.objects.all()
     dataelisa = Elisa.objects.all()
-    args = {"serum_nb": dataserum,"site_nb": datasite,"ward_nb": dataward,"freezer_nb": datafreezer, "elisa_nb": dataelisa}
-    return args
-
-def count_data(request):
-    counts = []
     count_serum = count_element(Serum)
     count_site = count_element(Site)
     count_ward = count_element(Ward)
-    counts = {"count_serum":count_serum,"count_site":count_site,"count_ward":count_ward}
-    return counts
+    args = {"serum_nb": dataserum,"site_nb": datasite,"ward_nb": dataward,"freezer_nb": datafreezer, "elisa_nb": dataelisa,"count_serum":count_serum,"count_site":count_site,"count_ward":count_ward}
+    return args
 
 def count_element(Model):
     count = Model.objects.all().count()
@@ -47,8 +42,64 @@ def count_element(Model):
 # STAFF DASHBOARD
 def staff(request):
     args = get_data(request)
-    counts = count_data(request)
-    return render (request, "sboapp/pages/staff.html", args, counts)
+
+    sample_id_list = list(Serum.objects.all().values_list('sample_id', flat=True))
+    random_sample_id_list = random.sample(sample_id_list, min(len(sample_id_list), 5))
+    serum_sample_list = Serum.objects.filter(sample_id__in=random_sample_id_list)
+    args['serum_sample_list'] = serum_sample_list
+    year_list=[]
+
+    ag_list=[]
+    bd_list=[]
+    dc_list=[]
+    dt_list=[]
+    hc_list=[]
+    hu_list=[]
+    kg_list=[]
+    kh_list=[]
+    qn_list=[]
+    st_list=[]
+
+    query_year=Serum.objects.values_list('year').distinct()
+    query_year=query_year.order_by('year')
+    count_year=query_year.count()
+    for i in range(count_year):
+        year_list.append(query_year[i][0])
+    args['year_list']=year_list
+    site_list=['AG','BD','DC','DT','HC','HU','KG','KH','QN','ST']
+    for i in range(len(year_list)):
+        for j in range(len(site_list)):
+            if site_list[j] == 'AG':
+                ag_list.append(Serum.objects.filter(site_id='AG',year=year_list[i]).count())
+            elif site_list[j] == 'BD':
+                bd_list.append(Serum.objects.filter(site_id='BD',year=year_list[i]).count())
+            elif site_list[j] == 'DC':
+                dc_list.append(Serum.objects.filter(site_id='DC',year=year_list[i]).count())
+            elif site_list[j] == 'DT':
+                dt_list.append(Serum.objects.filter(site_id='DT',year=year_list[i]).count())
+            elif site_list[j] == 'HC':
+                hc_list.append(Serum.objects.filter(site_id='HC',year=year_list[i]).count())
+            elif site_list[j] == 'HU':
+                hu_list.append(Serum.objects.filter(site_id='HU',year=year_list[i]).count())
+            elif site_list[j] == 'KG':
+                kg_list.append(Serum.objects.filter(site_id='KG',year=year_list[i]).count())
+            elif site_list[j] == 'KH':
+                kh_list.append(Serum.objects.filter(site_id='KH',year=year_list[i]).count())
+            elif site_list[j] == 'QN':
+                qn_list.append(Serum.objects.filter(site_id='QN',year=year_list[i]).count())
+            elif site_list[j] == 'ST':
+                st_list.append(Serum.objects.filter(site_id='ST',year=year_list[i]).count())
+    args['data_ag']=ag_list
+    args['data_bd']=bd_list
+    args['data_dc']=dc_list
+    args['data_dt']=dt_list
+    args['data_hc']=hc_list
+    args['data_hu']=hu_list
+    args['data_kg']=kg_list
+    args['data_kh']=kh_list
+    args['data_qn']=qn_list
+    args['data_st']=st_list
+    return render (request, "sboapp/pages/staff.html", args)
 
 def get_name(request): #display the user's name in the navbar (NOT DONE)
     # if this is a POST request we need to process the form data
@@ -770,35 +821,87 @@ def import_pma(request):
 #---QUERY + EXPORT FROM DATABASE TO FILE
 
 def query(request):
-    # filter by parameters
+    # filter by parameters TEST
     args = get_data(request)
     return render (request, "sboapp/pages/query.html", args)
 
 
+def display_exp(request):
+    # display query answer and export button TEST
+    return render (request, "sboapp/pages/display_exp.html")
+
+def sort_data(request):
+    # filter by parameters
+    args = get_data(request)
+    if request.method == "POST":
+        sort_form = SortDataForm(request.POST)
+        if sort_form.is_valid():
+            args['valid_error']= "form is valid"
+            return render(request, "sboapp/pages/sort_data.html",args)
+        else:
+            args['valid_error']= "valid error"
+            return render(request, "sboapp/pages/sort_data.html", args)
+    else:
+        sort_form = SortDataForm()
+    args = {'sort_form':sort_form}
+    return render (request, "sboapp/pages/sort_data.html", args)
+
+def validate_query(request):
+    # filter by parameters
+    args = get_data(request)
+    return render (request, "sboapp/pages/validate_query.html", args)
+
 def display_export(request):
-    # display query answer and export button
-    return render (request, "sboapp/pages/display_export.html")
+    # Get queryset from sort_data function
+    # display query answer and export button VOIR API django_excel
+    if request.method == "POST":
+        display_form = DisplayDataForm(request.POST)
+        if display_form.is_valid():
+            pass #construire le fichier de sortie en fonction des cases selectionnees
+        else:
+            render(request,"sboapp/pages/display_export.html",{'error_display_form': ' Display data form error'})
+        export_form = ExportFormatForm(request.POST)
+        if export_form.is_valid():
+            format_choice = export_form.cleaned_data.get('format')
+            if format_choice == "xls":
+                pass
+                # excel.make_response_from_query_sets(query_sets, column_names, 'xls', status=200)
+            elif format_choice == "xlsx":
+                pass
+                # excel.make_response_from_query_sets(query_sets, column_names, 'xlsx', status=200)
+            elif format_choice == "ods":
+                pass
+                # excel.make_response_from_query_sets(query_sets, column_names, 'ods', status=200)
+            elif format_choice == "csv":
+                pass
+                # excel.make_response_from_query_sets(query_sets, column_names, 'csv', status=200)
+            else:
+                render (request, "sboapp/pages/display_export.html", {'error_format_form':'Please select a file type'})
+    else:
+        export_form = ExportFormatForm()
+        display_form = DisplayDataForm()
+    args = {'export_form':export_form,'display_form':display_form}
+    return render (request, "sboapp/pages/display_export.html", args)
+
 
 #---DISPLAY TABLES
 
 def display_tables(request):
-    # TODO --> 20 RANDOM samples from db with corresponding location
     args = get_data(request)
     sample_id_list = list(Serum.objects.all().values_list('sample_id', flat=True))
     random_sample_id_list = random.sample(sample_id_list, min(len(sample_id_list), 20))
     freezer_sample_list = Freezer.objects.filter(sample__in=random_sample_id_list)
     serum_sample_list = Serum.objects.filter(sample_id__in=random_sample_id_list)
-    elisa_sample_list = Elisa.objects.filter(sample__in=random_sample_id_list)
-    chik_sample_list = []
-    dengue_sample_list = []
-    rickettsia_sample_list = []
+    # elisa_sample_list = Elisa.objects.filter(sample__in=random_sample_id_list)
+    # chik_sample_list = []
+    # dengue_sample_list = []
+    # rickettsia_sample_list = []
     args['serum_sample_list'] = serum_sample_list
     args['freezer_sample_list'] = freezer_sample_list
-    args['chik_sample_list'] = chik_sample_list
-    args['dengue_sample_list'] = dengue_sample_list
-    args['rickettsia_sample_list'] = rickettsia_sample_list
+    # args['chik_sample_list'] = chik_sample_list
+    # args['dengue_sample_list'] = dengue_sample_list
+    # args['rickettsia_sample_list'] = rickettsia_sample_list
     return render (request, "sboapp/pages/display_tables.html", args)
-
 
 
 # WORK IN PROGRESS

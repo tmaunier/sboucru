@@ -6,11 +6,15 @@
 <head>
   {% block styles %}
       <link rel="stylesheet" href="{% static 'css/table.css' %}">
+      <style media="screen">
+      body{
+        background: linear-gradient(to bottom, #8ac0ea 0%,#97c7ec 1%,#bedcf3 50%,#e5f1fa 100%);
+      }
+      </style>
   {% endblock %}
 </head>
 <body>
 {%block content%}
-<a href = "{% url "sboapp:staff"%}">Go back to your Dashboard</a>
 <div class="text-center">
 
     <h1>Site Table </h1>

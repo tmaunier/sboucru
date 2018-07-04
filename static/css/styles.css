@@ -20,6 +20,21 @@
   text-align: center;
 }
 
+.centered {
+  top: 50%;
+  position: relative;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.center-screen {
+  display: flex;
+  flex-direction: line;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 15vh;
+}
 /* Main Styles */
 
 body {
@@ -57,7 +72,7 @@ body {
 }
 
 .navbar .navbar-right li a:hover {
-  color: #1e5799;
+  color: #fbb838;
 }
 
 .navbar .navbar-logo {
@@ -86,6 +101,50 @@ body {
   overflow:hidden;
   border-radius: 20%;
   box-shadow: 6px 3px 4px #007cb6;
+
+}
+/* Dashboard buttons */
+
+dashboard-buttons{
+  /* width:25%; */
+  border-radius: 5%;
+  background:#31698a;
+  opacity:0.7;
+  color:#fff;
+  border:none;
+  position:relative;
+  font-size:1em;
+  padding: 20px;
+  cursor:pointer;
+  transition:800ms ease all;
+  outline:none;
+  margin-top: auto;
+  margin-left: auto;
+  margin-right: auto;
+}
+dashboard-buttons:hover {
+  background:#fff;
+  color:#31698a;
+}
+dashboard-buttons:before,dashboard-buttons:after{
+  content:'';
+  position:absolute;
+  top:0;
+  right:0;
+  height:2px;
+  width:0;
+  background: #fbb838;
+  transition:400ms ease all;
+}
+dashboard-buttons:after{
+  right:inherit;
+  top:inherit;
+  left:0;
+  bottom:0;
+}
+dashboard-buttons:hover:before,dashboard-buttons:hover:after{
+  width:100%;
+  transition:800ms ease all;
 }
 
 /* FORMS  */

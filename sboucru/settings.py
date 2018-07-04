@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     #added packages
     'django_extensions',
-    'bootstrapform',
+    'widget_tweaks',
     #apps
     'sboapp',
 ]
