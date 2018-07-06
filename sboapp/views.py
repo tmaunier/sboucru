@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404, render, redirect #render is mainly used with templates while HttpResponse is used for data (for example)
 from django.http import HttpResponse, HttpResponseBadRequest
+from django.urls import reverse
 from sboapp.models import Serum, Site, Ward, Freezer, Elisa, Chik_elisa, Dengue_elisa, Rickettsia_elisa, Pma, Pma_result
 from django import forms
 from .forms import NameForm, PathogenForm, ExportFormatForm, DisplayDataForm, SortDataForm
@@ -38,6 +39,9 @@ def get_data(request):
 def count_element(Model):
     count = Model.objects.all().count()
     return count
+
+class UploadFileForm(forms.Form):
+    file = forms.FileField()
 
 # STAFF DASHBOARD
 def staff(request):
@@ -101,20 +105,12 @@ def staff(request):
     args['data_st']=st_list
     return render (request, "sboapp/pages/staff.html", args)
 
-def get_name(request): #display the user's name in the navbar (NOT DONE)
-    # if this is a POST request we need to process the form data
+def get_name(request):
     if request.method == 'POST':
-        # create a form instance and populate it with data from the request:
         form = NameForm(request.POST)
-        # check whether it's valid:
         if form.is_valid():
-            # process the data in form.cleaned_data as required
-            # ...
-            # redirect to a new URL:
             user_name = {"user_name":user_name}
             return render(request,'sboapp/pages/staff.html',user_name)
-
-    # if a GET (or any other method) we'll create a blank form
     else:
         form = NameForm()
 
@@ -180,6 +176,7 @@ def extract_value(input_list, output_list, match_index):
                 if str(input_list[i]) == 'NA':
                     output_list.append('')
                 else:
+                    input_list[i]= str(input_list[i]).strip("' ") #coll_date format
                     output_list.append(input_list[i])
 
 
@@ -425,7 +422,7 @@ def modify_location(request):
         form = UploadFileForm()
     return render(request,'sboapp/pages/modify_location.html', {'form': form })
 
-def init_elisa(request):
+def init_elisa(request): #This function was necessary to input first data in the database
     # ER1 = Elisa.objects.create(result_id='ElisaChik_AG000000_2', pathogen='chikungunya', sample=Serum.objects.get(sample_id='AG020001'), elisa_day='25', elisa_month='02', elisa_year='2010')
     # ER1.save()
     # ER2 = Elisa.objects.create(result_id='ElisaChik_2', pathogen='chikungunya', sample=Serum.objects.get(sample_id='AG020002'), elisa_day='25', elisa_month='02', elisa_year='2010')
@@ -819,6 +816,12 @@ def import_pma(request):
     return render (request, "sboapp/pages/import_pma.html", {'form': form})
 
 #---QUERY + EXPORT FROM DATABASE TO FILE
+def check_clean_data(form,model,field):
+    q = model.objects.get(field=form.cleaned_data.get(field))
+    if q is not null:
+        return q
+    else:
+        return None
 
 def query(request):
     # filter by parameters TEST
@@ -832,12 +835,173 @@ def display_exp(request):
 
 def sort_data(request):
     # filter by parameters
-    args = get_data(request)
+    # args = get_data(request)
+    args={}
+    queryset=Serum.objects.all()
     if request.method == "POST":
         sort_form = SortDataForm(request.POST)
         if sort_form.is_valid():
             args['valid_error']= "form is valid"
-            return render(request, "sboapp/pages/sort_data.html",args)
+            if sort_form.has_changed():
+                print ('changed is good')
+                changed_list=sort_form.changed_data
+                args['changed_list']=changed_list
+                sample_id = sort_form.cleaned_data['sample_id']
+                site_id = sort_form.cleaned_data['site_id']
+                coll_num = sort_form.cleaned_data['coll_num']
+                birth_year = sort_form.cleaned_data['birth_year']
+                age = sort_form.cleaned_data['age']
+                age_min = sort_form.cleaned_data['age_min']
+                age_max = sort_form.cleaned_data['age_max']
+                gender = sort_form.cleaned_data['birth_year']
+                coll_date = sort_form.cleaned_data['coll_date']
+                year = sort_form.cleaned_data['year']
+                ward_id = sort_form.cleaned_data['ward_id']
+                study_code = sort_form.cleaned_data['study_code']
+                sample_type = sort_form.cleaned_data['sample_type']
+                aliquot_no = sort_form.cleaned_data['aliquot_no']
+                volume = sort_form.cleaned_data['volume']
+                freezer_section_name = sort_form.cleaned_data['freezer_section_name']
+                subdivision_1_position = sort_form.cleaned_data['subdivision_1_position']
+                subdivision_2_position = sort_form.cleaned_data['subdivision_2_position']
+                subdivision_3_position = sort_form.cleaned_data['subdivision_3_position']
+                subdivision_4_position = sort_form.cleaned_data['subdivision_4_position']
+
+                if sample_id:
+                    print("j'ai le sample")
+                    if Serum.objects.filter(sample_id=sort_form.cleaned_data.get('sample_id')).exists() is True:
+                        queryset.filter(sample_id=sort_form.cleaned_data.get('sample_id'))
+
+                    else:
+                        print('aled')
+                else:
+                    print("j'ai pas le sample")
+
+                if site_id:
+                    print("j'ai le site : ",site_id)
+                    queryset = queryset.filter(site__site_id__in=site_id)
+                    print('queryset : ',queryset)
+                    # args['site_id'] = queryset
+                else:
+                    print("j'ai pas le site : ",site_id)
+
+                if coll_num:
+                    print("j'ai la coll_num : ",coll_num)
+                    queryset = queryset.filter(coll_num__in=coll_num)
+                else:
+                    print("j'ai pas la coll_num : ",coll_num)
+
+                if birth_year:
+                    print("j'ai la birth_year : ",birth_year)
+                    queryset = queryset.filter(birth_year__in=birth_year)
+                else:
+                    print("j'ai pas la birth_year : ",birth_year)
+
+                if age:
+                    print("j'ai l'age : ",age)
+                    queryset = queryset.filter(age__in=age)
+                else:
+                    print("j'ai pas l'age : ",age)
+
+                if age_min:
+                    print("j'ai l'age_min : ",age_min)
+                    queryset = queryset.filter(age_min__in=age_min)
+                else:
+                    print("j'ai pas l'age_min : ",age_min)
+
+                if age_max:
+                    print("j'ai l'age_max : ",age_max)
+                    queryset = queryset.filter(age_max__in=age_max)
+                else:
+                    print("j'ai pas l'age_max : ",age_max)
+
+                if gender:
+                    print("j'ai le gender : ",gender)
+                    queryset = queryset.filter(gender__in=gender)
+                else:
+                    print("j'ai pas le gender : ",gender)
+
+                if coll_date:
+                    print("j'ai la coll_date : ",coll_date)
+                    queryset = queryset.filter(coll_date__in=coll_date)
+                else:
+                    print("j'ai pas la coll_date : ",coll_date)
+
+                if year:
+                    print("j'ai la year : ",year)
+                    queryset = queryset.filter(year__in=year)
+                else:
+                    print("j'ai pas la year : ",year)
+
+                if ward_id:
+                    print("j'ai le ward_id : ",ward_id)
+                    queryset = queryset.filter(ward__ward_id__in=ward_id)
+                else:
+                    print("j'ai pas le ward_id : ",ward_id)
+
+                if study_code:
+                    print("j'ai le study_code : ",study_code)
+                    queryset = queryset.filter(study_code__in=study_code)
+                else:
+                    print("j'ai pas le study_code : ",study_code)
+
+                if sample_type:
+                    print("j'ai le sample_type : ",sample_type)
+                    queryset = queryset.filter(sample_type__in=sample_type)
+                else:
+                    print("j'ai pas le sample_type : ",sample_type)
+
+                if aliquot_no:
+                    print("j'ai le aliquot_no : ",aliquot_no)
+                    queryset = queryset.filter(aliquot_no__in=aliquot_no)
+                else:
+                    print("j'ai pas le aliquot_no : ",aliquot_no)
+
+                if volume:
+                    print("j'ai le volume : ",volume)
+                    queryset = queryset.filter(volume__in=volume)
+                else:
+                    print("j'ai pas le volume : ",volume)
+
+                if freezer_section_name:
+                    print("j'ai le freezer_section_name : ",freezer_section_name)
+                    queryset = queryset.filter(freezer__freezer_section_name__in=freezer_section_name)
+                else:
+                    print("j'ai pas le freezer_section_name : ",freezer_section_name)
+
+                if subdivision_1_position:
+                    print("j'ai le subdivision_1_position : ",subdivision_1_position)
+                    queryset = queryset.filter(freezer__subdivision_1_position__in=subdivision_1_position)
+                else:
+                    print("j'ai pas le subdivision_1_position : ",subdivision_1_position)
+
+                if subdivision_2_position:
+                    print("j'ai le subdivision_2_position : ",subdivision_2_position)
+                    queryset = queryset.filter(freezer__subdivision_2_position__in=subdivision_2_position)
+                else:
+                    print("j'ai pas le subdivision_2_position : ",subdivision_2_position)
+
+                if subdivision_3_position:
+                    print("j'ai le subdivision_3_position : ",subdivision_3_position)
+                    queryset = queryset.filter(freezer__subdivision_3_position__in=subdivision_3_position)
+                else:
+                    print("j'ai pas le subdivision_3_position : ",subdivision_3_position)
+
+                if subdivision_4_position:
+                    print("j'ai le subdivision_4_position : ",subdivision_4_position)
+                    queryset = queryset.filter(freezer__subdivision_4_position__in=subdivision_4_position)
+                else:
+                    print("j'ai pas le subdivision_4_position : ",subdivision_4_position)
+
+                if queryset == None:
+                    args['queryset_error']='Warning ! There is no match for your query .'
+                else:
+                    args['queryset']=queryset
+                    args['queryset_count']=queryset.count()
+            else:
+                print('Nothing has changed')
+            return render (request, "sboapp/pages/validate_query.html",args)
+            # return render(request,'sort_data/validate_query',args)
         else:
             args['valid_error']= "valid error"
             return render(request, "sboapp/pages/sort_data.html", args)
@@ -847,40 +1011,48 @@ def sort_data(request):
     return render (request, "sboapp/pages/sort_data.html", args)
 
 def validate_query(request):
+    #recuperer le queryset, faire un count de serum et display dans un chart
     # filter by parameters
-    args = get_data(request)
-    return render (request, "sboapp/pages/validate_query.html", args)
+    if request.method == "POST":
+        args['oui']='oui'
+        print (args)
+    else:
+        args['non']='non'
+    return render (request, "sboapp/pages/validate_query.html",args)
 
 def display_export(request):
     # Get queryset from sort_data function
     # display query answer and export button VOIR API django_excel
     if request.method == "POST":
         display_form = DisplayDataForm(request.POST)
+        args={}
         if display_form.is_valid():
-            pass #construire le fichier de sortie en fonction des cases selectionnees
+            args['valid_error']= "form is valid"
+            return render (request, "display_export.html",args)
+             #construire le fichier de sortie en fonction des cases selectionnees
         else:
-            render(request,"sboapp/pages/display_export.html",{'error_display_form': ' Display data form error'})
-        export_form = ExportFormatForm(request.POST)
-        if export_form.is_valid():
-            format_choice = export_form.cleaned_data.get('format')
-            if format_choice == "xls":
-                pass
-                # excel.make_response_from_query_sets(query_sets, column_names, 'xls', status=200)
-            elif format_choice == "xlsx":
-                pass
-                # excel.make_response_from_query_sets(query_sets, column_names, 'xlsx', status=200)
-            elif format_choice == "ods":
-                pass
-                # excel.make_response_from_query_sets(query_sets, column_names, 'ods', status=200)
-            elif format_choice == "csv":
-                pass
-                # excel.make_response_from_query_sets(query_sets, column_names, 'csv', status=200)
-            else:
-                render (request, "sboapp/pages/display_export.html", {'error_format_form':'Please select a file type'})
+            return render(request,"sboapp/pages/display_export.html",{'error_display_form': ' Display data form error'})
+        # export_form = ExportFormatForm(request.POST)
+        # if export_form.is_valid():
+        #     format_choice = export_form.cleaned_data.get('format')
+        #     if format_choice == "xls":
+        #         pass
+        #         # excel.make_response_from_query_sets(query_sets, column_names, 'xls', status=200)
+        #     elif format_choice == "xlsx":
+        #         pass
+        #         # excel.make_response_from_query_sets(query_sets, column_names, 'xlsx', status=200)
+        #     elif format_choice == "ods":
+        #         pass
+        #         # excel.make_response_from_query_sets(query_sets, column_names, 'ods', status=200)
+        #     elif format_choice == "csv":
+        #         pass
+        #         # excel.make_response_from_query_sets(query_sets, column_names, 'csv', status=200)
+        #     else:
+        #         return render (request, "sboapp/pages/display_export.html", {'error_format_form':'Please select a file type'})
     else:
-        export_form = ExportFormatForm()
+        # export_form = ExportFormatForm()
         display_form = DisplayDataForm()
-    args = {'export_form':export_form,'display_form':display_form}
+    args = {'display_form':display_form}
     return render (request, "sboapp/pages/display_export.html", args)
 
 
@@ -892,182 +1064,9 @@ def display_tables(request):
     random_sample_id_list = random.sample(sample_id_list, min(len(sample_id_list), 20))
     freezer_sample_list = Freezer.objects.filter(sample__in=random_sample_id_list)
     serum_sample_list = Serum.objects.filter(sample_id__in=random_sample_id_list)
-    # elisa_sample_list = Elisa.objects.filter(sample__in=random_sample_id_list)
-    # chik_sample_list = []
-    # dengue_sample_list = []
-    # rickettsia_sample_list = []
     args['serum_sample_list'] = serum_sample_list
     args['freezer_sample_list'] = freezer_sample_list
-    # args['chik_sample_list'] = chik_sample_list
-    # args['dengue_sample_list'] = dengue_sample_list
-    # args['rickettsia_sample_list'] = rickettsia_sample_list
     return render (request, "sboapp/pages/display_tables.html", args)
 
 
 # WORK IN PROGRESS
-
-class UploadFileForm(forms.Form):
-    file = forms.FileField()
-
-def upload(request):
-    pass
-    # if request.method == "POST":
-    #     form = UploadFileForm(request.POST, request.FILES)
-    #     if form.is_valid():
-    #         filehandle = request.FILES['file']
-    #         return import_excel(request)
-    # else:
-    #     form = UploadFileForm()
-    # return render(request,'sboapp/pages/upload_form.html',{
-    #         'form': form,
-    #         'title': 'Excel file upload',
-    #         'header': 'Please choose a valid excel file'
-    #     })
-
-def handson_table(request):
-    return excel.make_response_from_tables(
-        [Serum], 'sboapp/pages/handsontable.html')
-
-# def embed_handson_table(request):
-#     """
-#     Renders two table in a handsontable
-#     """
-#     content = excel.pe.save_book_as(
-#         models=[Question, Choice],
-#         dest_file_type='sboapp/pages/handsontable.html',
-#         dest_embed=True)
-#     content.seek(0)
-#     return render(
-#         request,
-#         'custom-handson-table.html',
-#         {
-#             'handsontable_content': content.read()
-#         })
-
-
-def embed_handson_table_from_a_single_table(request):
-    """
-    Renders one table in a handsontable
-    """
-    content = excel.pe.save_as(
-        model=Serum,
-        dest_file_type='sboapp/pages/handsontable.html',
-        dest_embed=True)
-    content.seek(0)
-    return render(
-        request,
-        'custom-handson-table.html',
-        {
-            'handsontable_content': content.read()
-        })
-
-
-#--------FIRST TESTS
-
-# def detail(request, sample_id):
-#     serum = get_object_or_404(Serum, pk=sample_id)
-#     return render(request, 'sboapp/pages/detail.html', {'serum': serum}) #example with render --> template
-#
-# def vote(request, sample_id):
-#     return HttpResponse("You're voting on serum %s." % sample_id) #example with HttpResponse --> no errors if the sample_id is unknown !
-#
-# def indextest(request):
-#     first_3_serum = Serum.objects.order_by('local_sample_id')[:3]
-#     note = 'Here are the first 3 serum added on the database: \n '
-#     output = ', '.join([s.sample_id for s in first_3_serum])
-#     return HttpResponse(note + output)
-
-#-----------TEST IMPORT Data
-
-# def import_data(request):
-#     # le but de cette fonction est de upload des data à partir d'un sample_file de sera et de les transformer dans un nouveau tableau
-#     # pour controler, il faudra display l'ancien et le nouveau tableau
-#     if request.method == "POST":
-#         form = UploadFileForm(request.POST,request.FILES)
-#         if form.is_valid():
-#             sheet = request.FILES['file'].get_sheet(sheet_name=None, name_columns_by_row=0)
-#             colnames = list(sheet.colnames)
-#             old_data = list()
-#             for row in list(sheet.rows()):
-#                 row_data = list()
-#                 for cell in row:
-#                     row_data.append(str(cell))
-#                 old_data.append(row_data)
-#             return render(request,'sboapp/pages/import_data.html',{'form':form,'note':'Your data has been imported successfully',"old_data":old_data, "colnames":colnames})
-#         else:
-#             warning = 'WARNING !\n import has failed \n the form is not valid'
-#             print('import has failed')
-#             return render (request, "sboapp/pages/import_data.html",{'warning':warning})
-#     else:
-#         form = UploadFileForm()
-#     return render(request,'sboapp/pages/import_data.html',{'form': form})
-#
-# def display_import(request):
-#     if "GET" == request.method:
-#         return render(request, "sboapp/pages/display_import.html", {})
-#     else:
-#         excel_file = request.FILES["excel_file"]
-#         sheet = pyexcel.get_sheet(file_name='excel_file')
-#         sheet.save_as('display_import.html', display_length=10)
-#         IFrame("display_import.html",width=600, height=500)
-#         return render (request, "sboapp/pages/display_import.html", {})
-#
-# def import_excel(request):
-#     #NOT OVER
-#     #using pyexcel here
-#     #Works for one table, Pay attention to the sensitive case
-#     if request.method == "POST":
-#         form = UploadFileForm(request.POST,request.FILES)
-#         # def ward_func(row):
-#         #     s = Serum.objects.filter(ward=row[0])[0]
-#         #     row[0] = s
-#         #     return row
-#         if form.is_valid():
-#             sheet = request.FILES['file'].get_sheet(sheet_name=None, name_columns_by_row=0)
-#             sheet.save_to_django_model(
-#                 model=Serum,
-#                 # ,Ward,Site],
-#                 initializer=None,
-#                 # [None,ward_func],
-#                 mapdict=None,
-#                 # [
-#                 #     ['local_sample_id', 'site', 'coll_num', 'sample_id','birth_year','age','age_min','age_max','gender_1ismale_value','coll_date','day_value','month_value','year','ward']
-#                 #     # ,
-#                 #     # ['ward_id','ward_name','khoa'],
-#                 #     # ['site_id','site_name']
-#                 #     ]
-#             )
-#             return render(request,'sboapp/pages/import_excel.html',{'form':form,'note':'Your data has been imported successfully'})
-#         else:
-#             warning = 'WARNING !\n import has failed \n the form is not valid'
-#             print('import has failed')
-#             return render (request, "sboapp/pages/import_excel.html",{'warning':warning})
-#     else:
-#         form = UploadFileForm()
-#     return render(request,'sboapp/pages/import_excel.html',{'form': form})
-
-# excel_f = request.FILES["excel_f"]
-# sheet = excel.ExcelMixin.get_sheet(sheet_name=None, name_columns_by_row=0)
-# colnames = list(sheet.colnames())
-# # records = request.FILES["excel_file"].get_records()
-# old_data = list(sheet.rows())
-# new_data = list()
-
-# you may put validations here to check extension or file size
-# try:
-#     wb = openpyxl.reader.excel.load_workbook(excel_f,data_only=True)
-#     #print('import OK')
-# except:
-#     warning = 'WARNING !\n file not exist'
-#     print('import failed')
-#     return render (request, "sboapp/pages/import_data.html",{'warning':warning})
-# else:
-#     worksheet = wb["Sheet1"]
-#     # iterating over the rows and
-#     # getting value from each cell in row
-#     for row in worksheet.iter_rows():
-#         row_data = list()
-#         for cell in row:
-#             row_data.append(str(cell.value))
-#         old_data.append(row_data)
-# return render(request, "sboapp/pages/import_data.html", {"old_data":old_data, "colnames":colnames})

@@ -1,35 +1,18 @@
 <!DOCTYPE html>
-{%extends 'layouts/base.html'%}
+{%extends 'layouts/base_form.html'%}
 
-{%block title%} Serum Bank OUCRU app {%endblock%}
 
 <html>
-    <head>
-        <title>
-            Page where I display Query answer & Export button
-        </title>
-    </head>
     <body>
     {%block content%}
       <p>This is the display and export page</p>
-      {{error_format_form}}
-      <br>
-      {{error_display_form}}
       <br>
       <p>Add serums count + display form  + display preview</p>
       <br>
       <form action="display_export" method="post">
         {% csrf_token %}
-        {{ display_form }}
+        {{display_form}}
       </form>
-      <div class="text-center">
-      <form action="display_export" method="post">
-        {% csrf_token %}
-        {{ export_form }}
-      </form>
-      <br>
-      <input type="submit" value="Export file" style="background-color:#fbb838;color:#dd601d"/>
-      </div>
     {%endblock content%}
     </body>
 </html>

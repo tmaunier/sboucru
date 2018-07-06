@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     #added packages
     'django_extensions',
     'widget_tweaks',
+    'crispy_forms',
     #apps
     'sboapp',
 ]

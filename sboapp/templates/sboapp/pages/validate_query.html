@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{%extends 'layouts/base.html'%}
+{%extends 'layouts/base_form.html'%}
 
 {%block title%} Serum Bank OUCRU app {%endblock%}
 
@@ -14,16 +14,22 @@
       <p>This is the validate_query page</p><br>
       <p>Query result ---> Serum count + HighCharts (Serum = f (Year x Site))</p><br>
       <p>buttons : modify query (return to sort_data page) + export (go to display_export page)</p><br>
-      <form action="{% url "sboapp:display_export" %}" method="post" enctype="multipart/form-data">
-          {% csrf_token %}
+      <h1>{{valid_error}}</h1><br>
+      <h1>{{sample_id}}</h1><br><h1>{{changed_list}}</h1><br><h1>{{queryset_error}}</h1><br>
+      <a href="sort_data" class="btn btn-danger col-md-offset-1" role="button">Modify Query</a>
+      <a href="display_export" class="btn btn-success col-md-offset-8" role="button" type="submit">Validate Query</a><br>
+      <h1>Serum count : {{queryset_count}}</h1>
+      {% for serum in queryset %}
+      <ul>
+        <li>{{serum}}</li>
+      </ul>
+      {% endfor %}
 
-          <div class="text-center">
-          <input type="submit"
-                 value="Submit Query"
-                 style="border: 1px solid green; padding:5px; border-radius: 2px; cursor: pointer;">
-          </div>
-
-      </form>
+      <!-- <p>
+      {% for arg in args %}
+        {{ arg }}<br>
+      {% endfor %}
+    </p> -->
     {%endblock content%}
     </body>
 </html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+{%load static%}
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title> {%block title%} Base form template {%endblock title%}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css'%}">
+  <link rel="stylesheet"
+          href="//cdn.jsdelivr.net/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="//cdn.jsdelivr.net/bootstrap/3.3.6/css/bootstrap-theme.min.css">
+    <script src="//cdn.jsdelivr.net/jquery/2.2.3/jquery.min.js"></script>
+  {% block styles %}
+  {% endblock %}
+  {% block head-javascript %}
+  {% endblock %}
+  {% block javascript %}
+  {% endblock %}
+</head>
+<body>
+  {%include "layouts/_nav.html"%}
+  <div class="container" role="main">
+    <div id="summary">
+        <div class="page-header">
+            {% block page-header %}{% endblock %}
+        </div>
+    </div>
+    {% block content %}
+    {% endblock %}
+  </div>
+  <script src="//cdn.jsdelivr.net/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  {% block foot-javascript %}{% endblock %}
+</body>
+</html>
