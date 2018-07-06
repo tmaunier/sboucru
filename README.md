@@ -20,9 +20,11 @@ Virtualenv :
                 Django==2.0.3
                 django-admin-tools==0.8.1
                 django-bootstrap-form==3.4
+                django-crispy-forms==1.7.2
                 django-excel==0.0.10
                 django-extensions==2.0.6
                 django-filter==1.1.0
+                django-widget-tweaks==1.4.2
                 djangorestframework==3.7.7
                 et-xmlfile==1.0.1
                 html-json-forms==1.0.0
@@ -66,6 +68,7 @@ Virtualenv :
                 wq.io==1.0.0
                 xlrd==1.1.0
                 xlwt==1.3.0
+
 
 
 Written by Tristan Maunier - University of Bordeaux, France
