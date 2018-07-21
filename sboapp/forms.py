@@ -28,13 +28,10 @@ def get_pma_results_fields():
 
 def get_pma_fields():
     choices=[('all','all fields')]
+    fields_exceptions=['pma_result','sample','result_id']
     for f in Pma._meta.get_fields():
-        if f.name != 'pma_result':
-            if f.name == 'result_id':
-                choices.append((f.name,'Result identification code (result_id)',))
-            elif f.name == 'sample':
-                choices.append((f.name,'Sample id (sample)',))
-            elif f.name == 'processed_day':
+        if f.name not in fields_exceptions:
+            if f.name == 'processed_day':
                 choices.append((f.name,'Day of PMA test (processed_day)',))
             elif f.name == 'processed_month':
                 choices.append((f.name,'Month of PMA test (processed_month)',))
@@ -316,7 +313,7 @@ class DisplayDataForm(forms.Form):
     freezer_fields = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,choices=get_freezer_fields(), initial=['all'], required=False, label='', help_text='.')
     elisa_general_fields = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=get_elisa_fields(), initial=['all'], label='', help_text='Note : sample_id & result_id are exported by default ')
     pathogen = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,choices=get_pathogen(), initial=['all'], required=False, label='', help_text='.')
-    pma_general_fields = forms.MultipleChoiceField(label='',widget=forms.CheckboxSelectMultiple,choices=get_pma_fields(), initial=['all'], required=False, help_text='.')
+    pma_general_fields = forms.MultipleChoiceField(label='',widget=forms.CheckboxSelectMultiple,choices=get_pma_fields(), initial=['all'], required=False, help_text='Note : sample_id & result_id are exported by default ')
     pma_results_fields = forms.MultipleChoiceField(required=False, label='',widget=forms.CheckboxSelectMultiple, help_text='.',choices=(('all','all pathogens'),
     ('Chikungunya','Chikungunya (chikv_e1_mutant, chikv_e2)'),
     ('Dengue','Dengue (dv1_ns1, dv2_ns1, dv3_ns1, dv4_ns1)'),

@@ -1196,6 +1196,82 @@ def get_freezer_headers(input_list):
             output_list.append('Subdivision4Position')
     return output_list
 
+def get_elisa_headers(elisa_general_list,pathogen_code):
+    output_list = ['SampleId','ResultId']
+    if 'all' in elisa_general_list:
+        output_list.extend(['Pathogen','ProcessedDay','ProcessedMonth','ProcessedYear'])
+    else:
+        if 'pathogen' in elisa_general_list:
+            output_list.extend(['Pathogen'])
+        if 'elisa_day' in elisa_general_list:
+            output_list.extend(['ProcessedDay'])
+        if 'elisa_month' in elisa_general_list:
+            output_list.extend(['ProcessedMonth'])
+        if 'elisa_year' in elisa_general_list:
+            output_list.extend(['ProcessedYear'])
+
+    if pathogen_code=='chik':
+        output_list.extend(['SampleAbsorbance','NegativeAbsorbance','CutOff1Absorbance','CutOff2Absorbance','PositiveAbsorbance','CutOff','NovatecUnits','ResultChik'])
+    if pathogen_code=='dengue':
+        output_list.extend(['SampleAbsorbance','NegativeAbsorbance','PositiveAbsorbance','Calibrator1Absorbance','Calibrator2Absorbance','Calibrator3Absorbance','CalFactor','CutOff','PositiveCutOffRatio','DengueIndex','PanbioUnit','ResultDengue'])
+    if pathogen_code=='rickettsia':
+        output_list.extend(['ScrubTyphus','Typhus'])
+
+    return output_list
+
+def get_pma_headers(pma_general_fields,pma_results_fields):
+    output_list =['SampleId','ResultId']
+
+    if 'all' in pma_general_fields:
+        output_list.extend(['AgArrayId','Tray','BatchId','StartDilution','FileName','ProcessedDay','ProcessedMonth','ProcessedYear','BatchSentId','ScannedDay','ScannedMonth','ScannedYear','PanbioUnit'])
+    else:
+        if 'ag_array_id' in pma_general_fields:
+            output_list.extend(['AgArrayId'])
+        if 'tray' in pma_general_fields:
+            output_list.extend(['Tray'])
+        if 'batch_id' in pma_general_fields:
+            output_list.extend(['BatchId'])
+        if 'start_dilution' in pma_general_fields:
+            output_list.extend(['StartDilution'])
+        if 'file_name' in pma_general_fields:
+            output_list.extend(['FileName'])
+        if 'processed_day' in pma_general_fields:
+            output_list.extend(['ProcessedDay'])
+        if 'processed_month' in pma_general_fields:
+            output_list.extend(['ProcessedMonth'])
+        if 'processed_year' in pma_general_fields:
+            output_list.extend(['ProcessedYear'])
+        if 'batch_sent_id' in pma_general_fields:
+            output_list.extend(['BatchSentId'])
+        if 'scanned_day' in pma_general_fields:
+            output_list.extend(['ScannedDay'])
+        if 'scanned_month' in pma_general_fields:
+            output_list.extend(['ScannedMonth'])
+        if 'scanned_year' in pma_general_fields:
+            output_list.extend(['ScannedYear'])
+        if 'panbio_unit' in pma_general_fields:
+            output_list.extend(['PanbioUnit'])
+
+    if 'all' in pma_results_fields:
+        output_list.extend(['ChikvE1Mutant','ChikvE2','Dv1Ns1','Dv2Ns1','Dv3Ns1','Dv4Ns1','JevNs1','SlevNs1','TbevNs1','WnvNs1','YfvNs1','ZikvBrasilNs1','ZikvNs1'])
+    else:
+        if 'Chikungunya' in pma_results_fields:
+            output_list.extend(['ChikvE1Mutant','ChikvE2'])
+        if 'Dengue' in pma_results_fields:
+            output_list.extend(['Dv1Ns1','Dv2Ns1','Dv3Ns1','Dv4Ns1'])
+        if 'Japanese Encephalisis' in pma_results_fields:
+            output_list.extend(['JevNs1'])
+        if 'Saint-Louis Encephalisis' in pma_results_fields:
+            output_list.extend(['SlevNs1'])
+        if 'Tick-Borne Encephalisis' in pma_results_fields:
+            output_list.extend(['TbevNs1'])
+        if 'West Nile' in pma_results_fields:
+            output_list.extend(['WnvNs1'])
+        if 'Yellow Fever' in pma_results_fields:
+            output_list.extend(['YfvNs1'])
+        if 'Zika' in pma_results_fields:
+            output_list.extend(['ZikvBrasilNs1','ZikvNs1'])
+    return output_list
 def display_export(request):
     # Get queryset from sort_data function
 
@@ -1227,6 +1303,7 @@ def display_export(request):
                 export_file['Content-Disposition'] = filename
                 return export_file
             else:
+                export_content = {}
                 serum_freezer_array = []
                 chik_elisa_array = []
                 dengue_elisa_array = []
@@ -1237,25 +1314,55 @@ def display_export(request):
 
                 if serum_fields:
                     serum_headers_list=get_serum_headers(serum_fields)
-                    print ("serum headers list : ", serum_headers_list)
+                    # print ("serum headers list : ", serum_headers_list)
                 if freezer_fields:
                     freezer_headers_list=get_freezer_headers(freezer_fields)
-                    print ("freezer headers list : ", freezer_headers_list)
-                serum_freezer_array = serum_headers_list.extend(freezer_headers_list) #NE FONCTIONNE PAS
-                print ("serum freezer array : ", serum_freezer_array)
+                    # print ("freezer headers list : ", freezer_headers_list)
+                serum_freezer_array.append(serum_headers_list+freezer_headers_list)
+                # print ("serum freezer array : ", serum_freezer_array)
+                export_content['SerumFreezer'] = serum_freezer_array
+                print ('pathogen : ',pathogen)
+                print('elisa_general_fields : ', elisa_general_fields)
+                if pathogen or elisa_general_fields:
+                    if not elisa_general_fields:
+                        elisa_general_fields = []
+                    if 'all' in pathogen:
+                        chik_elisa_headers_list = get_elisa_headers(elisa_general_fields,'chik')
+                        dengue_elisa_headers_list = get_elisa_headers(elisa_general_fields,'dengue')
+                        rickettsia_elisa_headers_list = get_elisa_headers(elisa_general_fields,'rickettsia')
+                        chik_elisa_array.append(chik_elisa_headers_list)
+                        dengue_elisa_array.append(dengue_elisa_headers_list)
+                        rickettsia_elisa_array.append(rickettsia_elisa_headers_list)
+                        export_content['ChikElisa'] = chik_elisa_array
+                        export_content['DengueElisa'] = dengue_elisa_array
+                        export_content['RickettsiaElisa'] = rickettsia_elisa_array
+                    else:
+                        if 'chikungunya' in pathogen:
+                            chik_elisa_headers_list = get_elisa_headers(elisa_general_fields,'chik')
+                            chik_elisa_array.append(chik_elisa_headers_list)
+                            export_content['ChikElisa'] = chik_elisa_array
 
-                content = {
-                'Serum/Freezer':serum_freezer_array,
-                'ChikElisa':chik_elisa_array,
-                'DengueElisa':dengue_elisa_array,
-                'RickettsiaElisa':rickettsia_elisa_array,
-                'ProteinMicroArray':pma_array
-                }
-                book = pyexcel.get_book(bookdict=content)
+                        if 'dengue' in pathogen:
+                            dengue_elisa_headers_list = get_elisa_headers(elisa_general_fields,'dengue')
+                            dengue_elisa_array.append(dengue_elisa_headers_list)
+                            export_content['DengueElisa'] = dengue_elisa_array
+
+                        if 'rickettsia' in pathogen:
+                            rickettsia_elisa_headers_list = get_elisa_headers(elisa_general_fields,'rickettsia')
+                            rickettsia_elisa_array.append(rickettsia_elisa_headers_list)
+                            export_content['RickettsiaElisa'] = rickettsia_elisa_array
+
+                if pma_general_fields or pma_results_fields:
+                    pma_headers_list=get_pma_headers(pma_general_fields,pma_results_fields)
+                    pma_array.append(pma_headers_list)
+                    export_content['ProteinMicroArray'] = pma_array
+
+
+
                 if file_type == "xls":
                     # filename = "serum_bank_export_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".xls"
                     # book.save_as(filename)
-                    export_file=excel.make_response_from_book_dict(book,'xls',status=200) ### Use make response form array
+                    export_file=excel.make_response_from_book_dict(export_content,'xls',status=200) ### Use make response form array
                     filename ="attachement ; filename = serum_bank_export_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".xls"
                     export_file['Content-Disposition'] = filename
                     return export_file
