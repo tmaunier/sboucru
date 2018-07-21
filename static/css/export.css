@@ -2,8 +2,8 @@
 {% load staticfiles %}
 
 body {
-  /* background-color: #416475; */
-  background: url("../images/cloud.jpeg");
+  background-color: #fff;
+  /* background: url("../images/cloud.jpeg"); */
   /* background: url("{% static "images/cloud.jpeg"%}"); */
   /* background-image: url("https://www.goodfreephotos.com/cache/vietnam/saigon/skyline-and-cityscape-in-saigon-vietnam_800.jpg"); */
   /* background-image: url("https://images.pexels.com/photos/37728/pexels-photo-37728.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"); */

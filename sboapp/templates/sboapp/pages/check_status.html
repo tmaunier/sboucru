@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+{%extends 'layouts/base.html'%}
+{% load static %}
+
+{%block title%} Serum Bank OUCRU app {%endblock%}
+<head>
+  {% block styles %}
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.3.6/css/bootstrap.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.3.6/css/bootstrap-theme.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/styles_export.css'%}">
+  <link rel="stylesheet" href="{% static 'css/table.css' %}">
+  <script src="//cdn.jsdelivr.net/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  {% endblock %}
+</head>
+<body>
+{%block content%}
+  <div class="text-center">
+    <br>
+    <h1>Serums Available : {{available_count}}</h1>
+    <h1>Serums Unavailable : {{unavailable_count}}</h1>
+    <br>
+  <form action="" method="post" enctype="multipart/form-data">
+    <table>
+      {{file_type_form.as_table}}
+    </table>
+    {% csrf_token %}
+    <br>
+    <div class="text-center">
+      <input type="submit"
+      value="Export Table"
+      class="btn btn-success"
+      >
+    </div>
+    <br>
+  <table class="data-table">
+    <br>
+    <thead>
+      <tr>
+        <th>Sample id</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for sample in queryset %}
+      <tr>
+        <td>{{ sample.sample_id}}</td>
+        <td>{{ sample.status}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+{% endblock %}
+</body>

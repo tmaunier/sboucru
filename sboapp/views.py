@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.urls import reverse
 from sboapp.models import Serum, Site, Ward, Freezer, Elisa, Chik_elisa, Dengue_elisa, Rickettsia_elisa, Pma, Pma_result
 from django import forms
-from .forms import NameForm, PathogenForm, ExportFormatForm, DisplayDataForm, SortDataForm
+from .forms import UploadFileForm, NameForm, PathogenForm, DisplayDataForm, SortDataForm, FileTypeForm
 from django.views.generic.edit import FormView
 from django.db.models import Count
 import openpyxl
@@ -12,8 +12,8 @@ import django_excel as excel
 from IPython.display import IFrame
 import re #Regular expression python module
 import random
-
-
+import pickle
+import datetime
 
 # ERRORS 404 & 500
 
@@ -40,8 +40,6 @@ def count_element(Model):
     count = Model.objects.all().count()
     return count
 
-class UploadFileForm(forms.Form):
-    file = forms.FileField()
 
 # STAFF DASHBOARD
 def staff(request):
@@ -55,7 +53,7 @@ def staff(request):
 
     ag_list=[]
     bd_list=[]
-    dc_list=[]
+    dl_list=[]
     dt_list=[]
     hc_list=[]
     hu_list=[]
@@ -70,15 +68,15 @@ def staff(request):
     for i in range(count_year):
         year_list.append(query_year[i][0])
     args['year_list']=year_list
-    site_list=['AG','BD','DC','DT','HC','HU','KG','KH','QN','ST']
+    site_list=['AG','BD','DL','DT','HC','HU','KG','KH','QN','ST']
     for i in range(len(year_list)):
         for j in range(len(site_list)):
             if site_list[j] == 'AG':
                 ag_list.append(Serum.objects.filter(site_id='AG',year=year_list[i]).count())
             elif site_list[j] == 'BD':
                 bd_list.append(Serum.objects.filter(site_id='BD',year=year_list[i]).count())
-            elif site_list[j] == 'DC':
-                dc_list.append(Serum.objects.filter(site_id='DC',year=year_list[i]).count())
+            elif site_list[j] == 'DL':
+                dl_list.append(Serum.objects.filter(site_id='DL',year=year_list[i]).count())
             elif site_list[j] == 'DT':
                 dt_list.append(Serum.objects.filter(site_id='DT',year=year_list[i]).count())
             elif site_list[j] == 'HC':
@@ -95,7 +93,7 @@ def staff(request):
                 st_list.append(Serum.objects.filter(site_id='ST',year=year_list[i]).count())
     args['data_ag']=ag_list
     args['data_bd']=bd_list
-    args['data_dc']=dc_list
+    args['data_dl']=dl_list
     args['data_dt']=dt_list
     args['data_hc']=hc_list
     args['data_hu']=hu_list
@@ -205,6 +203,102 @@ def count_sample(input_list, sample_test_id):
             cpt+=1
     return cpt
 
+def download_file(export_file,filename):
+    export_file['Content-Disposition'] = filename
+    return export_file
+
+def count_results(request):
+    args = {}
+    serum_list = request.session.get('sort_queryset',None)
+    sample_list = []
+    final_array = [['SampleID','ChikElisaCount','DengueElisaCount','RickettsiaElisaCount','PmaCount','TotalCount']]
+    for i in range(len(serum_list)):
+        sample_list.append(serum_list[i][0])
+    for j in range(len(sample_list)):
+        tmp = []
+
+        pma_count = Pma.objects.filter(sample_id=sample_list[j]).count()
+        elisa_queryset = Elisa.objects.filter(sample_id=sample_list[j])
+        chik_elisa_count = elisa_queryset.filter(pathogen="chikungunya").count()
+        dengue_elisa_count = elisa_queryset.filter(pathogen="dengue").count()
+        rickettsia_elisa_count = elisa_queryset.filter(pathogen="rickettsia").count()
+        total_count = pma_count+chik_elisa_count+dengue_elisa_count+rickettsia_elisa_count
+
+        tmp.extend([sample_list[j],chik_elisa_count,dengue_elisa_count,rickettsia_elisa_count,pma_count,total_count])
+        final_array.append(tmp)
+
+    args['final_array'] = final_array
+    file_type_form=FileTypeForm()
+    if request.method == "POST":
+        file_type_form = FileTypeForm(request.POST)
+        if file_type_form.is_valid():
+            file_type = file_type_form.cleaned_data.get('file_type')
+            now = datetime.datetime.now()
+            if file_type == "xls":
+                export_file=excel.make_response_from_array(final_array,'xls',status=200) ### Use make response form array
+                filename ="attachement ; filename = serum_bank_results_counts_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".xls"
+                export_file['Content-Disposition'] = filename
+                return export_file
+
+            elif file_type == "xlsx":
+                export_file=excel.make_response_from_array(final_array,'xlsx',status=200)
+                filename ="attachement ; filename = serum_bank_results_counts_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".xlsx"
+                export_file['Content-Disposition'] = filename
+                return export_file
+
+            elif file_type == "csv":
+                export_file=excel.make_response_from_array(final_array,'csv',status=200)
+                filename ="attachement ; filename = serum_bank_results_counts_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".csv"
+                export_file['Content-Disposition'] = filename
+                return export_file
+    args['file_type_form'] = file_type_form
+    return render (request, "sboapp/pages/count_results.html",args)
+
+def check_status(request):
+    serum_list = request.session.get('sort_queryset',None)
+    sample_list = []
+    args = {}
+    for i in range(len(serum_list)):
+        sample_list.append(serum_list[i][0])
+
+    queryset = Serum.objects.filter(sample_id__in=sample_list)
+    cpt_available = queryset.filter(status="Available").count()
+    cpt_unavailable = queryset.filter(status="Unavailable").count()
+
+    args['queryset']= queryset
+    args['available_count']= cpt_available
+    args['unavailable_count']= cpt_unavailable
+    file_type_form=FileTypeForm()
+    if request.method == "POST":
+        file_type_form = FileTypeForm(request.POST)
+        if file_type_form.is_valid():
+            file_type = file_type_form.cleaned_data.get('file_type')
+            now = datetime.datetime.now()
+            final_array = [['SampleId','Status']]
+            for sample in queryset:
+                tmp = []
+                tmp.extend([sample.sample_id,sample.status])
+                final_array.append(tmp)
+            if file_type == "xls":
+                export_file=excel.make_response_from_array(final_array,'xls',status=200) ### Use make response form array
+                filename ="attachement ; filename = serum_bank_check_status_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".xls"
+                export_file['Content-Disposition'] = filename
+                return export_file
+
+            elif file_type == "xlsx":
+                export_file=excel.make_response_from_array(final_array,'xlsx',status=200)
+                filename ="attachement ; filename = serum_bank_check_status_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".xlsx"
+                export_file['Content-Disposition'] = filename
+                return export_file
+
+            elif file_type == "csv":
+                export_file=excel.make_response_from_array(final_array,'csv',status=200)
+                filename ="attachement ; filename = serum_bank_check_status_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".csv"
+                export_file['Content-Disposition'] = filename
+                return export_file
+    args['file_type_form'] = file_type_form
+
+    return render (request, "sboapp/pages/check_status.html",args)
 
 def import_serum(request):
     if request.method == "POST":
@@ -215,7 +309,7 @@ def import_serum(request):
             sample_exist_list = []
             no_match_site = []
             no_match_ward = []
-            db_list = [['local_sample_id','site','coll_num','sample_id','birth_year','age','age_min','age_max','gender_1ismale_value','coll_date','day_value','month_value','year','ward']]
+            db_list = [['local_sample_id','site','coll_num','sample_id','original_age','age_min','age_max','gender_1ismale_value','coll_date','day_value','month_value','year','ward']]
             sample_id_index = index_finder(sheet_array[0], [r'sample_id'])
             site_id_index = index_finder(sheet_array[0], [r'site_id'])
             ward_id_index = index_finder(sheet_array[0], [r'ward_id'])
@@ -242,8 +336,7 @@ def import_serum(request):
                         site_instance_converter(sheet_array[j],tmp,site_id_index) #Need to convert in Site instance
                         extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'coll_num']))
                         extract_value(sheet_array[j],tmp,sample_id_index)
-                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'birth year']))
-                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'original age',r'age_original', r'age_value']))#special regex
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'birth year', r'original age',r'age_original', r'age_value']))#special regex
                         extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'age_min']))
                         extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'age_max']))
                         extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'gender_1ismale_value']))
@@ -274,6 +367,48 @@ def import_serum(request):
         form = UploadFileForm()
     return render(request,'sboapp/pages/import_serum.html', {'form': form })
 
+def modify_status(request):
+    if request.method == "POST":
+        form = UploadFileForm(request.POST,request.FILES)
+        if form.is_valid():
+            sheet = request.FILES['file'].get_sheet(sheet_name=None, name_columns_by_row=0)
+            sheet_array = sheet.get_array()
+            sample_doesnt_exist = []
+            report_list = [['sample','old status','new status']]
+            sample_id_index = index_finder(sheet_array[0], [r'sample_id'])
+            if sample_id_index is not None:
+                for j in range(1,len(sheet_array)):
+                    if sample_id_exists(sheet_array[j][sample_id_index]) == False:
+                        sample_doesnt_exist.append(sheet_array[j][sample_id_index])
+                    else:
+                        obj = Serum.objects.get(sample_id=sheet_array[j][sample_id_index])
+                        tmp=[]
+                        tmp.extend([sheet_array[j][sample_id_index],obj.status])
+                        if obj.status == "Available":
+                            obj.status = "Unavailable"
+                            obj.save()
+                            tmp.append(obj.status)
+                            report_list.append(tmp)
+                        elif obj.status == "Unavailable":
+                            obj.status = "Available"
+                            obj.save()
+                            tmp.append(obj.status)
+                            report_list.append(tmp)
+            else:
+                headings_error = 'File\'s header error, no match for sample_id \n These data can\'t be modified'
+            if len(sample_doesnt_exist) != 0 :
+                headings_error=''
+                sample_doesnt_exist_warning = 'Warning ! These following samples don\'t exist in the database, you can\'t change their status \n'
+                args = {'form': form, 'success':'Congratulations, the status of these serums have been modified successfully !', 'context':sheet_array,'sheet':sheet, 'sample_doesnt_exist':sample_doesnt_exist, 'sample_doesnt_exist_warning':sample_doesnt_exist_warning, 'headings_error':headings_error, 'report_list': report_list}
+            else:
+                args = {'form': form,'success':'Congratulations, the status of these serums have been modified successfully !', 'context':sheet_array, 'report_list': report_list}
+            return render (request, "sboapp/pages/modify_status.html", args)
+        else:
+            warning = 'WARNING !\n import has failed \n the form is not valid'
+            return render (request, "sboapp/pages/modify_status.html",{'warning':warning})
+    else:
+        form = UploadFileForm()
+    return render(request,'sboapp/pages/modify_status.html', {'form': form })
 
 def import_location(request):
     if request.method == "POST":
@@ -407,7 +542,7 @@ def modify_location(request):
                                     obj.subdivision_4_position = sheet_array[j][k]
                                     obj.save()
             else:
-                headings_error = 'File\'s header error, no match for ParticipantNo or sample_id \n These data can\'t be imported'
+                headings_error = 'File\'s header error, no match for ParticipantNo or sample_id \n These data can\'t be modified'
             if len(sample_doesnt_exist_in_freezer_list) != 0 :
                 headings_error=''
                 sample_doesnt_exist_in_freezer_warning = 'Warning ! These following samples don\'t exist in the freezer table, you can\'t change their location \n'
@@ -743,9 +878,9 @@ def import_pma(request):
                         extract_value(sheet_array[j],tmp_pma_not_first,index_finder(sheet_array[0],[r'processed_month',r'processedmonth']))
                         extract_value(sheet_array[j],tmp_pma_not_first,index_finder(sheet_array[0],[r'processed_year',r'processedyear']))
                         extract_value(sheet_array[j],tmp_pma_not_first,index_finder(sheet_array[0],[r'batch_sent_id',r'batchsentid']))
-                        extract_value(sheet_array[j],tmp_pma_not_first,index_finder(sheet_array[0],[r'scanned_day',r'scannedday']))
-                        extract_value(sheet_array[j],tmp_pma_not_first,index_finder(sheet_array[0],[r'scanned_month',r'scannedmonth']))
-                        extract_value(sheet_array[j],tmp_pma_not_first,index_finder(sheet_array[0],[r'scanned_year',r'scannedyear']))
+                        extract_value(sheet_array[j],tmp_pma_not_first,index_finder(sheet_array[0],[r'scannedday',r'scanned_day']))
+                        extract_value(sheet_array[j],tmp_pma_not_first,index_finder(sheet_array[0],[r'scannedmonth',r'scanned_month']))
+                        extract_value(sheet_array[j],tmp_pma_not_first,index_finder(sheet_array[0],[r'scannedyear',r'scanned_year']))
                         extract_value(sheet_array[j],tmp_pma_not_first,index_finder(sheet_array[0],[r'panbio_unit',r'panbiounit']))
                         db_pma_list.append(tmp_pma_not_first)
 
@@ -823,24 +958,15 @@ def check_clean_data(form,model,field):
     else:
         return None
 
-def query(request):
-    # filter by parameters TEST
-    args = get_data(request)
-    return render (request, "sboapp/pages/query.html", args)
-
-
-def display_exp(request):
-    # display query answer and export button TEST
-    return render (request, "sboapp/pages/display_exp.html")
-
 def sort_data(request):
     # filter by parameters
     # args = get_data(request)
     args={}
     queryset=Serum.objects.all()
     if request.method == "POST":
-        sort_form = SortDataForm(request.POST)
+        sort_form = SortDataForm(request.POST, request.FILES)
         if sort_form.is_valid():
+            sort_form.clean()
             args['valid_error']= "form is valid"
             if sort_form.has_changed():
                 print ('changed is good')
@@ -849,11 +975,10 @@ def sort_data(request):
                 sample_id = sort_form.cleaned_data['sample_id']
                 site_id = sort_form.cleaned_data['site_id']
                 coll_num = sort_form.cleaned_data['coll_num']
-                birth_year = sort_form.cleaned_data['birth_year']
-                age = sort_form.cleaned_data['age']
+                status = sort_form.cleaned_data['status']
                 age_min = sort_form.cleaned_data['age_min']
                 age_max = sort_form.cleaned_data['age_max']
-                gender = sort_form.cleaned_data['birth_year']
+                gender = sort_form.cleaned_data['gender']
                 coll_date = sort_form.cleaned_data['coll_date']
                 year = sort_form.cleaned_data['year']
                 ward_id = sort_form.cleaned_data['ward_id']
@@ -866,143 +991,153 @@ def sort_data(request):
                 subdivision_2_position = sort_form.cleaned_data['subdivision_2_position']
                 subdivision_3_position = sort_form.cleaned_data['subdivision_3_position']
                 subdivision_4_position = sort_form.cleaned_data['subdivision_4_position']
+                # sheet = request.FILES['serum_file_array'].get_sheet(sheet_name=None, name_columns_by_row=0)
+                # serum_file_array = sheet.get_array()
+                # serum_file_array = sort_form.cleaned_data['serum_file'] #It became an array thanks to the clean data step
 
+                # if serum_file_array:
+                #     print("j'ai le file")
+                #     sample_doesnt_exist = []
+                #     serum_list  = []
+                #     sample_id_index = index_finder(serum_file_array[0], [r'sample_id'])
+                #     if sample_id_index is not None:
+                #         for j in range(1,len(serum_file_array)):
+                #             if sample_id_exists(serum_file_array[j][sample_id_index]) == False:
+                #                 sample_doesnt_exist.append(serum_file_array[j][sample_id_index])
+                #             else:
+                #                 serum_list.append(serum_file_array[j][sample_id_index])
+                #         queryset = Serum.objects.filter(sample_id__in=serum_list) #Reset the initial queryset
+                #     else:
+                #         headings_error = 'File\'s header error, no match for sample_id \n These serums can\'t be imported'
+                #         queryset = Serum.objects.filter(sample_id= 'AG000000') #Return 0 result
                 if sample_id:
-                    print("j'ai le sample")
-                    if Serum.objects.filter(sample_id=sort_form.cleaned_data.get('sample_id')).exists() is True:
-                        queryset.filter(sample_id=sort_form.cleaned_data.get('sample_id'))
-
-                    else:
-                        print('aled')
-                else:
-                    print("j'ai pas le sample")
+                    if Serum.objects.filter(sample_id=sort_form.cleaned_data['sample_id']).exists() is True:
+                        queryset=queryset.filter(sample_id=sort_form.cleaned_data.get('sample_id'))
 
                 if site_id:
-                    print("j'ai le site : ",site_id)
                     queryset = queryset.filter(site__site_id__in=site_id)
-                    print('queryset : ',queryset)
-                    # args['site_id'] = queryset
-                else:
-                    print("j'ai pas le site : ",site_id)
 
                 if coll_num:
-                    print("j'ai la coll_num : ",coll_num)
                     queryset = queryset.filter(coll_num__in=coll_num)
-                else:
-                    print("j'ai pas la coll_num : ",coll_num)
 
-                if birth_year:
-                    print("j'ai la birth_year : ",birth_year)
-                    queryset = queryset.filter(birth_year__in=birth_year)
-                else:
-                    print("j'ai pas la birth_year : ",birth_year)
-
-                if age:
-                    print("j'ai l'age : ",age)
-                    queryset = queryset.filter(age__in=age)
-                else:
-                    print("j'ai pas l'age : ",age)
+                if status:
+                    queryset = queryset.filter(status__in=status)
 
                 if age_min:
-                    print("j'ai l'age_min : ",age_min)
-                    queryset = queryset.filter(age_min__in=age_min)
-                else:
-                    print("j'ai pas l'age_min : ",age_min)
+                    queryset = queryset.filter(age_min__gte=age_min)
 
                 if age_max:
-                    print("j'ai l'age_max : ",age_max)
-                    queryset = queryset.filter(age_max__in=age_max)
-                else:
-                    print("j'ai pas l'age_max : ",age_max)
+                    queryset = queryset.filter(age_max__lte=age_max)
 
                 if gender:
-                    print("j'ai le gender : ",gender)
-                    queryset = queryset.filter(gender__in=gender)
-                else:
-                    print("j'ai pas le gender : ",gender)
+                    queryset = queryset.filter(gender_1ismale_value__in=gender)
 
                 if coll_date:
-                    print("j'ai la coll_date : ",coll_date)
-                    queryset = queryset.filter(coll_date__in=coll_date)
-                else:
-                    print("j'ai pas la coll_date : ",coll_date)
+                    queryset = queryset.filter(coll_date=coll_date)
 
                 if year:
-                    print("j'ai la year : ",year)
-                    queryset = queryset.filter(year__in=year)
-                else:
-                    print("j'ai pas la year : ",year)
+                    queryset = queryset.filter(year=year)
 
                 if ward_id:
-                    print("j'ai le ward_id : ",ward_id)
                     queryset = queryset.filter(ward__ward_id__in=ward_id)
-                else:
-                    print("j'ai pas le ward_id : ",ward_id)
 
                 if study_code:
-                    print("j'ai le study_code : ",study_code)
                     queryset = queryset.filter(study_code__in=study_code)
-                else:
-                    print("j'ai pas le study_code : ",study_code)
 
                 if sample_type:
-                    print("j'ai le sample_type : ",sample_type)
-                    queryset = queryset.filter(sample_type__in=sample_type)
-                else:
-                    print("j'ai pas le sample_type : ",sample_type)
+                    queryset = queryset.filter(sample_type=sample_type)
 
                 if aliquot_no:
-                    print("j'ai le aliquot_no : ",aliquot_no)
-                    queryset = queryset.filter(aliquot_no__in=aliquot_no)
-                else:
-                    print("j'ai pas le aliquot_no : ",aliquot_no)
+                    queryset = queryset.filter(aliquot_no=aliquot_no)
 
                 if volume:
-                    print("j'ai le volume : ",volume)
-                    queryset = queryset.filter(volume__in=volume)
-                else:
-                    print("j'ai pas le volume : ",volume)
+                    queryset = queryset.filter(volume=volume)
 
                 if freezer_section_name:
-                    print("j'ai le freezer_section_name : ",freezer_section_name)
-                    queryset = queryset.filter(freezer__freezer_section_name__in=freezer_section_name)
-                else:
-                    print("j'ai pas le freezer_section_name : ",freezer_section_name)
+                    queryset = queryset.filter(freezer__freezer_section_name=freezer_section_name)
 
                 if subdivision_1_position:
-                    print("j'ai le subdivision_1_position : ",subdivision_1_position)
-                    queryset = queryset.filter(freezer__subdivision_1_position__in=subdivision_1_position)
-                else:
-                    print("j'ai pas le subdivision_1_position : ",subdivision_1_position)
+                    queryset = queryset.filter(freezer__subdivision_1_position=subdivision_1_position)
 
                 if subdivision_2_position:
-                    print("j'ai le subdivision_2_position : ",subdivision_2_position)
-                    queryset = queryset.filter(freezer__subdivision_2_position__in=subdivision_2_position)
-                else:
-                    print("j'ai pas le subdivision_2_position : ",subdivision_2_position)
+                    queryset = queryset.filter(freezer__subdivision_2_position=subdivision_2_position)
 
                 if subdivision_3_position:
-                    print("j'ai le subdivision_3_position : ",subdivision_3_position)
-                    queryset = queryset.filter(freezer__subdivision_3_position__in=subdivision_3_position)
-                else:
-                    print("j'ai pas le subdivision_3_position : ",subdivision_3_position)
+                    queryset = queryset.filter(freezer__subdivision_3_position=subdivision_3_position)
 
                 if subdivision_4_position:
-                    print("j'ai le subdivision_4_position : ",subdivision_4_position)
-                    queryset = queryset.filter(freezer__subdivision_4_position__in=subdivision_4_position)
-                else:
-                    print("j'ai pas le subdivision_4_position : ",subdivision_4_position)
+                    queryset = queryset.filter(freezer__subdivision_4_position=subdivision_4_position)
 
-                if queryset == None:
-                    args['queryset_error']='Warning ! There is no match for your query .'
-                else:
-                    args['queryset']=queryset
-                    args['queryset_count']=queryset.count()
+                args['queryset']=queryset
+                args['queryset_count']=queryset.count()
+
             else:
-                print('Nothing has changed')
+                args['queryset']=queryset
+                args['queryset_count']=queryset.count()
+
+            year_list=[]
+            site_list=[]
+            ag_list=[]
+            bd_list=[]
+            dl_list=[]
+            dt_list=[]
+            hc_list=[]
+            hu_list=[]
+            kg_list=[]
+            kh_list=[]
+            qn_list=[]
+            st_list=[]
+
+            query_year=queryset.values_list('year').distinct()
+            query_year=query_year.order_by('year')
+            count_year=query_year.count()
+            for i in range(count_year):
+                year_list.append(query_year[i][0])
+            args['year_list']=year_list
+            query_site=queryset.values_list('site').distinct()
+            query_site=query_site.order_by('site')
+            count_site=query_site.count()
+            for i in range(count_site):
+                site_list.append(query_site[i][0])
+            args['site_list']=site_list
+
+            for i in range(len(year_list)):
+                for j in range(len(site_list)):
+                    if site_list[j] == 'AG':
+                        ag_list.append(queryset.filter(site_id='AG',year=year_list[i]).count())
+                    elif site_list[j] == 'BD':
+                        bd_list.append(queryset.filter(site_id='BD',year=year_list[i]).count())
+                    elif site_list[j] == 'DL':
+                        dl_list.append(queryset.filter(site_id='DL',year=year_list[i]).count())
+                    elif site_list[j] == 'DT':
+                        dt_list.append(queryset.filter(site_id='DT',year=year_list[i]).count())
+                    elif site_list[j] == 'HC':
+                        hc_list.append(queryset.filter(site_id='HC',year=year_list[i]).count())
+                    elif site_list[j] == 'HU':
+                        hu_list.append(queryset.filter(site_id='HU',year=year_list[i]).count())
+                    elif site_list[j] == 'KG':
+                        kg_list.append(queryset.filter(site_id='KG',year=year_list[i]).count())
+                    elif site_list[j] == 'KH':
+                        kh_list.append(queryset.filter(site_id='KH',year=year_list[i]).count())
+                    elif site_list[j] == 'QN':
+                        qn_list.append(queryset.filter(site_id='QN',year=year_list[i]).count())
+                    elif site_list[j] == 'ST':
+                        st_list.append(queryset.filter(site_id='ST',year=year_list[i]).count())
+            args['data_ag']=ag_list
+            args['data_bd']=bd_list
+            args['data_dl']=dl_list
+            args['data_dt']=dt_list
+            args['data_hc']=hc_list
+            args['data_hu']=hu_list
+            args['data_kg']=kg_list
+            args['data_kh']=kh_list
+            args['data_qn']=qn_list
+            args['data_st']=st_list
+
+            request.session['sort_queryset'] = list(queryset.values_list('sample_id').distinct())
             return render (request, "sboapp/pages/validate_query.html",args)
-            # return render(request,'sort_data/validate_query',args)
         else:
+            args = {'sort_form':sort_form}
             args['valid_error']= "valid error"
             return render(request, "sboapp/pages/sort_data.html", args)
     else:
@@ -1010,47 +1145,135 @@ def sort_data(request):
     args = {'sort_form':sort_form}
     return render (request, "sboapp/pages/sort_data.html", args)
 
-def validate_query(request):
-    #recuperer le queryset, faire un count de serum et display dans un chart
-    # filter by parameters
-    if request.method == "POST":
-        args['oui']='oui'
-        print (args)
+def get_serum_headers(input_list):
+    output_list = []
+    output_list.extend(['SampleId','SiteId','CollNum','CollDate','WardId'])
+    if 'all' in input_list:
+        output_list.extend(['LocalSampleId','Status','OriginalAge','AgeMin','AgeMax','Gender1isMaleValue','Day','Month','Year'])
     else:
-        args['non']='non'
-    return render (request, "sboapp/pages/validate_query.html",args)
+        if 'local_sample_id' in input_list:
+            output_list.append('LocalSampleId')
+        if 'status' in input_list:
+            output_list.append('Status')
+        if 'original_age' in input_list:
+            output_list.append('OriginalAge')
+        if 'age_min' in input_list:
+            output_list.append('AgeMin')
+        if 'age_max' in input_list:
+            output_list.append('AgeMax')
+        if 'gender_1ismale_value' in input_list:
+            output_list.append('Gender1isMaleValue')
+        if 'day_value' in input_list:
+            output_list.append('Day')
+        if 'month_value' in input_list:
+            output_list.append('Month')
+        if 'year' in input_list:
+            output_list.append('Year')
+    return output_list
+
+def get_freezer_headers(input_list):
+    output_list = []
+    if 'all' in input_list:
+        output_list.extend(['StudyCode','SampleType','AliquotNo','Volume','FreezerSectionName','Subdivision1Position','Subdivision2Position','Subdivision3Position','Subdivision4Position'])
+    else:
+        if 'study_code' in input_list:
+            output_list.append('StudyCode')
+        if 'sample_type' in input_list:
+            output_list.append('SampleType')
+        if 'aliquot_no' in input_list:
+            output_list.append('AliquotNo')
+        if 'volume' in input_list:
+            output_list.append('Volume')
+        if 'freezer_section_name' in input_list:
+            output_list.append('FreezerSectionName')
+        if 'subdivision_1_position' in input_list:
+            output_list.append('Subdivision1Position')
+        if 'subdivision_2_position' in input_list:
+            output_list.append('Subdivision2Position')
+        if 'subdivision_3_position' in input_list:
+            output_list.append('Subdivision3Position')
+        if 'subdivision_4_position' in input_list:
+            output_list.append('Subdivision4Position')
+    return output_list
 
 def display_export(request):
     # Get queryset from sort_data function
-    # display query answer and export button VOIR API django_excel
+
+    ## LES HEADERS EN PASCAL CASE
+
     if request.method == "POST":
         display_form = DisplayDataForm(request.POST)
         args={}
         if display_form.is_valid():
-            args['valid_error']= "form is valid"
-            return render (request, "display_export.html",args)
-             #construire le fichier de sortie en fonction des cases selectionnees
+            serum_list = request.session.get('sort_queryset',None)
+            sample_list = []
+            for i in range(len(serum_list)):
+                sample_list.append(serum_list[i][0])
+            queryset = Serum.objects.filter(sample_id__in=sample_list)
+            queryset=queryset.values()
+
+            serum_fields = display_form.cleaned_data['serum_fields']
+            freezer_fields = display_form.cleaned_data['freezer_fields']
+            elisa_general_fields = display_form.cleaned_data['elisa_general_fields']
+            pathogen = display_form.cleaned_data['pathogen']
+            pma_general_fields = display_form.cleaned_data['pma_general_fields']
+            pma_results_fields = display_form.cleaned_data['pma_results_fields']
+            file_type = display_form.cleaned_data.get('file_type')
+
+            now = datetime.datetime.now()
+            if file_type == "csv":
+                export_file=excel.make_response_from_array(final_csv_array,'csv',status=200)
+                filename ="attachement ; filename = serum_bank_export_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".csv"
+                export_file['Content-Disposition'] = filename
+                return export_file
+            else:
+                serum_freezer_array = []
+                chik_elisa_array = []
+                dengue_elisa_array = []
+                rickettsia_elisa_array = []
+                pma_array = []
+                serum_headers_list = []
+                freezer_headers_list = []
+
+                if serum_fields:
+                    serum_headers_list=get_serum_headers(serum_fields)
+                    print ("serum headers list : ", serum_headers_list)
+                if freezer_fields:
+                    freezer_headers_list=get_freezer_headers(freezer_fields)
+                    print ("freezer headers list : ", freezer_headers_list)
+                serum_freezer_array = serum_headers_list.extend(freezer_headers_list) #NE FONCTIONNE PAS
+                print ("serum freezer array : ", serum_freezer_array)
+
+                content = {
+                'Serum/Freezer':serum_freezer_array,
+                'ChikElisa':chik_elisa_array,
+                'DengueElisa':dengue_elisa_array,
+                'RickettsiaElisa':rickettsia_elisa_array,
+                'ProteinMicroArray':pma_array
+                }
+                book = pyexcel.get_book(bookdict=content)
+                if file_type == "xls":
+                    # filename = "serum_bank_export_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".xls"
+                    # book.save_as(filename)
+                    export_file=excel.make_response_from_book_dict(book,'xls',status=200) ### Use make response form array
+                    filename ="attachement ; filename = serum_bank_export_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".xls"
+                    export_file['Content-Disposition'] = filename
+                    return export_file
+
+                elif file_type == "xlsx":
+                    # filename = "serum_bank_export_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".xlsx"
+                    # book.save_as(filename)
+                    export_file=excel.make_response_from_book_dict(book,'xlsx',status=200)
+                    filename ="attachement ; filename = serum_bank_export_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".xlsx"
+                    export_file['Content-Disposition'] = filename
+                    return export_file
+
         else:
-            return render(request,"sboapp/pages/display_export.html",{'error_display_form': ' Display data form error'})
-        # export_form = ExportFormatForm(request.POST)
-        # if export_form.is_valid():
-        #     format_choice = export_form.cleaned_data.get('format')
-        #     if format_choice == "xls":
-        #         pass
-        #         # excel.make_response_from_query_sets(query_sets, column_names, 'xls', status=200)
-        #     elif format_choice == "xlsx":
-        #         pass
-        #         # excel.make_response_from_query_sets(query_sets, column_names, 'xlsx', status=200)
-        #     elif format_choice == "ods":
-        #         pass
-        #         # excel.make_response_from_query_sets(query_sets, column_names, 'ods', status=200)
-        #     elif format_choice == "csv":
-        #         pass
-        #         # excel.make_response_from_query_sets(query_sets, column_names, 'csv', status=200)
-        #     else:
-        #         return render (request, "sboapp/pages/display_export.html", {'error_format_form':'Please select a file type'})
+            display_form = DisplayDataForm()
+            args['display_form']= display_form
+            args['error_display_form']=' Display data form error'
+            return render(request,"sboapp/pages/display_export.html",args)
     else:
-        # export_form = ExportFormatForm()
         display_form = DisplayDataForm()
     args = {'display_form':display_form}
     return render (request, "sboapp/pages/display_export.html", args)

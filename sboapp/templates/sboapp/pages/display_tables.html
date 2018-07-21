@@ -8,7 +8,8 @@
       <link rel="stylesheet" href="{% static 'css/table.css' %}">
       <style media="screen">
       body{
-        background: linear-gradient(to bottom, #8ac0ea 0%,#97c7ec 1%,#bedcf3 50%,#e5f1fa 100%);
+        /* background: linear-gradient(to top, #8ac0ea 0%,#97c7ec 1%,#bedcf3 50%,#e5f1fa 100%); */
+        background: linear-gradient(to top, #8ac0ea 0%,#97c7ec 1%,#e5f1fa 50%,#fff 100%);
       }
       </style>
   {% endblock %}
@@ -65,8 +66,8 @@
 				<th>site_id</th>
 				<th>coll_num</th>
 				<th>sample_id</th>
-        <th>birth_year</th>
-				<th>age</th>
+        <th>status</th>
+				<th>original_age</th>
 				<th>age_min</th>
 				<th>age_max</th>
 				<th>gender</th>
@@ -84,8 +85,8 @@
         <td>{{ serum.site_id}}</td>
         <td>{{ serum.coll_num}}</td>
         <td>{{ serum.sample_id}}</td>
-        <td>{{ serum.birth_year}}</td>
-        <td>{{ serum.age}}</td>
+        <td>{{ serum.status}}</td>
+        <td>{{ serum.original_age}}</td>
         <td>{{ serum.age_min}}</td>
         <td>{{ serum.age_max}}</td>
         <td>{{ serum.gender_1ismale_value}}</td>

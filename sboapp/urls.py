@@ -17,17 +17,17 @@ urlpatterns = [
     path('staff/import_pma',views.import_pma, name='import_pma'),
         #Modify Location
     path('staff/modify_location',views.modify_location, name='modify_location'),
+        #Modify Status
+    path('staff/modify_status',views.modify_status, name='modify_status'),
         #Query + Export
         #Display Tables
     path('staff/tables/',views.display_tables, name='tables'),
 
 
     #WORK IN PROGRESS
-    path('staff/query', views.query, name ='query'),
-    path('staff/query/display_exp', views.display_exp, name ='display_exp'),
-
     path('staff/sort_data', views.sort_data, name ='sort_data'),
-    path('staff/sort_data/validate_query', views.validate_query, name ='validate_query'),
+    path('staff/sort_data/check_status', views.check_status, name ='check_status'),
+    path('staff/sort_data/count_results', views.count_results, name ='count_results'),
     path('staff/sort_data/display_export', views.display_export, name ='display_export'),
 
 

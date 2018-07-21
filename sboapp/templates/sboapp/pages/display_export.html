@@ -1,18 +1,42 @@
 <!DOCTYPE html>
-{%extends 'layouts/base_form.html'%}
+{%extends 'layouts/base_export.html'%}
+
+{% load widget_tweaks %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+
+<!-- {%block title%} Serum Bank OUCRU app {%endblock%} -->
+{% block head-javascript %}
+    {{ display_form.media }}
+{% endblock %}
 
 
-<html>
-    <body>
-    {%block content%}
-      <p>This is the display and export page</p>
-      <br>
-      <p>Add serums count + display form  + display preview</p>
-      <br>
-      <form action="display_export" method="post">
-        {% csrf_token %}
-        {{display_form}}
-      </form>
-    {%endblock content%}
-    </body>
-</html>
+{% block page-header %}
+<h1>Export Data</h1>
+<h2>Select fields you want to export</h2>
+{% endblock %}
+
+
+{% block content %}
+{{success}}
+<div class="row">
+  {% crispy display_form %}
+</div>
+{% endblock %}
+
+{% block foot-javascript %}
+<script>
+$( document ).ready( function() {
+    // Afficher l'onglet suivant en cliquant sur le bouton suivant
+    $('.btnNext').click(function(){
+        $('.nav-tabs > .active + li a').trigger('click');
+        $(".nav-tabs + .tab-content").find(":input:visible:first").focus();
+    });
+    // Afficher l'onglet précédent en cliquant sur le bouton précédent
+    $('.btnPrevious').click(function(){
+        $('.nav-tabs > .active').prev('li').find('a').trigger('click');
+        $(".nav-tabs + .tab-content").find(":input:visible:first").focus();
+    });
+});
+</script>
+{% endblock %}

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-{%extends 'layouts/base_form.html'%}
-
+{%extends 'layouts/base_export.html'%}
 {%block title%} Serum Bank OUCRU app {%endblock%}
 
 <html>
@@ -8,22 +7,85 @@
         <title>
             Validate or modify query
         </title>
+        {% block javascript %}
+        <script src="https://code.highcharts.com/highcharts.src.js"></script>
+        {% endblock %}
+
     </head>
     <body>
+    {% block page-header %}
+    <h1>Queryset Validation</h1>
+    {% endblock %}
     {%block content%}
-      <p>This is the validate_query page</p><br>
-      <p>Query result ---> Serum count + HighCharts (Serum = f (Year x Site))</p><br>
+      <!-- <p>This is the validate_query page</p><br>
+      <p>Query result = Serum count + HighCharts (Serum = f (Year x Site))</p><br>
       <p>buttons : modify query (return to sort_data page) + export (go to display_export page)</p><br>
-      <h1>{{valid_error}}</h1><br>
-      <h1>{{sample_id}}</h1><br><h1>{{changed_list}}</h1><br><h1>{{queryset_error}}</h1><br>
-      <a href="sort_data" class="btn btn-danger col-md-offset-1" role="button">Modify Query</a>
-      <a href="display_export" class="btn btn-success col-md-offset-8" role="button" type="submit">Validate Query</a><br>
-      <h1>Serum count : {{queryset_count}}</h1>
-      {% for serum in queryset %}
+      <h1>{{valid_error}}</h1><br> -->
+      <!-- <h1>{{sample_id}}</h1><br><h1>{{changed_list}}</h1><br><h1>{{queryset_error}}</h1><br> -->
+      <div class="text-center">
+        <h1>Serums found : {{queryset_count}}</h1>
+        <!-- <h1>Serums found : {{queryset}}</h1> -->
+      <br>
+      <div class="wrapper">
+      <div id="container"></div>
+      <script>
+        Highcharts.chart('container', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Serums / Year x Site'
+            },
+            xAxis: {
+                categories: {{year_list}}
+            },
+            series:[{
+                name: 'AG',
+                data: {{data_ag}},
+            }, {
+                name: 'BD',
+                data: {{data_bd}},
+            }, {
+                name: 'DL',
+                data: {{data_dl}},
+            }, {
+                name: 'DT',
+                data: {{data_dt}},
+            }, {
+                name: 'HC',
+                data: {{data_hc}},
+            }, {
+                name: 'HU',
+                data: {{data_hu}},
+            }, {
+                name: 'KG',
+                data: {{data_kg}},
+            }, {
+                name: 'KH',
+                data: {{data_kh}},
+            }, {
+                name: 'QN',
+                data: {{data_qn}},
+            }, {
+                name: 'ST',
+                data: {{data_st}},
+            }]
+        });
+      </script>
+      <br>
+    </div>
+      <a href="sort_data" class="btn btn-danger  col-md-offset-1 ">Modify Query</a>
+      <a href="sort_data/display_export" class="btn btn-success">Validate Query</a>
+      <a href="sort_data/check_status" class="btn btn-warning ">Check Serums Status</a>
+      <a href="sort_data/count_results" class="btn btn-warning ">Count Serums Tests</a><br>
+      <br>
+  </div>
+<!-- col-md-offset-1 -->
+      <!-- {% for serum in queryset %}
       <ul>
         <li>{{serum}}</li>
       </ul>
-      {% endfor %}
+      {% endfor %} -->
 
       <!-- <p>
       {% for arg in args %}

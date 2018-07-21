@@ -40,7 +40,7 @@
 
 body {
   height: 100%;
-  /* background-color: #fff; */
+  background-color: #fff;
   /* background: linear-gradient(to top, #8ac0ea 0%,#97c7ec 1%,#e5f1fa 50%,#fff 100%); */
   /* background: linear-gradient(to bottom, #8ac0ea 0%,#97c7ec 1%,#e5f1fa 50%,#fff 100%); */
   /* background: linear-gradient(to bottom, #8ac0ea 0%,#97c7ec 1%,#bedcf3 50%,#e5f1fa 100%); */
@@ -48,7 +48,6 @@ body {
   background-size: cover;
   font-family: 'Open Sans', Helvetica, sans-serif;
 }
-
 
 nav{
   display: flex;
@@ -106,28 +105,12 @@ a[href^="{% url 'sboapp:staff'%}"] {
 #banner{
   height:30px;
 }
-
-/* .alert {
-  padding: 0.75rem 1.25rem;
-  margin-bottom: 1rem;
-  border: 1px solid transparent;
-  border-radius: 0.25rem;
-}
-
-.alert-danger {
-  background-color: #f2dede;
-  border-color: #ebcccc;
-  color: #a94442;
-}
-
-.alert-danger hr {
-  border-top-color: #e4b9b9;
-}
-
-.alert-danger .alert-link {
-  color: #843534;
-} */
 /* Dashboard buttons */
+
+btn {
+  border-radius: 20%;
+  float: left;
+}
 
 dashboard-buttons{
   /* width:25%; */

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 {%extends 'layouts/base.html'%}
 {% load static %}
-{% load range %}
 {%block title%} Serum Bank OUCRU app {%endblock%}
 
 <html>
@@ -14,13 +13,13 @@
       <link rel="stylesheet" href="{% static 'css/styles.css' %}">
       {% endblock %}
         <title>
-            Import Serum
+            Modify Status
         </title>
     </head>
     <body>
       {%block content%}
-      <div class=text-center>  <h2>Serum Import page</h2> <br>
-        <h1>Please, select a serum file</h1>
+      <div class=text-center>  <h2>Modify serums status page</h2> <br>
+        <h1>Please, select a list of serums file</h1>
         <br>
       </div>
       <form action="" method="post" enctype="multipart/form-data">
@@ -35,52 +34,30 @@
           style="border: 1px solid green; padding:5px; border-radius: 2px; cursor: pointer;">
         </div>
         <br>
-          <fieldset >
+          <fieldset>
             <div class="text-center">
               <h1>Errors Report </h1>
             </div>
           <br>
-          {{headings_error}}
+          {{sample_doesnt_exist_warning}}
           <br>
-          {{sample_exist_warning}}
-          <br>
-          {{sample_exist}}
-          <br>
-          <br>
-          {{site_exist_warning}}
-          <br>
-          {{site_exist}}
-          <br>
-          <br>
-          {{ward_exist_warning}}
-          <br>
-          {{ward_exist}}
+          {{sample_doesnt_exist}}
           <br>
           </fieldset>
           <fieldset>
             <div class="text-center">
-              <h1>Data imported</h1>
+              <h1>Data modified</h1>
               {{success}}
             </div>
             <table class="data-table">
           		<thead>
-          			  <th>local_sample_id</th>
-          				<th>site_id</th>
-          				<th>coll_num</th>
-          				<th>sample_id</th>
-          				<th>original_age</th>
-          				<th>age_min</th>
-          				<th>age_max</th>
-          				<th>gender</th>
-          				<th>coll_date</th>
-          				<th>day</th>
-          				<th>month</th>
-          				<th>year</th>
-          				<th>ward_id</th>
+                <th>sample</th>
+                <th>old status</th>
+                <th>new status</th>
           			</tr>
           		</thead>
           		<tbody>
-                {% for row in db_list %}
+                {% for row in report_list %}
                   {% if forloop.first == False %}
                   <!-- Headers are not displayed -->
               		  <tr>
@@ -92,7 +69,6 @@
                 {% endfor %}
           		</tbody>
           	</table>
-          </fieldset>
       </form>
       {{warning}}
       {%endblock content%}

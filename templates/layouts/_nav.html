@@ -1,11 +1,14 @@
-<nav class='navbar'>
-  <div class="wrapper">
-    <a href="{% url 'sboapp:staff' %}"  class='navbar-logo'><img class=grow src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRICA1c-zKr1CMGPddMK7rchPy2_DW5JfxXUNENTvtsLkcoc8nl" id="logo"></a>
-    <ul class='navbar-right'>
-      <!-- List of links displayed on the navbar -->
+{% load staticfiles %}
+
+<nav>
+  <!-- <div class="wrapper"> -->
+    <a href="{% url 'sboapp:staff' %}"  ><img class=grow src="{% static "images/OUCRU_rgb.png" %}" id="logo"></a>
+    <a href='' disabled="disabled"><img src="{% static "images/oucru_banner.png" %}" id="banner"></a>
+    <!-- <ul class='navbar-right'>
       <li><a href = "{% url 'home'%}">Home</a></li>
       <li><a href = "{% url 'sboapp:staff'%}">Dashboard</a></li>
-      <!-- <li><a href = "{% url "sboapp:staff"%}">Staff</a></li> -->
-    </ul>
-  </div>
+    </ul> -->
+    <a href = "{% url 'home'%}">Log out</a>
+    <a href = "{% url 'sboapp:staff'%}">Dashboard</a>
+  <!-- </div> -->
 </nav>

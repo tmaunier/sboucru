@@ -2,6 +2,9 @@
 {% load staticfiles %}
 
 <head>
+  {% block title %}
+  Serum bank OUCRU app
+  {% endblock %}
   {% block styles %}
       <link rel="stylesheet" href="{% static 'css/home.css' %}">
       <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.css' %}">
@@ -14,7 +17,8 @@
   {%block content%}
 <div class="sandbox sandbox-correct-pronounciation">
   <h1 class="heading heading-correct-pronounciation">
-    Welcome to the
+    <!-- Welcome to the -->
+    <br>
     <em>
       <span style="color: #0e2f44">O</span>
       <span style="color: #e46f30">U</span>

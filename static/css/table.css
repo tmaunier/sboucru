@@ -55,6 +55,8 @@
 			background: linear-gradient(to bottom, #1e5799 0%,#207cca 1%,#2989d8 50%,#7db9e8 100%);
 			color: #FFFFFF;
 			border-color: #6ea1cc !important;
+			text-align: center;
+		
 			/* text-transform: uppercase; */
 		}
 
