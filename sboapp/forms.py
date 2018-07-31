@@ -32,7 +32,7 @@ def get_pma_results_fields():
 
 def get_pma_fields():
     choices=[('all','all fields')]
-    fields_exceptions=['pma_result','sample','result_id']
+    fields_exceptions=['pma_result','sample','result_id','import_date','import_time','import_user']
     for f in Pma._meta.get_fields():
         if f.name not in fields_exceptions:
             if f.name == 'processed_day':
@@ -53,7 +53,7 @@ def get_pma_fields():
 
 def get_serum_fields():
     choices=[('all','all fields')]
-    fields_exceptions=['sample_id','freezer','pma','elisa','site','coll_num','coll_date','ward_id','ward']
+    fields_exceptions=['sample_id','freezer','pma','elisa','site','coll_num','coll_date','ward_id','ward','import_date','import_time','import_user']
     for f in Serum._meta.get_fields():
         if f.name not in fields_exceptions:
             choices.append((f.name,f.name,))
@@ -61,30 +61,34 @@ def get_serum_fields():
 
 def get_freezer_fields():
     choices=[('all','all fields')]
+    fields_exceptions=['import_date','import_time','import_user']
     for f in Freezer._meta.get_fields():
-        if f.name == 'subdivision_1_position':
-            choices.append((f.name,'Shelf (subdivision_1_position)'))
-        elif f.name == 'subdivision_2_position':
-            choices.append((f.name,'Rack (subdivision_2_position)'))
-        elif f.name == 'subdivision_3_position':
-            choices.append((f.name,'Box (subdivision_3_position)'))
-        elif f.name == 'subdivision_4_position':
-            choices.append((f.name,'Tube (subdivision_4_position)'))
-        elif f.name != 'sample':
-            choices.append((f.name,f.name,))
+        if f.name not in fields_exceptions:
+            if f.name == 'subdivision_1_position':
+                choices.append((f.name,'Shelf (subdivision_1_position)'))
+            elif f.name == 'subdivision_2_position':
+                choices.append((f.name,'Rack (subdivision_2_position)'))
+            elif f.name == 'subdivision_3_position':
+                choices.append((f.name,'Box (subdivision_3_position)'))
+            elif f.name == 'subdivision_4_position':
+                choices.append((f.name,'Tube (subdivision_4_position)'))
+            elif f.name != 'sample':
+                choices.append((f.name,f.name,))
     return choices
 
 def get_elisa_fields():
     choices=[('all','all fields')]
+    fields_exceptions=['import_date','import_time','import_user']
     for e in Elisa._meta.get_fields():
-        if e.name == 'pathogen':
-            choices.append((e.name,'Name of the disease (pathogen)'))
-        elif e.name == 'elisa_day':
-            choices.append((e.name,'Day of the Elisa test (processed day)'))
-        elif e.name == 'elisa_month':
-            choices.append((e.name,'Month of the Elisa test (processed month)'))
-        elif e.name == 'elisa_year':
-            choices.append((e.name,'Year of the Elisa test (processed year)'))
+        if e.name not in fields_exceptions:
+            if e.name == 'pathogen':
+                choices.append((e.name,'Name of the disease (pathogen)'))
+            elif e.name == 'elisa_day':
+                choices.append((e.name,'Day of the Elisa test (processed day)'))
+            elif e.name == 'elisa_month':
+                choices.append((e.name,'Month of the Elisa test (processed month)'))
+            elif e.name == 'elisa_year':
+                choices.append((e.name,'Year of the Elisa test (processed year)'))
     return choices
 
 def get_pathogen():
@@ -118,7 +122,7 @@ def get_last_three_days():
     dayminusone = datetoday + datetime.timedelta(days=-1)
     dayminustwo = datetoday + datetime.timedelta(days=-2)
     dayminusthree = datetoday + datetime.timedelta(days=-3)
-    days_list = [(datetoday,datetoday),(dayminusone,dayminusone),(dayminustwo,dayminustwo),(dayminusthree,dayminusthree)]
+    days_list = [(None,'----'),(datetoday,datetoday),(dayminusone,dayminusone),(dayminustwo,dayminustwo),(dayminusthree,dayminusthree)]
     # days_list = [("J-0",datetoday),("J-1",dayminusone),("J-2",dayminustwo),("J-3",dayminusthree)]
     return days_list
 
@@ -138,6 +142,33 @@ def sample_validator(value):
 class UploadFileForm(forms.Form):
     file = forms.FileField()
 
+class YesNoForm(forms.Form):
+    answer = forms.ChoiceField(label='',widget=forms.RadioSelect,choices=((0,'Yes'),(1,'No')), initial=1, help_text='Warning ! Are you sure about it ? This action is definitive')
+    def __init__(self, *args, **kwargs):
+        """
+        Surcharge de l'initialisation du formulaire
+        """
+        super().__init__(*args, **kwargs)
+        # Tu utilises FormHelper pour customiser ton formulaire
+        self.helper = FormHelper()
+        # Tu définis l'id et la classe bootstrap de ton formulaire
+        self.helper.form_class = 'form-horizontal'
+        self.helper.form_id = 'validate_undo_form'
+        # Tu définis la taille des labels et des champs sur la grille
+        self.helper.label_class = 'col-md-4'
+        self.helper.field_class = 'col-md-8'
+        self.helper.layout = Layout(
+        Fieldset(
+        'Validate Undo Import',
+        'answer',
+        ),
+        StrictButton(
+        '<span class="glyphicon glyphicon-trash" \
+        aria-hidden="true"></span> %s' % "Erase",
+        type='submit', color='red',
+        css_class='btn-danger col-md-offset-10', href='undo_import/delete_import'
+        ),)
+
 class UndoForm(forms.Form):
     import_type = forms.ChoiceField(widget=forms.Select(attrs={"class":"form-control", "id":"exampleFormControlSelect1"}),label='', choices=((None,'----'),
     ("serum","Serum"),
@@ -150,18 +181,18 @@ class UndoForm(forms.Form):
     import_date = forms.ChoiceField(widget=forms.Select(attrs={"class":"form-control", "id":"exampleFormControlSelect1"}),choices=get_last_three_days(),label='', help_text='.')
     # import_date = forms.DateField(widget=forms.SelectDateWidget(years=get_import_years()),label='', help_text='.')
     import_time = forms.ChoiceField(widget=forms.Select(attrs={"class":"form-control", "id":"exampleFormControlSelect1"}),label='', choices=((None,'----'),
-    ("0-2am","00:00 am -> 01:59 am"),
-    ("2-4am","02:00 am -> 03:59 am"),
-    ("4-6am","04:00 am -> 05:59 am"),
-    ("6-8am","06:00 am -> 07:59 am"),
-    ("8-10am","08:00 am -> 09:59 am"),
-    ("10am-0pm","10:00 am -> 11:59 am"),
-    ("0-2pm","00:00 pm -> 01:59 pm"),
-    ("2-4pm","02:00 pm -> 03:59 pm"),
-    ("4-6pm","04:00 pm -> 05:59 pm"),
-    ("6-8pm","06:00 pm -> 07:59 pm"),
-    ("8-10pm","08:00 pm -> 09:59 pm"),
-    ("10pm-0am","10:00 pm -> 11:59 pm")
+    ("0-2","00:00 -> 01:59"),
+    ("2-4","02:00 -> 03:59"),
+    ("4-6","04:00 -> 05:59"),
+    ("6-8","06:00 -> 07:59"),
+    ("8-10","08:00 -> 09:59"),
+    ("10-12","10:00 -> 11:59"),
+    ("12-14","12:00 -> 13:59"),
+    ("14-16","14:00 -> 15:59"),
+    ("16-18","16:00 -> 17:59"),
+    ("18-20","18:00 -> 19:59"),
+    ("20-22","20:00 -> 21:59"),
+    ("22-24","22:00 -> 23:59")
     ), help_text='.')
 
     def __init__(self, *args, **kwargs):
@@ -173,7 +204,7 @@ class UndoForm(forms.Form):
         self.helper = FormHelper()
         # Tu définis l'id et la classe bootstrap de ton formulaire
         self.helper.form_class = 'form-horizontal'
-        self.helper.form_id = 'sort-form'
+        self.helper.form_id = 'undo_form'
         # Tu définis la taille des labels et des champs sur la grille
         self.helper.label_class = 'col-md-4'
         self.helper.field_class = 'col-md-8'

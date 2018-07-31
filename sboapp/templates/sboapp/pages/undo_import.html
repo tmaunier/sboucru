@@ -18,7 +18,15 @@
 
 
 {% block content %}
-<div class="container-card">
+  {% if user_error %}
+  <div class="container-error">
+    <div class="text-center">
+      <h3>No Match !</h3>
+      {{ user_error }}
+    </div>
+  </div>
+  {% else %}
+  <div class="container-card">
   <div class="text-center">
   <h3>Undo Rules !</h3>
   <br>
@@ -32,8 +40,8 @@
   </div>
 </ul>
 </div>
+{% endif %}
 <br>
-{{ user_error }}
 <div class="row">
   {% crispy form %}
 </div>

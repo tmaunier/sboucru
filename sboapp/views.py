@@ -4,9 +4,12 @@ from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from sboapp.models import Serum, Site, Ward, Freezer, Elisa, Chik_elisa, Dengue_elisa, Rickettsia_elisa, Pma, Pma_result
 from django import forms
-from .forms import UploadFileForm, PathogenForm, DisplayDataForm, SortDataForm, FileTypeForm, UndoForm
+from .forms import UploadFileForm, PathogenForm, DisplayDataForm, SortDataForm, FileTypeForm, UndoForm, YesNoForm
 from django.views.generic.edit import FormView
 from django.db.models import Count
+from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 import openpyxl
 import pyexcel #module to read Excel files in Django
 import django_excel as excel
@@ -42,6 +45,30 @@ def count_element(Model):
     count = Model.objects.all().count()
     return count
 
+def get_import_list(Model,field):
+    import_list = [field]
+    last_element = Model.objects.latest('import_date')
+    last_date = last_element.import_date
+    queryset = Model.objects.filter(import_date=last_date)
+    count = queryset.count()
+    q=queryset[0]
+    if field == 'Elisa':
+        pathogen = q.pathogen
+        x = "Elisa - "+str(pathogen)
+        import_list=[x]
+    date = q.import_date
+    user = q.import_user
+    import_list.extend([count,date,user])
+    return import_list
+
+def get_import_array():
+    import_array = [
+    get_import_list(Serum,"Serum"),
+    get_import_list(Freezer,"Location"),
+    get_import_list(Elisa,"Elisa"),
+    get_import_list(Pma,"PMA"),
+    ]
+    return import_array
 
 # STAFF DASHBOARD
 def staff(request):
@@ -103,7 +130,44 @@ def staff(request):
     args['data_kh']=kh_list
     args['data_qn']=qn_list
     args['data_st']=st_list
+
+    import_array = get_import_array()
+    args['import_array']= import_array
     return render (request, "sboapp/pages/staff.html", args)
+
+def edit_profile(request):
+    args={}
+    return render(request, 'sboapp/pages/edit_profile.html', args)
+
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important!
+            return render(request, 'sboapp/pages/change_password_done.html')
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'sboapp/pages/change_password.html', {'form': form})
+
+def change_profile(request):
+    if request.method == 'POST':
+        return render(request, 'sboapp/pages/change_profile_done.html')
+    # if request.method == 'POST':
+    #     form = PasswordChangeForm(request.user, request.POST)
+    #     if form.is_valid():
+    #         user = form.save()
+    #         update_session_auth_hash(request, user)  # Important!
+    #         return render(request, 'sboapp/pages/change_profile_done.html')
+    #     else:
+    #         messages.error(request, 'Please correct the error below.')
+    # else:
+    #     form = PasswordChangeForm(request.user)
+    # return render(request, 'sboapp/pages/change_profile.html', {'form': form})
+    else:
+        return render(request, 'sboapp/pages/change_profile.html')
 
 #---IMPORT DATA FROM FILE TO DATABASE
 def sample_id_exists(sample_test_id): #Check if the serum_id exists in the Serum table, return Boolean
@@ -984,59 +1048,148 @@ def import_pma(request):
 
 def undo_import(request):
     if request.method == "POST":
-        form = UndoForm(request.POST)
-        args={}
-        if form.is_valid():
-            cln_import_type = form.cleaned_data['import_type']
-            cln_import_date = form.cleaned_data['import_date']
-            cln_import_time = form.cleaned_data['import_time']
+        yesnoform = YesNoForm(request.POST)
+        if yesnoform.is_valid():
+            answer = yesnoform.cleaned_data['answer']
+            request.session['answer'] = int(answer)
+            return redirect('undo_import/delete_import')
 
-            # print("import_type",cln_import_type)
-            # print("import_date",cln_import_date)
-            # print("import_time",cln_import_time)
-
-            if cln_import_type == "serum":
-                queryset = Serum.objects.all()
-            elif cln_import_type == "freezer":
-                queryset = Freezer.objects.all()
-            elif cln_import_type == "elisa_chik":
-                queryset = Elisa.objects.filter(pathogen='chikungunya')
-            elif cln_import_type == "elisa_dengue":
-                queryset = Elisa.objects.filter(pathogen='dengue')
-            elif cln_import_type == "elisa_rickettsia":
-                queryset = Elisa.objects.filter(pathogen='rickettsia')
-            elif cln_import_type == "pma":
-                queryset = Pma.objects.all()
-            try:
-                queryset = queryset.filter(import_user=request.user)
-            except:
-                args['user_error'] = "Sorry, there is no data matched with your request that you are allowed to erase. Please refer to the undo rules !"
-                return render(request, "sboapp/pages/undo_import.html", args)
-            try:
-                # print('I AM HERE')
-                queryset = queryset.filter(import_date=cln_import_date)
-            except:
-                # print('import_date',cln_import_date)
-                args['user_error'] = "date error"
-                return render(request, "sboapp/pages/undo_import.html", args)
-
-            # if cln_import_time == "0-2am":
-            #     queryset = queryset.filter(import_time__gte=cln_import_time)
-            #     queryset = queryset.filter(import_time__lte=cln_import_time)
-
-            queryset = list(queryset.values_list('sample_id').distinct())
-            request.session['undo_queryset'] = queryset
-            return render (request, "sboapp/pages/validate_undo.html",args)
         else:
-            # args['valid_error']= "valid error"
-            return render(request, "sboapp/pages/undo_import.html", args)
+            form = UndoForm(request.POST)
+            args={}
+            if form.is_valid():
+                cln_import_type = form.cleaned_data['import_type']
+                cln_import_date = form.cleaned_data['import_date']
+                cln_import_time = form.cleaned_data['import_time']
+
+                args['type'] = cln_import_type
+
+                if cln_import_type == "serum":
+                    queryset = Serum.objects.all()
+                elif cln_import_type == "freezer":
+                    queryset = Freezer.objects.all()
+                elif cln_import_type == "elisa_chik":
+                    queryset = Elisa.objects.filter(pathogen='chikungunya')
+                elif cln_import_type == "elisa_dengue":
+                    queryset = Elisa.objects.filter(pathogen='dengue')
+                elif cln_import_type == "elisa_rickettsia":
+                    queryset = Elisa.objects.filter(pathogen='rickettsia')
+                elif cln_import_type == "pma":
+                    queryset = Pma.objects.all()
+                try:
+                    queryset = queryset.filter(import_user=request.user)
+                    if not queryset:
+                        args['user_error'] = "Sorry, there is no data matched with your request !"
+                        form = UndoForm()
+                        args['form']= form
+                        return render(request, "sboapp/pages/undo_import.html", args)
+                except:
+                    form = UndoForm()
+                    args['form']= form
+                    args['user_error'] = "User error : there is no data matched with your request that you are allowed to erase. Please refer to the undo rules !"
+                    return render(request, "sboapp/pages/undo_import.html", args)
+                try:
+                    queryset = queryset.filter(import_date=cln_import_date)
+                    if not queryset:
+                        form = UndoForm()
+                        args['form']= form
+                        args['user_error'] = "Sorry, there is no data matched with your request !"
+                        return render(request, "sboapp/pages/undo_import.html", args)
+                except:
+                    form = UndoForm()
+                    args['form']= form
+                    args['user_error'] = "Date error. Please refer to the undo rules !"
+                    return render(request, "sboapp/pages/undo_import.html", args)
+
+                try:
+                    if cln_import_time =="0-2":
+                        queryset = queryset.filter(import_time__range=('00:00','01:59'))
+                    elif cln_import_time == "2-4":
+                        queryset = queryset.filter(import_time__range=('02:00','03:59'))
+                    elif cln_import_time == "4-6":
+                        queryset = queryset.filter(import_time__range=('04:00','05:59'))
+                    elif cln_import_time == "6-8":
+                        queryset = queryset.filter(import_time__range=('06:00','07:59'))
+                    elif cln_import_time == "8-10":
+                        queryset = queryset.filter(import_time__range=('08:00','09:59'))
+                    elif cln_import_time == "10-12":
+                        queryset = queryset.filter(import_time__range=('10:00','11:59'))
+                    elif cln_import_time == "12-14":
+                        queryset = queryset.filter(import_time__range=('12:00','13:59'))
+                    elif cln_import_time == "14-16":
+                        queryset = queryset.filter(import_time__range=('14:00','15:59'))
+                    elif cln_import_time == "16-18":
+                        queryset = queryset.filter(import_time__range=('16:00','17:59'))
+                    elif cln_import_time == "18-20":
+                        queryset = queryset.filter(import_time__range=('18:00','19:59'))
+                    elif cln_import_time == "20-22":
+                        queryset = queryset.filter(import_time__range=('20:00','21:59'))
+                    elif cln_import_time == "22-24":
+                        queryset = queryset.filter(import_time__range=('22:00','23:59'))
+
+                    if not queryset:
+                        form = UndoForm()
+                        args['form']= form
+                        args['user_error'] = "Sorry, there is no data matched with your request !"
+                        return render(request, "sboapp/pages/undo_import.html", args)
+                except:
+                    form = UndoForm()
+                    args['form']= form
+                    args['user_error'] = "Time error. Please refer to the undo rules !"
+                    return render(request, "sboapp/pages/undo_import.html", args)
+
+                if cln_import_type == "elisa_chik" or cln_import_type == "elisa_dengue" or cln_import_type == "elisa_rickettsia":
+                    args['pathogen'] = q.pathogen
+                args['quantity'] = queryset.count()
+                q = queryset[0]
+                args['date'] = q.import_date
+                args['time'] = q.import_time
+                request.session['undo_queryset'] = list(queryset.values_list('sample_id').distinct())
+                request.session['undo_type'] = cln_import_type
+                args['undo_queryset'] = queryset
+                validate_undo_form = YesNoForm()
+                args['validate_undo_form'] = validate_undo_form
+                return render (request, "sboapp/pages/validate_undo.html",args)
+            else:
+                form = UndoForm()
+                args['form']= form
+                return render(request, "sboapp/pages/undo_import.html", args)
     else:
         form = UndoForm()
     return render (request, "sboapp/pages/undo_import.html", {'form':form})
 
 def delete_import(request):
-    pass
-    
+    args = {}
+    undo_type = request.session.get('undo_type',None)
+    undo_list = request.session.get('undo_queryset',None)
+    tmp = []
+    for i in undo_list:
+        tmp.append(i[0])
+    answer = request.session.get('answer',None)
+    if answer == 0:
+        if undo_type == "serum":
+            queryset = Serum.objects.filter(sample_id__in=tmp)
+        elif undo_type == "freezer":
+            queryset = Freezer.objects.filter(sample_id__in=tmp)
+        elif undo_type == "elisa_chik":
+            queryset = Elisa.objects.filter(pathogen='chikungunya')
+            queryset = queryset.filter(sample_id__in=tmp)
+        elif undo_type == "elisa_dengue":
+            queryset = Elisa.objects.filter(pathogen='dengue')
+            queryset = queryset.filter(sample_id__in=tmp)
+        elif undo_type == "elisa_rickettsia":
+            queryset = Elisa.objects.filter(pathogen='rickettsia')
+            queryset = queryset.filter(sample_id__in=tmp)
+        elif undo_type == "pma":
+            queryset = Pma.objects.filter(sample_id__in=tmp)
+        for obj in queryset:
+            obj.delete()
+        args['header_message'] = 'Congratulations'
+        args['message'] = 'Your data has been erased successfully'
+    else:
+        args['header_message'] = 'Undo function cancelled'
+    return render(request, "sboapp/pages/undo_done.html", args)
+
 #---QUERY + EXPORT FROM DATABASE TO FILE
 def check_clean_data(form,model,field):
     q = model.objects.get(field=form.cleaned_data.get(field))

@@ -10,7 +10,9 @@ app_name = "sboapp"
 urlpatterns = [
         #Staff dashboard
     path('staff/', views.staff, name='staff'),
-    # path('staff/password_change/',auth_views.password_change, name='password_change'),
+    path('staff/edit_profile',views.edit_profile, name='edit_profile'),
+    path('staff/edit_profile/change_password',views.change_password, name='change_password'),
+    path('staff/edit_profile/change_profile',views.change_profile, name='change_profile'),
     # path('staff/password_change/',auth_views.PasswordChangeView.as_view(success_url='sboapp/staff/password_change_done'), name='password_change'),
     # path('staff/password_change/',auth_views.PasswordChangeView.as_view(success_url=reverse_lazy('sboapp:staff/password_change_done')), name='password_change'),
         #Import data
@@ -23,7 +25,7 @@ urlpatterns = [
     path('staff/import_pma',views.import_pma, name='import_pma'),
         #Undo Import
     path('staff/undo_import',views.undo_import, name='undo_import'),
-    # path('staff/delete_import',views.delete_import, name='delete_import'),
+    path('staff/undo_import/delete_import',views.delete_import, name='delete_import'),
         #Modify Location
     path('staff/modify_location',views.modify_location, name='modify_location'),
         #Modify Status

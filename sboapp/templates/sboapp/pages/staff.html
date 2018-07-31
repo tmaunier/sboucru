@@ -19,32 +19,61 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
 }
+.data-table {
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 350px;
+  top: 10%;
+}
+.data-table th,
+.data-table td {
+  border: 0;
+  /* border: 1px solid #e1edff; */
+  padding: 7px 7px;
+}
+.data-table thead th {
+  /* background-color: #508abb; */
+  background: linear-gradient(to bottom, #2d5932 0%,#2d5932 1%,#4a727e 50%,#8ea7ae 100%);
+  color: #FFFFFF;
+  /* border-color: #6ea1cc !important; */
+  text-align: center;
+}
+.data-table tbody tr:nth-child(odd) td {
+  /* background-color: #abbcad */
+  background-color: #d5ddd6
+}
+.data-table tbody td {
+  color: #353535;
+  background-color: #eaeeea;
+}
 .container-card {
     background: url("{% static 'images/halong.jpeg' %}");
     background-size: cover;
     position: relative;
     text-align: center;
-    margin-left: 25%;
-    margin-right: 25%;
-    margin-top: 10px;
+    vertical-align: top;
+    height: 250px;
+    display: inline-block;
+    margin-left: 4%;
+    margin-right: 2%;
+    margin-top: 15px;
     padding: 20px;
-    /* width:700px; */
+    width:40%;
     /* padding-top: 1px; */
     /* padding-bottom: : 10px; */
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6);
 }
+
 .container-chart {
-    /* background: url("{% static 'images/halong.jpeg' %}");
-    background-size: cover; */
-    background: linear-gradient(to bottom, #2d5932 0%,#2d5932 1%,#4a727e 50%,#8ea7ae 100%);
-    /* opacity:0.5; */
-    /* background: linear-gradient(to bottom, #2d5932 0%,#557e60 1%,#4a727e 50%,#8ea7ae 100%); */
+    background: url("{% static 'images/rice.jpeg' %}");
+    background-size: cover;
+    /* background: linear-gradient(to bottom, #2d5932 0%,#2d5932 1%,#4a727e 50%,#8ea7ae 100%); */
     position: relative;
     text-align: center;
     margin-left: 1%;
     margin-right: 2%;
-    margin-top: 10px;
-    padding-top: 10px;
+    margin-top: 20px;
+    padding-top: 15px;
     padding-bottom: 70px;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6);
     color: #fff;
@@ -57,7 +86,7 @@ body {
     /* border-radius: 5%; */
     max-width: 300px;
     /* margin: auto; */
-    /* margin-top: 20px; */
+    margin-top: 20px;
     text-align: center;
     position: relative;
     padding: 2px;
@@ -148,10 +177,33 @@ body {
       <p>Email : {{ user.email}} </p>
     {% endif %}
   </div>
-  <button class="card-btn" onclick="window.location.href='password_change'">
-      <img  src="{% static 'images/edit.png' %}" width="30" height="30"/>
-      <span>Edit password</span>
+  <button class="card-btn" onclick="window.location.href='edit_profile'">
+      <img  src="{% static 'images/edit.png' %}" width="30" height="30"/><br>
+      <span>Edit profile</span>
   </button>
+</div>
+<div class="container-card">
+  <h1>Latest import</h1>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Type of data</th>
+        <th>Quantity</th>
+        <th>Import Date</th>
+        <!-- <th>Import Time</th> -->
+        <th>Import User</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in import_array%}
+        <tr>
+          {% for value in row %}
+              <td>{{ value }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 
 

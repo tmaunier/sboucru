@@ -102,21 +102,78 @@ a[href^="{% url 'sboapp:staff'%}"] {
 
 }
 .container-card {
-    /* background: #f2f2f2; */
-    background: linear-gradient(to bottom, #fbb838 0%,#fbb838 1%,#fbbf4b 50%,#fccd73 100%);
-    position: relative;
-    /* text-align: justify; */
-    margin-left: 25%;
-    margin-right: 25%;
-    margin-top: 10px;
-    padding: 10px;
-    padding-right: 30px;
-    /* width:700px; */
-    /* padding-top: 1px; */
-    /* padding-bottom: : 10px; */
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6);
+  background: linear-gradient(to bottom, #fbb838 0%,#fbb838 1%,#fbbf4b 50%,#fccd73 100%);
+  position: relative;
+  margin-left: 25%;
+  margin-right: 25%;
+  margin-top: 10px;
+  padding: 10px;
+  padding-right: 30px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6);
 }
 
+.container-error {
+  background: linear-gradient(to bottom, #9c2a27 0%,#9c2a27 1%,#a53f3c 50%,#af5452 100%);
+  position: relative;
+  margin-left: 30%;
+  margin-right: 30%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-top: 5px;
+  padding-bottom:40px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6);
+}
+
+.container-done {
+  background: linear-gradient(to bottom, #6086a3 0%,#7cacd2 1%,#d0e5f6 50%,#fff 100%);
+  position: relative;
+  margin-left: 30%;
+  margin-right: 30%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-top: 5px;
+  padding-bottom:40px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6);
+}
+.card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6);
+    background: #fff;
+    opacity: 0.7;
+    display: inline-block;
+    /* border-radius: 5%; */
+    max-width: 300px;
+    /* margin: auto; */
+    margin-top: 20px;
+    margin-right: 20px;
+    margin-left: 20px;
+    text-align: center;
+    position: relative;
+    padding: 20px;
+}
+.card-btn {
+  background: #fff;
+  opacity: 0.7;
+  position: absolute;
+  bottom: 33%;
+  left: 55%;
+  padding: 10px;
+  padding-right: 10px;
+  display: inline-block;
+  outline: 0;
+  border: 0;
+  margin: 50px;
+  border-radius: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: black;
+  cursor: pointer;
+  width: 25%;
+  /* width: 180px; */
+}
+.card-btn:hover {
+  background: #15721f;
+  opacity: 0.8;
+}
 #banner{
   height:30px;
 }

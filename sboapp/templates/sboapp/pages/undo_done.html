@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+{%extends 'layouts/base_export.html'%}
+
+{%block title%} Serum Bank OUCRU app {%endblock%}
+
+{% block page-header %}
+<h1>Undo Done</h1>
+{% endblock %}
+{% block content %}
+<div class="text-center">
+  <div class="container-done">
+    <h3>{{header_message}}</h3>
+    {% if message%}
+      <p>Your data has been erased successfully</p><br>
+    {% endif %}
+    <p>You can return to the dashboard</p>
+  </div>
+</div>
+{% endblock %}
+</body>

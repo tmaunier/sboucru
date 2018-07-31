@@ -15,13 +15,66 @@
 {% block page-header %}
 <h1>Undo Validation</h1>
 {% endblock %}
-<p>display recap en fonction du type de data</p>
+{% block content %}
+<div class="text-center">
+    {% if type == 'serum' or type == 'freezer' or type == 'pma' %}
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Quantity</th>
+            <th>Import Date</th>
+            <th>Import Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ type }}</td>
+            <td>{{ quantity }}</td>
+            <td>{{ date }}</td>
+            <td>{{ time }}</td>
+          </tr>
+        </tbody>
+      </table>
+    {% endif %}
+    {% if type == 'elisa_chik' or type == 'elisa_dengue' or type == 'elisa_rickettsia' %}
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Pathogen</th>
+            <th>Quantity</th>
+            <th>Import Date</th>
+            <th>Import Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ type }}</td>
+            <td>{{ pathogen }}</td>
+            <td>{{ quantity }}</td>
+            <td>{{ date }}</td>
+            <td>{{ time }}</td>
+          </tr>
+        </tbody>
+      </table>
+    {% endif %}
+</div>
+<br>
+<div class="row">
+  {% crispy validate_undo_form %}
+</div>
+<!-- <p>display recap en fonction du type de data</p>
 <br>
 <p>confirm button + alert (are you sure its definitif)</p>
 <p> YES or NO form ? </p>
 <p> red danger button to submit </p>
-
-{% block content %}
-
+<ul>
+{% for x in undo_queryset %}
+  <li>
+    {{ x }}
+  </li>
+{% endfor %}
+</ul> -->
 {% endblock %}
 </body>
