@@ -1,8 +1,12 @@
 from django import forms
+from django.contrib.auth.forms import AuthenticationForm
 from django.core import validators
 from django.core.exceptions import ValidationError
+from django.forms.widgets import PasswordInput, TextInput
 from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
+import datetime
+from datetime import date
 from sboapp.models import Elisa, Site, Serum, Freezer, Ward, Elisa, Chik_elisa, Dengue_elisa, Rickettsia_elisa, Pma, Pma_result
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, HTML
@@ -101,6 +105,23 @@ def get_years():
     year_list.sort()
     return year_list
 
+# def get_import_years():
+#     queryset=Serum.objects.dates('import_date','year')
+#     year_list = []
+#     for q in queryset:
+#         year_list.append(q.year)
+#     year_list.sort()
+#     return year_list
+
+def get_last_three_days():
+    datetoday = datetime.date.today()
+    dayminusone = datetoday + datetime.timedelta(days=-1)
+    dayminustwo = datetoday + datetime.timedelta(days=-2)
+    dayminusthree = datetoday + datetime.timedelta(days=-3)
+    days_list = [(datetoday,datetoday),(dayminusone,dayminusone),(dayminustwo,dayminustwo),(dayminusthree,dayminusthree)]
+    # days_list = [("J-0",datetoday),("J-1",dayminusone),("J-2",dayminustwo),("J-3",dayminusthree)]
+    return days_list
+
 def get_wards():
     ward_list=[]
     query=Ward.objects.values_list('ward_id','ward_name').distinct()
@@ -117,12 +138,75 @@ def sample_validator(value):
 class UploadFileForm(forms.Form):
     file = forms.FileField()
 
-class NameForm(forms.Form):
-    error_css_class = 'error'
-    required_css_class = 'required'
-    user_name = forms.CharField(label='User name',widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Username'}))
-    user_id = forms.CharField(label='User id',widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Userid'})) #a remplacer par le vrai password
-    # user_password = forms.PasswordInput()
+class UndoForm(forms.Form):
+    import_type = forms.ChoiceField(widget=forms.Select(attrs={"class":"form-control", "id":"exampleFormControlSelect1"}),label='', choices=((None,'----'),
+    ("serum","Serum"),
+    ("freezer","Serum's location"),
+    ("elisa_chik","Elisa Chikungunya"),
+    ("elisa_dengue","Elisa Dengue"),
+    ("elisa_rickettsia","Elisa Rickettsia"),
+    ("pma","PMA"),
+    ), help_text='.')
+    import_date = forms.ChoiceField(widget=forms.Select(attrs={"class":"form-control", "id":"exampleFormControlSelect1"}),choices=get_last_three_days(),label='', help_text='.')
+    # import_date = forms.DateField(widget=forms.SelectDateWidget(years=get_import_years()),label='', help_text='.')
+    import_time = forms.ChoiceField(widget=forms.Select(attrs={"class":"form-control", "id":"exampleFormControlSelect1"}),label='', choices=((None,'----'),
+    ("0-2am","00:00 am -> 01:59 am"),
+    ("2-4am","02:00 am -> 03:59 am"),
+    ("4-6am","04:00 am -> 05:59 am"),
+    ("6-8am","06:00 am -> 07:59 am"),
+    ("8-10am","08:00 am -> 09:59 am"),
+    ("10am-0pm","10:00 am -> 11:59 am"),
+    ("0-2pm","00:00 pm -> 01:59 pm"),
+    ("2-4pm","02:00 pm -> 03:59 pm"),
+    ("4-6pm","04:00 pm -> 05:59 pm"),
+    ("6-8pm","06:00 pm -> 07:59 pm"),
+    ("8-10pm","08:00 pm -> 09:59 pm"),
+    ("10pm-0am","10:00 pm -> 11:59 pm")
+    ), help_text='.')
+
+    def __init__(self, *args, **kwargs):
+        """
+        Surcharge de l'initialisation du formulaire
+        """
+        super().__init__(*args, **kwargs)
+        # Tu utilises FormHelper pour customiser ton formulaire
+        self.helper = FormHelper()
+        # Tu définis l'id et la classe bootstrap de ton formulaire
+        self.helper.form_class = 'form-horizontal'
+        self.helper.form_id = 'sort-form'
+        # Tu définis la taille des labels et des champs sur la grille
+        self.helper.label_class = 'col-md-4'
+        self.helper.field_class = 'col-md-8'
+        self.helper.layout = Layout(
+        Fieldset(
+        'Import Type',
+        'import_type',
+        ),
+        Fieldset(
+        'Import date',
+        'import_date',
+        ),
+        Fieldset(
+        'Import Time',
+        'import_time',
+        ),
+        StrictButton(
+        '<span class="glyphicon glyphicon-ok" \
+        aria-hidden="true"></span> %s' % "Submit",
+        type='submit', color='green',
+        css_class='btn-success col-md-offset-10'
+        ),)
+
+# class NameForm(forms.Form):
+#     # error_css_class = 'error'
+#     # required_css_class = 'required'
+#     # user_name = forms.CharField(label='User name',widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Username'}))
+#     user_id = forms.CharField(label='User id',widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Userid'})) #a remplacer par le vrai password
+#     user_password = forms.PasswordInput()
+
+class CustomAuthForm(AuthenticationForm):
+    username = forms.CharField(widget=TextInput(attrs={'class':'validate','placeholder': 'Username'}))
+    password = forms.CharField(widget=PasswordInput(attrs={'placeholder':'Password'}))
 
 class PathogenForm(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -312,7 +396,7 @@ class DisplayDataForm(forms.Form):
     serum_fields = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,choices=get_serum_fields(), initial=['all'], required=False, label='', help_text='Note : sample_id, site_id, coll_num, coll_date & ward_id are exported by default ')
     freezer_fields = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,choices=get_freezer_fields(), initial=['all'], required=False, label='', help_text='.')
     elisa_general_fields = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=get_elisa_fields(), initial=['all'], label='', help_text='Note : sample_id & result_id are exported by default ')
-    pathogen = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,choices=get_pathogen(), initial=['all'], required=False, label='', help_text='.')
+    pathogen = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,choices=get_pathogen(), initial=['all'], required=False, label='', help_text='Note: If you want Elisa info you need to check at least one pathogen, if you don\'t you won\'t have any Elisa result in your file')
     pma_general_fields = forms.MultipleChoiceField(label='',widget=forms.CheckboxSelectMultiple,choices=get_pma_fields(), initial=['all'], required=False, help_text='Note : sample_id & result_id are exported by default ')
     pma_results_fields = forms.MultipleChoiceField(required=False, label='',widget=forms.CheckboxSelectMultiple, help_text='.',choices=(('all','all pathogens'),
     ('Chikungunya','Chikungunya (chikv_e1_mutant, chikv_e2)'),
@@ -489,8 +573,3 @@ class DisplayDataForm(forms.Form):
                 ),
             ),
         )
-# chaque champ de serum et freezer independant
-# tout de serum et freezer (un bouton pour chaque)
-# les noms complets pour les sites et ward (un bouton pour chaque)
-# resultats par test ou par pathogen (fichier resultats independant ?)
-# boolean -> use Form.has_changed() --> set initial value to False (True for sample_id, site, year of collect)

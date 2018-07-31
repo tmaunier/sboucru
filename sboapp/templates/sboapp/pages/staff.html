@@ -8,6 +8,7 @@
 {% block styles %}
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="{% static 'css/table.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
 body {
   font-family: "Lato", sans-serif;
@@ -17,6 +18,49 @@ body {
   background: url("{% static 'images/sky_hcmc.jpeg' %}");
   background-repeat: no-repeat;
   background-size: cover;
+}
+.container-card {
+    background: url("{% static 'images/halong.jpeg' %}");
+    background-size: cover;
+    position: relative;
+    text-align: center;
+    margin-left: 25%;
+    margin-right: 25%;
+    margin-top: 10px;
+    padding: 20px;
+    /* width:700px; */
+    /* padding-top: 1px; */
+    /* padding-bottom: : 10px; */
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6);
+}
+.container-chart {
+    /* background: url("{% static 'images/halong.jpeg' %}");
+    background-size: cover; */
+    background: linear-gradient(to bottom, #2d5932 0%,#2d5932 1%,#4a727e 50%,#8ea7ae 100%);
+    /* opacity:0.5; */
+    /* background: linear-gradient(to bottom, #2d5932 0%,#557e60 1%,#4a727e 50%,#8ea7ae 100%); */
+    position: relative;
+    text-align: center;
+    margin-left: 1%;
+    margin-right: 2%;
+    margin-top: 10px;
+    padding-top: 10px;
+    padding-bottom: 70px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6);
+    color: #fff;
+}
+
+.card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6);
+    background: #fff;
+    opacity: 0.7;
+    /* border-radius: 5%; */
+    max-width: 300px;
+    /* margin: auto; */
+    /* margin-top: 20px; */
+    text-align: center;
+    position: relative;
+    padding: 2px;
 }
 
 /* Style the tab */
@@ -93,9 +137,30 @@ body {
 </div>
 
 <div id="Welcome" class="tabcontent">
+<div class="container-card">
+
+  <div class="card">
+    {% if user.is_authenticated %}
+      <h1>{{user.first_name}}'s profile</h1>
+      <p>First name : {{ user.first_name}}</p>
+      <p>Last name : {{ user.last_name}}</p>
+      <p>Username : {{ user.username}}</p>
+      <p>Email : {{ user.email}} </p>
+    {% endif %}
+  </div>
+  <button class="card-btn" onclick="window.location.href='password_change'">
+      <img  src="{% static 'images/edit.png' %}" width="30" height="30"/>
+      <span>Edit password</span>
+  </button>
+</div>
+
+
   <br>
+  <div class="container-chart">
+
+
   <div class="text-center">
-  <h1>Total amount of Serums in the database : {{count_serum}}</h1>
+  <h1>Total amount of Serums in the database :   {{count_serum}}</h1>
   <br>
   <div class="wrapper">
   <div id="container"></div>
@@ -147,7 +212,7 @@ body {
 </div>
   <!-- <p>Note : add an update button to avoid loading of the query each time you go through the welcome page</p> -->
 </div>
-
+  </div>
 <div id="Import" class="tabcontent">
   <br>
   <div class="center-screen">
@@ -155,6 +220,7 @@ body {
     <dashboard-buttons onclick="window.location.href='import_location'">Import Serum's location</dashboard-buttons>
     <dashboard-buttons onclick="window.location.href='import_elisa_choices'">Import Elisa results</dashboard-buttons>
     <dashboard-buttons onclick="window.location.href='import_pma'">Import PMA results</dashboard-buttons>
+    <dashboard-buttons onclick="window.location.href='undo_import'">Undo Import</dashboard-buttons>
   </div>
 </div>
 
@@ -162,7 +228,7 @@ body {
   <br>
   <div class="center-screen">
     <dashboard-buttons onclick="window.location.href='modify_location'">Modify serums location</dashboard-buttons>
-    <dashboard-buttons onclick="window.location.href='modify_status'">Modify serums status</dashboard-buttons>
+    <dashboard-buttons onclick="window.location.href='modify_status'">Switch serums status</dashboard-buttons>
     <dashboard-buttons onclick="window.location.href='sort_data'">Sort & Export Data</dashboard-buttons>
   </div>
 </div>

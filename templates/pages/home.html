@@ -6,8 +6,8 @@
   Serum bank OUCRU app
   {% endblock %}
   {% block styles %}
-      <link rel="stylesheet" href="{% static 'css/home.css' %}">
       <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.css' %}">
+      <link rel="stylesheet" href="{% static 'css/home.css' %}">
   {% endblock %}
   {% block javascript %}
   <script type="text/javascript" src="{% static 'bootstrap/js/bootstrap.js' %}"></script>
@@ -28,52 +28,50 @@
     </em>
    Serum bank manager
   </h1>
-  <div class="text-center">
-    <form method="post" action="sboapp/staff/">
-      {% csrf_token %}
-      {{ staff }}
-      <br>
-      <p> </p>
-      <br>
-      <input class="form-control form-control-lg" type="text" name="staff" placeholder="User name " id="staff" size="10" maxlength="8" value="{{ staff.user_name }}" required/><br>
-      <input type="text" name="staff" placeholder="Password " id="staff" size="10" maxlength="8" value="{{ staff.user_id }}" /><br>
-      <!-- a remplacer par le vrai password dans le form  -->
-      <input class="log-button" type="submit" value="Login">
-    </form>
-  </div>
+  <br>
 </div>
-<!-- Temporary login box -->
-<!-- <div class="box">
-</div> -->
-<!-- <div class="container">
-  <div class="box">
-  <div style="width:30%">
-      <form method="post" action="sboapp/staff/">
-          {%csrf_token%}
-          {% for error in staff.non_field_errors %}
-          <div class="form-group has-errors text-danger small">
-              {{error}}
-          </div>
-          {% endfor %}
-          {% for field in staff %}
-          <div class="form-group has-errors text-danger small">
-              {{field.errors}}
-          </div>
-          <div class="form-group has-errors text-danger small">
-          </div>
-          <div class="form-group">
-              {{field}}
-          </div>
-          {% endfor %}
-          <button class="btn btn-primary" style="width:100%">Login</button>
-      </form>
-  </div>
-  </div>
-</div> -->
+
+{% if next %}
+    {% if user.is_authenticated %}
+    <p>Your account doesn't have access to this page. To proceed,
+    please login with an account that has access.</p>
+    {% else %}
+    <p>Please login to see this page.</p>
+    {% endif %}
+{% endif %}
+<div class="box">
+
+<form method="post" action="{% url 'login' %}">
+{% csrf_token %}
+
+<table>
+<tr>
+    <td>{{ form.username }}</td>
+</tr>
+<tr>
+    <td>{{ form.password }}</td>
+</tr>
+</table>
+<input class="btn btn-primary" type="submit" value="login" />
+<input type="hidden" name="next" value="{{ next }}" />
+</div>
+</form>
 <div class="wrapper">
   <a class='navbar-logo' href='http://www.ox.ac.uk/'><img src="https://armacad.info/images/2017/04/UniversityofOxfordPre-MastersCourse2017--hlEg2iy5PYQGFjURZE_yoZAn7-un0YIT.png" id="oxfordLogo"></a>
   <a class='navbar-logo' href='http://www.oucru.org/'><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRICA1c-zKr1CMGPddMK7rchPy2_DW5JfxXUNENTvtsLkcoc8nl" id="oucruLogo"></a>
-  <a class='navbar-logo' href="{% url 'about'%}"><img src="{% static 'images/about.png' %}" id="aboutLogo"></a>
 </div>
   {%endblock content%}
 </body>
+
+
+
+<!-- <div class="text-center">
+<form method="post">
+{% csrf_token %}
+{{ form.as_p }}
+<br>
+<p> </p>
+<br>
+<input class="btn btn-success" type="submit" value="Login">
+</form>
+</div> -->

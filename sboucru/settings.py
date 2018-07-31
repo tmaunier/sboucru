@@ -110,19 +110,24 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+#Registeration
+#login
+LOGIN_REDIRECT_URL = 'sboapp/staff'
+#reset password
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Ho_Chi_Minh' #by default was 'UTC', now it's UTC+7
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)

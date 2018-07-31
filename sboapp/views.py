@@ -1,9 +1,10 @@
 from django.shortcuts import get_object_or_404, render, redirect #render is mainly used with templates while HttpResponse is used for data (for example)
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.urls import reverse
+from django.core.exceptions import ObjectDoesNotExist
 from sboapp.models import Serum, Site, Ward, Freezer, Elisa, Chik_elisa, Dengue_elisa, Rickettsia_elisa, Pma, Pma_result
 from django import forms
-from .forms import UploadFileForm, NameForm, PathogenForm, DisplayDataForm, SortDataForm, FileTypeForm
+from .forms import UploadFileForm, PathogenForm, DisplayDataForm, SortDataForm, FileTypeForm, UndoForm
 from django.views.generic.edit import FormView
 from django.db.models import Count
 import openpyxl
@@ -14,6 +15,7 @@ import re #Regular expression python module
 import random
 import pickle
 import datetime
+from datetime import date
 
 # ERRORS 404 & 500
 
@@ -103,59 +105,65 @@ def staff(request):
     args['data_st']=st_list
     return render (request, "sboapp/pages/staff.html", args)
 
-def get_name(request):
-    if request.method == 'POST':
-        form = NameForm(request.POST)
-        if form.is_valid():
-            user_name = {"user_name":user_name}
-            return render(request,'sboapp/pages/staff.html',user_name)
-    else:
-        form = NameForm()
-
-    return render(request, 'sboapp/pages/staff.html', {'form': form})
-
-
 #---IMPORT DATA FROM FILE TO DATABASE
 def sample_id_exists(sample_test_id): #Check if the serum_id exists in the Serum table, return Boolean
-    exist_count = Serum.objects.filter(sample_id = sample_test_id).count()
-    if exist_count >=1:
-        return True
-    else:
+    try:
+        exist_count = Serum.objects.filter(sample_id = sample_test_id).count()
+        if exist_count >=1:
+            return True
+        else:
+            return False
+    except:
         return False
 
 def ward_id_exists(ward_test_id): #Check if the ward_id exists in the Ward table, return Boolean
-    exist_count = Ward.objects.filter(ward_id = int(ward_test_id)).count()
-    if exist_count >= 1:
-        return True
-    else:
+    try:
+        exist_count = Ward.objects.filter(ward_id = int(ward_test_id)).count()
+        if exist_count >= 1:
+            return True
+        else:
+            return False
+    except:
         return False
 
 def site_id_exists(site_test_id): #Check if the site_id exists in the Site table, return Boolean
-    exist_count = Site.objects.filter(site_id= site_test_id).count()
-    if exist_count >= 1:
-        return True
-    else:
+    try:
+        exist_count = Site.objects.filter(site_id= site_test_id).count()
+        if exist_count >= 1:
+            return True
+        else:
+            return False
+    except:
         return False
 
 def sample_id_exists_in_freezer(sample_test_id): #Check if the sample_id exists in the Freezer table, return Boolean
-    exist_count = Freezer.objects.filter(sample= sample_test_id).count()
-    if exist_count >= 1:
-        return True
-    else:
+    try:
+        exist_count = Freezer.objects.filter(sample= sample_test_id).count()
+        if exist_count >= 1:
+            return True
+        else:
+            return False
+    except:
         return False
 
 def sample_id_exists_in_elisa(sample_test_id): #Check if the sample_test_id exists in Elisa table, return Boolean
-    exist_count = Elisa.objects.filter(sample= sample_test_id).count()
-    if exist_count >= 1:
-        return True
-    else:
+    try:
+        exist_count = Elisa.objects.filter(sample= sample_test_id).count()
+        if exist_count >= 1:
+            return True
+        else:
+            return False
+    except:
         return False
 
 def sample_id_exists_in_pma(sample_test_id): #Check if the sample_test_id exists in Pma table, return Boolean
-    exist_count = Pma.objects.filter(sample= sample_test_id).count()
-    if exist_count >= 1:
-        return True
-    else:
+    try:
+        exist_count = Pma.objects.filter(sample= sample_test_id).count()
+        if exist_count >= 1:
+            return True
+        else:
+            return False
+    except:
         return False
 
 def index_finder(headers_list, header_test_list):
@@ -348,6 +356,10 @@ def import_serum(request):
                         db_list.append(tmp)
                 #save list to database
                 pyexcel.save_as(array=db_list,name_columns_by_row=0, dest_model=Serum, dest_initializer=None, dest_mapdict=None, dest_batch_size=None)
+                for i in db_list[1:]: #avoid first row of the array --> contains the headers
+                    obj = Serum.objects.get(sample_id=i[3])
+                    obj.import_user = request.user
+                    obj.save()
             else:
                 headings_error = 'File\'s header error, no match for sample_id, site_id or ward_id \n These data can\'t be imported'
 
@@ -443,6 +455,10 @@ def import_location(request):
 
                 #save list to database
                 pyexcel.save_as(array=db_list,name_columns_by_row=0, dest_model=Freezer, dest_initializer=None, dest_mapdict=None, dest_batch_size=None)
+                for i in db_list[1:]: #avoid first row of the array --> contains the headers
+                    obj = Freezer.objects.get(sample_id=i[2])
+                    obj.import_user = request.user
+                    obj.save()
             else:
                 headings_error = 'File\'s header error, no match for ParticpantNo or sample_id \n These data can\'t be imported'
 
@@ -621,9 +637,9 @@ def import_chik_elisa(request):
                         pathogen = 'chikungunya'
                         tmp_elisa_not_first.append(pathogen)
                         serum_instance_converter(sheet_array[j],tmp_elisa_not_first,sample_id_index) #Need to convert in Serum instance
-                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_day',r'processedday']))
-                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_month',r'processedmonth']))
-                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_year',r'processedyear']))
+                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_day',r'processedday',r'e_day']))
+                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_month',r'processedmonth',r'e_month']))
+                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_year',r'processedyear',r'e_year']))
                         db_elisa_list.append(tmp_elisa_not_first)
 
                     else:
@@ -634,12 +650,16 @@ def import_chik_elisa(request):
                         pathogen = 'chikungunya'
                         tmp_elisa_first.append(pathogen)
                         serum_instance_converter(sheet_array[j],tmp_elisa_first,sample_id_index) #Need to convert in Serum instance
-                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_day',r'processedday']))
-                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_month',r'processedmonth']))
-                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_year',r'processedyear']))
+                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_day',r'processedday',r'e_day']))
+                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_month',r'processedmonth',r'e_month']))
+                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_year',r'processedyear',r'e_year']))
                         db_elisa_list.append(tmp_elisa_first)
                 #save list to database
                 pyexcel.save_as(array=db_elisa_list,name_columns_by_row=0, dest_model=Elisa, dest_initializer=None, dest_mapdict=None, dest_batch_size=None)
+                for i in db_elisa_list[1:]: #avoid first row of the array --> contains the headers
+                    obj = Elisa.objects.get(result_id=i[0])
+                    obj.import_user = request.user
+                    obj.save()
             else:
                 headings_error = 'File\'s header error, no match for sample_id\n These data can\'t be imported'
 
@@ -706,9 +726,9 @@ def import_dengue_elisa(request):
                         pathogen = 'dengue'
                         tmp_elisa_not_first.append(pathogen)
                         serum_instance_converter(sheet_array[j],tmp_elisa_not_first,sample_id_index) #Need to convert in Serum instance
-                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_day',r'processedday']))
-                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_month',r'processedmonth']))
-                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_year',r'processedyear']))
+                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_day',r'processedday',r'e_day']))
+                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_month',r'processedmonth',r'e_month']))
+                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_year',r'processedyear',r'e_year']))
                         db_elisa_list.append(tmp_elisa_not_first)
 
                     else:
@@ -719,12 +739,16 @@ def import_dengue_elisa(request):
                         pathogen = 'dengue'
                         tmp_elisa_first.append(pathogen)
                         serum_instance_converter(sheet_array[j],tmp_elisa_first,sample_id_index) #Need to convert in Serum instance
-                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_day',r'processedday']))
-                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_month',r'processedmonth']))
-                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_year',r'processedyear']))
+                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_day',r'processedday',r'e_day']))
+                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_month',r'processedmonth',r'e_month']))
+                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_year',r'processedyear',r'e_year']))
                         db_elisa_list.append(tmp_elisa_first)
                 #save list to database
                 pyexcel.save_as(array=db_elisa_list,name_columns_by_row=0, dest_model=Elisa, dest_initializer=None, dest_mapdict=None, dest_batch_size=None)
+                for i in db_elisa_list[1:]: #avoid first row of the array --> contains the headers
+                    obj = Elisa.objects.get(result_id=i[0])
+                    obj.import_user = request.user
+                    obj.save()
             else:
                 headings_error = 'File\'s header error, no match for sample_id\n These data can\'t be imported'
 
@@ -735,18 +759,18 @@ def import_dengue_elisa(request):
                         if str(sheet_array[j][sample_id_index]) == str(elisa_obj.sample): #comparaison avec le sample_id correspondant au result_id stocke dans chik_import_list
                             tmp_dengue_elisa=[]
                             elisa = elisa_obj
-                            tmp_chik_elisa.append(elisa)
+                            tmp_dengue_elisa.append(elisa)
                             extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'sample_absorbance', r'sampleabsorbance']))
                             extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'negative_absorbance', r'negativeabsorbance']))
                             extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'positive_absorbance', r'positiveabsorbance']))
-                            extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'calibrator_1_absorbance']))
-                            extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'calibrator_2_absorbance']))
-                            extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'calibrator_3_absorbance']))
-                            extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'cal_factor']))
-                            extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'cut_off', r'cut-off']))
-                            extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'positive_cut_off_ratio']))
+                            extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'calibrator_1_absorbance', r'calibrator1absorbance']))
+                            extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'calibrator_2_absorbance', r'calibrator2absorbance']))
+                            extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'calibrator_3_absorbance', r'calibrator3absorbance']))
+                            extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'cal_factor',r'cal.factor']))
+                            extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'cut_off', r'cut-off', r'cut.off']))
+                            extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'positive_cut_off_ratio', r'positive.cut.off.ratio']))
                             extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'dengue_index', r'index']))
-                            extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'panbio_unit']))
+                            extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'panbio_unit', r'panbio.unit', r'panbiounit']))
                             extract_value(sheet_array[j],tmp_dengue_elisa,index_finder(sheet_array[0],[r'result']))
                             db_dengue_list.append(tmp_dengue_elisa)
 
@@ -792,9 +816,9 @@ def import_rickettsia_elisa(request):
                         pathogen = 'rickettsia'
                         tmp_elisa_not_first.append(pathogen)
                         serum_instance_converter(sheet_array[j],tmp_elisa_not_first,sample_id_index) #Need to convert in Serum instance
-                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_day',r'processedday']))
-                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_month',r'processedmonth']))
-                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_year',r'processedyear']))
+                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_day',r'processedday',r'e_day']))
+                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_month',r'processedmonth',r'e_month']))
+                        extract_value(sheet_array[j],tmp_elisa_not_first,index_finder(sheet_array[0],[r'elisa_year',r'processedyear',r'e_year']))
                         db_elisa_list.append(tmp_elisa_not_first)
 
                     else:
@@ -805,12 +829,16 @@ def import_rickettsia_elisa(request):
                         pathogen = 'rickettsia'
                         tmp_elisa_first.append(pathogen)
                         serum_instance_converter(sheet_array[j],tmp_elisa_first,sample_id_index) #Need to convert in Serum instance
-                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_day',r'processedday']))
-                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_month',r'processedmonth']))
-                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_year',r'processedyear']))
+                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_day',r'processedday',r'e_day']))
+                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_month',r'processedmonth',r'e_month']))
+                        extract_value(sheet_array[j],tmp_elisa_first,index_finder(sheet_array[0],[r'elisa_year',r'processedyear',r'e_year']))
                         db_elisa_list.append(tmp_elisa_first)
                 #save list to database
                 pyexcel.save_as(array=db_elisa_list,name_columns_by_row=0, dest_model=Elisa, dest_initializer=None, dest_mapdict=None, dest_batch_size=None)
+                for i in db_elisa_list[1:]: #avoid first row of the array --> contains the headers
+                    obj = Elisa.objects.get(result_id=i[0])
+                    obj.import_user = request.user
+                    obj.save()
             else:
                 headings_error = 'File\'s header error, no match for sample_id\n These data can\'t be imported'
 
@@ -821,7 +849,7 @@ def import_rickettsia_elisa(request):
                         if str(sheet_array[j][sample_id_index]) == str(elisa_obj.sample): #comparaison avec le sample_id correspondant au result_id stocke dans chik_import_list
                             tmp_rickettsia_elisa=[]
                             elisa = elisa_obj
-                            tmp_chik_elisa.append(elisa)
+                            tmp_rickettsia_elisa.append(elisa)
                             extract_value(sheet_array[j],tmp_rickettsia_elisa,index_finder(sheet_array[0],[r'scrub_typhus']))
                             extract_value(sheet_array[j],tmp_rickettsia_elisa,index_finder(sheet_array[0],[r'typhus']))
                             db_rickettsia_list.append(tmp_rickettsia_elisa)
@@ -907,6 +935,10 @@ def import_pma(request):
                         db_pma_list.append(tmp_pma_first)
                 #save list to database
                 pyexcel.save_as(array=db_pma_list,name_columns_by_row=0, dest_model=Pma, dest_initializer=None, dest_mapdict=None, dest_batch_size=None)
+                for i in db_pma_list[1:]: #avoid first row of the array --> contains the headers
+                    obj = Pma.objects.get(result_id=i[0])
+                    obj.import_user = request.user
+                    obj.save()
             else:
                 headings_error = 'File\'s header error, no match for sample_id or sampleid \n These data can\'t be imported'
 
@@ -950,6 +982,61 @@ def import_pma(request):
         form = UploadFileForm()
     return render (request, "sboapp/pages/import_pma.html", {'form': form})
 
+def undo_import(request):
+    if request.method == "POST":
+        form = UndoForm(request.POST)
+        args={}
+        if form.is_valid():
+            cln_import_type = form.cleaned_data['import_type']
+            cln_import_date = form.cleaned_data['import_date']
+            cln_import_time = form.cleaned_data['import_time']
+
+            # print("import_type",cln_import_type)
+            # print("import_date",cln_import_date)
+            # print("import_time",cln_import_time)
+
+            if cln_import_type == "serum":
+                queryset = Serum.objects.all()
+            elif cln_import_type == "freezer":
+                queryset = Freezer.objects.all()
+            elif cln_import_type == "elisa_chik":
+                queryset = Elisa.objects.filter(pathogen='chikungunya')
+            elif cln_import_type == "elisa_dengue":
+                queryset = Elisa.objects.filter(pathogen='dengue')
+            elif cln_import_type == "elisa_rickettsia":
+                queryset = Elisa.objects.filter(pathogen='rickettsia')
+            elif cln_import_type == "pma":
+                queryset = Pma.objects.all()
+            try:
+                queryset = queryset.filter(import_user=request.user)
+            except:
+                args['user_error'] = "Sorry, there is no data matched with your request that you are allowed to erase. Please refer to the undo rules !"
+                return render(request, "sboapp/pages/undo_import.html", args)
+            try:
+                # print('I AM HERE')
+                queryset = queryset.filter(import_date=cln_import_date)
+            except:
+                # print('import_date',cln_import_date)
+                args['user_error'] = "date error"
+                return render(request, "sboapp/pages/undo_import.html", args)
+
+            # if cln_import_time == "0-2am":
+            #     queryset = queryset.filter(import_time__gte=cln_import_time)
+            #     queryset = queryset.filter(import_time__lte=cln_import_time)
+
+            queryset = list(queryset.values_list('sample_id').distinct())
+            request.session['undo_queryset'] = queryset
+            return render (request, "sboapp/pages/validate_undo.html",args)
+        else:
+            # args['valid_error']= "valid error"
+            return render(request, "sboapp/pages/undo_import.html", args)
+    else:
+        form = UndoForm()
+    return render (request, "sboapp/pages/undo_import.html", {'form':form})
+
+def delete_import(request):
+    pass
+    
 #---QUERY + EXPORT FROM DATABASE TO FILE
 def check_clean_data(form,model,field):
     q = model.objects.get(field=form.cleaned_data.get(field))
@@ -969,7 +1056,6 @@ def sort_data(request):
             sort_form.clean()
             args['valid_error']= "form is valid"
             if sort_form.has_changed():
-                print ('changed is good')
                 changed_list=sort_form.changed_data
                 args['changed_list']=changed_list
                 sample_id = sort_form.cleaned_data['sample_id']
@@ -991,25 +1077,7 @@ def sort_data(request):
                 subdivision_2_position = sort_form.cleaned_data['subdivision_2_position']
                 subdivision_3_position = sort_form.cleaned_data['subdivision_3_position']
                 subdivision_4_position = sort_form.cleaned_data['subdivision_4_position']
-                # sheet = request.FILES['serum_file_array'].get_sheet(sheet_name=None, name_columns_by_row=0)
-                # serum_file_array = sheet.get_array()
-                # serum_file_array = sort_form.cleaned_data['serum_file'] #It became an array thanks to the clean data step
 
-                # if serum_file_array:
-                #     print("j'ai le file")
-                #     sample_doesnt_exist = []
-                #     serum_list  = []
-                #     sample_id_index = index_finder(serum_file_array[0], [r'sample_id'])
-                #     if sample_id_index is not None:
-                #         for j in range(1,len(serum_file_array)):
-                #             if sample_id_exists(serum_file_array[j][sample_id_index]) == False:
-                #                 sample_doesnt_exist.append(serum_file_array[j][sample_id_index])
-                #             else:
-                #                 serum_list.append(serum_file_array[j][sample_id_index])
-                #         queryset = Serum.objects.filter(sample_id__in=serum_list) #Reset the initial queryset
-                #     else:
-                #         headings_error = 'File\'s header error, no match for sample_id \n These serums can\'t be imported'
-                #         queryset = Serum.objects.filter(sample_id= 'AG000000') #Return 0 result
                 if sample_id:
                     if Serum.objects.filter(sample_id=sort_form.cleaned_data['sample_id']).exists() is True:
                         queryset=queryset.filter(sample_id=sort_form.cleaned_data.get('sample_id'))
@@ -1263,7 +1331,7 @@ def get_pma_headers(pma_general_fields,pma_results_fields):
             output_list.extend(['JevNs1'])
         if 'Saint-Louis Encephalisis' in pma_results_fields:
             output_list.extend(['SlevNs1'])
-        if 'Tick-Borne Encephalisis' in pma_results_fields:
+        if 'Tick-borne Encephalisis' in pma_results_fields:
             output_list.extend(['TbevNs1'])
         if 'West Nile' in pma_results_fields:
             output_list.extend(['WnvNs1'])
@@ -1272,10 +1340,486 @@ def get_pma_headers(pma_general_fields,pma_results_fields):
         if 'Zika' in pma_results_fields:
             output_list.extend(['ZikvBrasilNs1','ZikvNs1'])
     return output_list
+
+def fill_value(input_list,output_list,field,value):
+    if field in input_list:
+        if value is None:
+            output_list.append('NA')
+        else:
+            output_list.append(value)
+
+def get_serum_freezer_data(serum_freezer_headers_list,serum_queryset):
+    output_array=[serum_freezer_headers_list]
+    for serum in serum_queryset:
+        output_list=[]
+        output_list.extend([serum.sample_id,serum.site.site_id,serum.coll_num,serum.coll_date,serum.ward.ward_id])
+        fill_value(serum_freezer_headers_list,output_list,'LocalSampleId',serum.local_sample_id)
+        fill_value(serum_freezer_headers_list,output_list,'Status',serum.status)
+        fill_value(serum_freezer_headers_list,output_list,'OriginalAge',serum.original_age)
+        fill_value(serum_freezer_headers_list,output_list,'AgeMin',serum.age_min)
+        fill_value(serum_freezer_headers_list,output_list,'AgeMax',serum.age_max)
+        fill_value(serum_freezer_headers_list,output_list,'Gender1isMaleValue',serum.gender_1ismale_value)
+        fill_value(serum_freezer_headers_list,output_list,'Day',serum.day_value)
+        fill_value(serum_freezer_headers_list,output_list,'Month',serum.month_value)
+        fill_value(serum_freezer_headers_list,output_list,'Year',serum.year)
+
+        try:
+            freezer_valid = serum.freezer
+            fill_value(serum_freezer_headers_list,output_list,'StudyCode',serum.freezer.study_code)
+            fill_value(serum_freezer_headers_list,output_list,'SampleType',serum.freezer.sample_type)
+            fill_value(serum_freezer_headers_list,output_list,'AliquotNo',serum.freezer.aliquot_no)
+            fill_value(serum_freezer_headers_list,output_list,'Volume',serum.freezer.volume)
+            fill_value(serum_freezer_headers_list,output_list,'FreezerSectionName',serum.freezer.freezer_section_name)
+            fill_value(serum_freezer_headers_list,output_list,'Subdivision1Position',serum.freezer.subdivision_1_position)
+            fill_value(serum_freezer_headers_list,output_list,'Subdivision2Position',serum.freezer.subdivision_2_position)
+            fill_value(serum_freezer_headers_list,output_list,'Subdivision3Position',serum.freezer.subdivision_3_position)
+            fill_value(serum_freezer_headers_list,output_list,'Subdivision4Position',serum.freezer.subdivision_4_position)
+
+        except ObjectDoesNotExist:
+            fill_value(serum_freezer_headers_list,output_list,'StudyCode',None)
+            fill_value(serum_freezer_headers_list,output_list,'SampleType',None)
+            fill_value(serum_freezer_headers_list,output_list,'AliquotNo',None)
+            fill_value(serum_freezer_headers_list,output_list,'Volume',None)
+            fill_value(serum_freezer_headers_list,output_list,'FreezerSectionName',None)
+            fill_value(serum_freezer_headers_list,output_list,'Subdivision1Position',None)
+            fill_value(serum_freezer_headers_list,output_list,'Subdivision2Position',None)
+            fill_value(serum_freezer_headers_list,output_list,'Subdivision3Position',None)
+            fill_value(serum_freezer_headers_list,output_list,'Subdivision4Position',None)
+
+        output_array.append(output_list)
+    return output_array
+
+def get_chik_elisa_data(chik_elisa_headers_list,sample_list):
+    output_array = [chik_elisa_headers_list]
+    for s in sample_list:
+        output_list=[]
+        q = Elisa.objects.filter(sample=s).filter(pathogen='chikungunya')
+        if q:
+            for elisa in q:
+                output_list = []
+                fill_value(chik_elisa_headers_list,output_list,'SampleId',elisa.sample.sample_id)
+                fill_value(chik_elisa_headers_list,output_list,'ResultId',elisa.result_id)
+                fill_value(chik_elisa_headers_list,output_list,'Pathogen',elisa.pathogen)
+                fill_value(chik_elisa_headers_list,output_list,'ProcessedDay',elisa.elisa_day)
+                fill_value(chik_elisa_headers_list,output_list,'ProcessedMonth',elisa.elisa_month)
+                fill_value(chik_elisa_headers_list,output_list,'ProcessedYear',elisa.elisa_year)
+                fill_value(chik_elisa_headers_list,output_list,'SampleAbsorbance',elisa.chik_elisa.sample_absorbance)
+                fill_value(chik_elisa_headers_list,output_list,'NegativeAbsorbance',elisa.chik_elisa.negative_absorbance)
+                fill_value(chik_elisa_headers_list,output_list,'CutOff1Absorbance',elisa.chik_elisa.cut_off_1_absorbance)
+                fill_value(chik_elisa_headers_list,output_list,'CutOff2Absorbance',elisa.chik_elisa.cut_off_2_absorbance)
+                fill_value(chik_elisa_headers_list,output_list,'PositiveAbsorbance',elisa.chik_elisa.positive_absorbance)
+                fill_value(chik_elisa_headers_list,output_list,'CutOff',elisa.chik_elisa.cut_off)
+                fill_value(chik_elisa_headers_list,output_list,'NovatecUnits',elisa.chik_elisa.novatech_units)
+                fill_value(chik_elisa_headers_list,output_list,'ResultChik',elisa.chik_elisa.result_chik)
+                output_array.append(output_list)
+
+        else:
+            output_list.append(s)
+            for i in range(1,len(chik_elisa_headers_list)):
+                output_list.append('NA')
+            output_array.append(output_list)
+    return output_array
+
+def get_dengue_elisa_data(dengue_elisa_headers_list,sample_list):
+    output_array = [dengue_elisa_headers_list]
+    for s in sample_list:
+        output_list=[]
+        q = Elisa.objects.filter(sample=s).filter(pathogen='dengue')
+        if q:
+            for elisa in q:
+                output_list = []
+                fill_value(dengue_elisa_headers_list,output_list,'SampleId',elisa.sample.sample_id)
+                fill_value(dengue_elisa_headers_list,output_list,'ResultId',elisa.result_id)
+                fill_value(dengue_elisa_headers_list,output_list,'Pathogen',elisa.pathogen)
+                fill_value(dengue_elisa_headers_list,output_list,'ProcessedDay',elisa.elisa_day)
+                fill_value(dengue_elisa_headers_list,output_list,'ProcessedMonth',elisa.elisa_month)
+                fill_value(dengue_elisa_headers_list,output_list,'ProcessedYear',elisa.elisa_year)
+                fill_value(dengue_elisa_headers_list,output_list,'SampleAbsorbance',elisa.dengue_elisa.sample_absorbance)
+                fill_value(dengue_elisa_headers_list,output_list,'NegativeAbsorbance',elisa.dengue_elisa.negative_absorbance)
+                fill_value(dengue_elisa_headers_list,output_list,'PositiveAbsorbance',elisa.dengue_elisa.positive_absorbance)
+                fill_value(dengue_elisa_headers_list,output_list,'Calibrator1Absorbance',elisa.dengue_elisa.calibrator_1_absorbance)
+                fill_value(dengue_elisa_headers_list,output_list,'Calibrator2Absorbance',elisa.dengue_elisa.calibrator_2_absorbance)
+                fill_value(dengue_elisa_headers_list,output_list,'Calibrator3Absorbance',elisa.dengue_elisa.calibrator_3_absorbance)
+                fill_value(dengue_elisa_headers_list,output_list,'CalFactor',elisa.dengue_elisa.cal_factor)
+                fill_value(dengue_elisa_headers_list,output_list,'CutOff',elisa.dengue_elisa.cut_off)
+                fill_value(dengue_elisa_headers_list,output_list,'PositiveCutOffRatio',elisa.dengue_elisa.positive_cut_off_ratio)
+                fill_value(dengue_elisa_headers_list,output_list,'DengueIndex',elisa.dengue_elisa.dengue_index)
+                fill_value(dengue_elisa_headers_list,output_list,'PanbioUnit',elisa.dengue_elisa.panbio_unit)
+                fill_value(dengue_elisa_headers_list,output_list,'ResultDengue',elisa.dengue_elisa.result_dengue)
+                output_array.append(output_list)
+
+        else:
+            output_list.append(s)
+            for i in range(1,len(dengue_elisa_headers_list)):
+                output_list.append('NA')
+            output_array.append(output_list)
+    return output_array
+
+def get_rickettsia_elisa_data(rickettsia_elisa_headers_list,sample_list):
+    output_array = [rickettsia_elisa_headers_list]
+    for s in sample_list:
+        output_list=[]
+        q = Elisa.objects.filter(sample=s).filter(pathogen='rickettsia')
+        if q:
+            for elisa in q:
+                output_list = []
+                fill_value(rickettsia_elisa_headers_list,output_list,'SampleId',elisa.sample.sample_id)
+                fill_value(rickettsia_elisa_headers_list,output_list,'ResultId',elisa.result_id)
+                fill_value(rickettsia_elisa_headers_list,output_list,'Pathogen',elisa.pathogen)
+                fill_value(rickettsia_elisa_headers_list,output_list,'ProcessedDay',elisa.elisa_day)
+                fill_value(rickettsia_elisa_headers_list,output_list,'ProcessedMonth',elisa.elisa_month)
+                fill_value(rickettsia_elisa_headers_list,output_list,'ProcessedYear',elisa.elisa_year)
+                fill_value(rickettsia_elisa_headers_list,output_list,'ScrubTyphus',elisa.rickettsia_elisa.scrub_typhus)
+                fill_value(rickettsia_elisa_headers_list,output_list,'Typhus',elisa.rickettsia_elisa.typhus)
+                output_array.append(output_list)
+
+        else:
+            output_list.append(s)
+            for i in range(1,len(rickettsia_elisa_headers_list)):
+                output_list.append('NA')
+            output_array.append(output_list)
+    return output_array
+
+def get_pma_data(pma_headers_list,sample_list):
+    output_array = [pma_headers_list]
+    for s in sample_list:
+        output_list=[]
+        q = Pma.objects.filter(sample=s)
+        if q:
+            for pma in q:
+                output_list = []
+                fill_value(pma_headers_list,output_list,'SampleId',pma.sample.sample_id)
+                fill_value(pma_headers_list,output_list,'ResultId',pma.result_id)
+                fill_value(pma_headers_list,output_list,'AgArrayId',pma.ag_array_id)
+                fill_value(pma_headers_list,output_list,'Tray',pma.tray)
+                fill_value(pma_headers_list,output_list,'BatchId',pma.batch_id)
+                fill_value(pma_headers_list,output_list,'StartDilution',pma.start_dilution)
+                fill_value(pma_headers_list,output_list,'FileName',pma.file_name)
+                fill_value(pma_headers_list,output_list,'ProcessedDay',pma.processed_day)
+                fill_value(pma_headers_list,output_list,'ProcessedMonth',pma.processed_month)
+                fill_value(pma_headers_list,output_list,'ProcessedYear',pma.processed_year)
+                fill_value(pma_headers_list,output_list,'BatchSentId',pma.batch_sent_id)
+                fill_value(pma_headers_list,output_list,'ScannedDay',pma.scanned_day)
+                fill_value(pma_headers_list,output_list,'ScannedMonth',pma.scanned_month)
+                fill_value(pma_headers_list,output_list,'ScannedYear',pma.scanned_year)
+                fill_value(pma_headers_list,output_list,'PanbioUnit',pma.panbio_unit)
+                fill_value(pma_headers_list,output_list,'ChikvE1Mutant',pma.pma_result.chikv_e1_mutant)
+                fill_value(pma_headers_list,output_list,'ChikvE2',pma.pma_result.chikv_e2)
+                fill_value(pma_headers_list,output_list,'Dv1Ns1',pma.pma_result.dv1_ns1)
+                fill_value(pma_headers_list,output_list,'Dv2Ns1',pma.pma_result.dv2_ns1)
+                fill_value(pma_headers_list,output_list,'Dv3Ns1',pma.pma_result.dv3_ns1)
+                fill_value(pma_headers_list,output_list,'Dv4Ns1',pma.pma_result.dv4_ns1)
+                fill_value(pma_headers_list,output_list,'JevNs1',pma.pma_result.jev_ns1)
+                fill_value(pma_headers_list,output_list,'SlevNs1',pma.pma_result.slev_ns1)
+                fill_value(pma_headers_list,output_list,'TbevNs1',pma.pma_result.tbev_ns1)
+                fill_value(pma_headers_list,output_list,'WnvNs1',pma.pma_result.wnv_ns1)
+                fill_value(pma_headers_list,output_list,'YfvNs1',pma.pma_result.yfv_ns1)
+                fill_value(pma_headers_list,output_list,'ZikvBrasilNs1',pma.pma_result.zikv_brasil_ns1)
+                fill_value(pma_headers_list,output_list,'ZikvNs1',pma.pma_result.zikv_ns1)
+                output_array.append(output_list)
+
+        else:
+            output_list.append(s)
+            for i in range(1,len(pma_headers_list)):
+                output_list.append('NA')
+            output_array.append(output_list)
+    return output_array
+
+# def csv_chik_result(output_array,chik_queryset,check_value,start_line_list,csv_final_headers):
+#     if check_value == 1:
+#         for elisa in chik_queryset:
+#             output_list = []
+#             output_list.extend(start_line_list)
+#             fill_value(csv_final_headers,output_list,'SampleId',elisa.sample.sample_id)
+#             fill_value(csv_final_headers,output_list,'ResultId',elisa.result_id)
+#             fill_value(csv_final_headers,output_list,'Pathogen',elisa.pathogen)
+#             fill_value(csv_final_headers,output_list,'ProcessedDay',elisa.elisa_day)
+#             fill_value(csv_final_headers,output_list,'ProcessedMonth',elisa.elisa_month)
+#             fill_value(csv_final_headers,output_list,'ProcessedYear',elisa.elisa_year)
+#             fill_value(csv_final_headers,output_list,'SampleAbsorbance',elisa.chik_elisa.sample_absorbance)
+#             fill_value(csv_final_headers,output_list,'NegativeAbsorbance',elisa.chik_elisa.negative_absorbance)
+#             fill_value(csv_final_headers,output_list,'CutOff1Absorbance',elisa.chik_elisa.cut_off_1_absorbance)
+#             fill_value(csv_final_headers,output_list,'CutOff2Absorbance',elisa.chik_elisa.cut_off_2_absorbance)
+#             fill_value(csv_final_headers,output_list,'PositiveAbsorbance',elisa.chik_elisa.positive_absorbance)
+#             fill_value(csv_final_headers,output_list,'CutOff',elisa.chik_elisa.cut_off)
+#             fill_value(csv_final_headers,output_list,'NovatecUnits',elisa.chik_elisa.novatech_units)
+#             fill_value(csv_final_headers,output_list,'ResultChik',elisa.chik_elisa.result_chik)
+#             output_array.append(output_list)
+#     else:
+#         output_list = []
+#         output_list.extend(start_line_list)
+#         fill_value(csv_final_headers,output_list,'SampleId',None)
+#         fill_value(csv_final_headers,output_list,'ResultId',None)
+#         fill_value(csv_final_headers,output_list,'Pathogen',None)
+#         fill_value(csv_final_headers,output_list,'ProcessedDay',None)
+#         fill_value(csv_final_headers,output_list,'ProcessedMonth',None)
+#         fill_value(csv_final_headers,output_list,'ProcessedYear',None)
+#         fill_value(csv_final_headers,output_list,'SampleAbsorbance',None)
+#         fill_value(csv_final_headers,output_list,'NegativeAbsorbance',None)
+#         fill_value(csv_final_headers,output_list,'CutOff1Absorbance',None)
+#         fill_value(csv_final_headers,output_list,'CutOff2Absorbance',None)
+#         fill_value(csv_final_headers,output_list,'PositiveAbsorbance',None)
+#         fill_value(csv_final_headers,output_list,'CutOff',None)
+#         fill_value(csv_final_headers,output_list,'NovatecUnits',None)
+#         fill_value(csv_final_headers,output_list,'ResultChik',None)
+#         output_array.append(output_list)
+#     return output_array
+#
+# def csv_dengue_result(output_array,dengue_queryset,check_value,start_line_list,csv_final_headers):
+#     if check_value == 1:
+#         for elisa in dengue_queryset:
+#             output_list = []
+#             output_list.extend(start_line_list)
+#             fill_value(csv_final_headers,output_list,'SampleId',elisa.sample.sample_id)
+#             fill_value(csv_final_headers,output_list,'ResultId',elisa.result_id)
+#             fill_value(csv_final_headers,output_list,'Pathogen',elisa.pathogen)
+#             fill_value(csv_final_headers,output_list,'ProcessedDay',elisa.elisa_day)
+#             fill_value(csv_final_headers,output_list,'ProcessedMonth',elisa.elisa_month)
+#             fill_value(csv_final_headers,output_list,'ProcessedYear',elisa.elisa_year)
+#             fill_value(csv_final_headers,output_list,'SampleAbsorbance',elisa.dengue_elisa.sample_absorbance)
+#             fill_value(csv_final_headers,output_list,'NegativeAbsorbance',elisa.dengue_elisa.negative_absorbance)
+#             fill_value(csv_final_headers,output_list,'PositiveAbsorbance',elisa.dengue_elisa.positive_absorbance)
+#             fill_value(csv_final_headers,output_list,'Calibrator1Absorbance',elisa.dengue_elisa.calibrator_1_absorbance)
+#             fill_value(csv_final_headers,output_list,'Calibrator2Absorbance',elisa.dengue_elisa.calibrator_2_absorbance)
+#             fill_value(csv_final_headers,output_list,'Calibrator3Absorbance',elisa.dengue_elisa.calibrator_3_absorbance)
+#             fill_value(csv_final_headers,output_list,'CalFactor',elisa.dengue_elisa.cal_factor)
+#             fill_value(csv_final_headers,output_list,'CutOff',elisa.dengue_elisa.cut_off)
+#             fill_value(csv_final_headers,output_list,'PositiveCutOffRatio',elisa.dengue_elisa.positive_cut_off_ratio)
+#             fill_value(csv_final_headers,output_list,'DengueIndex',elisa.dengue_elisa.dengue_index)
+#             fill_value(csv_final_headers,output_list,'PanbioUnit',elisa.dengue_elisa.panbio_unit)
+#             fill_value(csv_final_headers,output_list,'ResultDengue',elisa.dengue_elisa.result_dengue)
+#             output_array.append(output_list)
+#     else:
+#         output_list = []
+#         output_list.extend(start_line_list)
+#         fill_value(csv_final_headers,output_list,'SampleId',None)
+#         fill_value(csv_final_headers,output_list,'ResultId',None)
+#         fill_value(csv_final_headers,output_list,'Pathogen',None)
+#         fill_value(csv_final_headers,output_list,'ProcessedDay',None)
+#         fill_value(csv_final_headers,output_list,'ProcessedMonth',None)
+#         fill_value(csv_final_headers,output_list,'ProcessedYear',None)
+#         fill_value(csv_final_headers,output_list,'SampleAbsorbance',None)
+#         fill_value(csv_final_headers,output_list,'NegativeAbsorbance',None)
+#         fill_value(csv_final_headers,output_list,'PositiveAbsorbance',None)
+#         fill_value(csv_final_headers,output_list,'Calibrator1Absorbance',None)
+#         fill_value(csv_final_headers,output_list,'Calibrator2Absorbance',None)
+#         fill_value(csv_final_headers,output_list,'Calibrator3Absorbance',None)
+#         fill_value(csv_final_headers,output_list,'CalFactor',None)
+#         fill_value(csv_final_headers,output_list,'CutOff',None)
+#         fill_value(csv_final_headers,output_list,'PositiveCutOffRatio',None)
+#         fill_value(csv_final_headers,output_list,'DengueIndex',None)
+#         fill_value(csv_final_headers,output_list,'PanbioUnit',None)
+#         fill_value(csv_final_headers,output_list,'ResultDengue',None)
+#         output_array.append(output_list)
+#     return output_array
+#
+# def csv_rickettsia_result(output_array,rickettsia_queryset,check_value,start_line_list,csv_final_headers):
+#     if check_value == 1:
+#         for elisa in rickettsia_queryset:
+#             output_list = []
+#             output_list.extend(start_line_list)
+#             fill_value(csv_final_headers,output_list,'SampleId',elisa.sample.sample_id)
+#             fill_value(csv_final_headers,output_list,'ResultId',elisa.result_id)
+#             fill_value(csv_final_headers,output_list,'Pathogen',elisa.pathogen)
+#             fill_value(csv_final_headers,output_list,'ProcessedDay',elisa.elisa_day)
+#             fill_value(csv_final_headers,output_list,'ProcessedMonth',elisa.elisa_month)
+#             fill_value(csv_final_headers,output_list,'ProcessedYear',elisa.elisa_year)
+#             fill_value(csv_final_headers,output_list,'ScrubTyphus',elisa.rickettsia_elisa.scrub_typhus)
+#             fill_value(csv_final_headers,output_list,'Typhus',elisa.rickettsia_elisa.typhus)
+#             output_array.append(output_list)
+#     else:
+#         output_list = []
+#         output_list.extend(start_line_list)
+#         fill_value(csv_final_headers,output_list,'SampleId',None)
+#         fill_value(csv_final_headers,output_list,'ResultId',None)
+#         fill_value(csv_final_headers,output_list,'Pathogen',None)
+#         fill_value(csv_final_headers,output_list,'ProcessedDay',None)
+#         fill_value(csv_final_headers,output_list,'ProcessedMonth',None)
+#         fill_value(csv_final_headers,output_list,'ProcessedYear',None)
+#         fill_value(csv_final_headers,output_list,'ScrubTyphus',None)
+#         fill_value(csv_final_headers,output_list,'Typhus',None)
+#         output_array.append(output_list)
+#     return output_array
+#
+# def csv_pma_result(output_array,pma_queryset,check_value,start_line_list,csv_final_headers):
+#     if check_value == 1:
+#         for pma in pma_queryset:
+#             output_list = []
+#             output_list.extend(start_line_list)
+#             fill_value(csv_final_headers,output_list,'SampleId',pma.sample.sample_id)
+#             fill_value(csv_final_headers,output_list,'ResultId',pma.result_id)
+#             fill_value(csv_final_headers,output_list,'AgArrayId',pma.ag_array_id)
+#             fill_value(csv_final_headers,output_list,'Tray',pma.tray)
+#             fill_value(csv_final_headers,output_list,'BatchId',pma.batch_id)
+#             fill_value(csv_final_headers,output_list,'StartDilution',pma.start_dilution)
+#             fill_value(csv_final_headers,output_list,'FileName',pma.file_name)
+#             fill_value(csv_final_headers,output_list,'ProcessedDay',pma.processed_day)
+#             fill_value(csv_final_headers,output_list,'ProcessedMonth',pma.processed_month)
+#             fill_value(csv_final_headers,output_list,'ProcessedYear',pma.processed_year)
+#             fill_value(csv_final_headers,output_list,'BatchSentId',pma.batch_sent_id)
+#             fill_value(csv_final_headers,output_list,'ScannedDay',pma.scanned_day)
+#             fill_value(csv_final_headers,output_list,'ScannedMonth',pma.scanned_month)
+#             fill_value(csv_final_headers,output_list,'ScannedYear',pma.scanned_year)
+#             fill_value(csv_final_headers,output_list,'PanbioUnit',pma.panbio_unit)
+#             fill_value(csv_final_headers,output_list,'ChikvE1Mutant',pma.pma_result.chikv_e1_mutant)
+#             fill_value(csv_final_headers,output_list,'ChikvE2',pma.pma_result.chikv_e2)
+#             fill_value(csv_final_headers,output_list,'Dv1Ns1',pma.pma_result.dv1_ns1)
+#             fill_value(csv_final_headers,output_list,'Dv2Ns1',pma.pma_result.dv2_ns1)
+#             fill_value(csv_final_headers,output_list,'Dv3Ns1',pma.pma_result.dv3_ns1)
+#             fill_value(csv_final_headers,output_list,'Dv4Ns1',pma.pma_result.dv4_ns1)
+#             fill_value(csv_final_headers,output_list,'JevNs1',pma.pma_result.jev_ns1)
+#             fill_value(csv_final_headers,output_list,'SlevNs1',pma.pma_result.slev_ns1)
+#             fill_value(csv_final_headers,output_list,'TbevNs1',pma.pma_result.tbev_ns1)
+#             fill_value(csv_final_headers,output_list,'WnvNs1',pma.pma_result.wnv_ns1)
+#             fill_value(csv_final_headers,output_list,'YfvNs1',pma.pma_result.yfv_ns1)
+#             fill_value(csv_final_headers,output_list,'ZikvBrasilNs1',pma.pma_result.zikv_brasil_ns1)
+#             fill_value(csv_final_headers,output_list,'ZikvNs1',pma.pma_result.zikv_ns1)
+#             output_array.append(output_list)
+#     else:
+#         output_list = []
+#         output_list.extend(start_line_list)
+#         fill_value(csv_final_headers,output_list,'SampleId',None)
+#         fill_value(csv_final_headers,output_list,'ResultId',None)
+#         fill_value(csv_final_headers,output_list,'AgArrayId',None)
+#         fill_value(csv_final_headers,output_list,'Tray',None)
+#         fill_value(csv_final_headers,output_list,'BatchId',None)
+#         fill_value(csv_final_headers,output_list,'StartDilution',None)
+#         fill_value(csv_final_headers,output_list,'FileName',None)
+#         fill_value(csv_final_headers,output_list,'ProcessedDay',None)
+#         fill_value(csv_final_headers,output_list,'ProcessedMonth',None)
+#         fill_value(csv_final_headers,output_list,'ProcessedYear',None)
+#         fill_value(csv_final_headers,output_list,'BatchSentId',None)
+#         fill_value(csv_final_headers,output_list,'ScannedDay',None)
+#         fill_value(csv_final_headers,output_list,'ScannedMonth',None)
+#         fill_value(csv_final_headers,output_list,'ScannedYear',None)
+#         fill_value(csv_final_headers,output_list,'PanbioUnit',None)
+#         fill_value(csv_final_headers,output_list,'ChikvE1Mutant',None)
+#         fill_value(csv_final_headers,output_list,'ChikvE2',None)
+#         fill_value(csv_final_headers,output_list,'Dv1Ns1',None)
+#         fill_value(csv_final_headers,output_list,'Dv2Ns1',None)
+#         fill_value(csv_final_headers,output_list,'Dv3Ns1',None)
+#         fill_value(csv_final_headers,output_list,'Dv4Ns1',None)
+#         fill_value(csv_final_headers,output_list,'JevNs1',None)
+#         fill_value(csv_final_headers,output_list,'SlevNs1',None)
+#         fill_value(csv_final_headers,output_list,'TbevNs1',None)
+#         fill_value(csv_final_headers,output_list,'WnvNs1',None)
+#         fill_value(csv_final_headers,output_list,'YfvNs1',None)
+#         fill_value(csv_final_headers,output_list,'ZikvBrasilNs1',None)
+#         fill_value(csv_final_headers,output_list,'ZikvNs1',None)
+#         output_array.append(output_list)
+#     return output_array
+#
+# def get_csv_data(csv_final_headers, sample_list):
+#     output_array=[csv_final_headers]
+#     for s in sample_list:
+#         serum=Serum.objects.get(sample_id=s)
+#         start_line_list=[]
+#         start_line_list.extend([serum.sample_id,serum.site.site_id,serum.coll_num,serum.coll_date,serum.ward.ward_id])
+#         fill_value(csv_final_headers,start_line_list,'LocalSampleId',serum.local_sample_id)
+#         fill_value(csv_final_headers,start_line_list,'Status',serum.status)
+#         fill_value(csv_final_headers,start_line_list,'OriginalAge',serum.original_age)
+#         fill_value(csv_final_headers,start_line_list,'AgeMin',serum.age_min)
+#         fill_value(csv_final_headers,start_line_list,'AgeMax',serum.age_max)
+#         fill_value(csv_final_headers,start_line_list,'Gender1isMaleValue',serum.gender_1ismale_value)
+#         fill_value(csv_final_headers,start_line_list,'Day',serum.day_value)
+#         fill_value(csv_final_headers,start_line_list,'Month',serum.month_value)
+#         fill_value(csv_final_headers,start_line_list,'Year',serum.year)
+#
+#         try:
+#             freezer_valid = serum.freezer
+#             fill_value(csv_final_headers,start_line_list,'StudyCode',serum.freezer.study_code)
+#             fill_value(csv_final_headers,start_line_list,'SampleType',serum.freezer.sample_type)
+#             fill_value(csv_final_headers,start_line_list,'AliquotNo',serum.freezer.aliquot_no)
+#             fill_value(csv_final_headers,start_line_list,'Volume',serum.freezer.volume)
+#             fill_value(csv_final_headers,start_line_list,'FreezerSectionName',serum.freezer.freezer_section_name)
+#             fill_value(csv_final_headers,start_line_list,'Subdivision1Position',serum.freezer.subdivision_1_position)
+#             fill_value(csv_final_headers,start_line_list,'Subdivision2Position',serum.freezer.subdivision_2_position)
+#             fill_value(csv_final_headers,start_line_list,'Subdivision3Position',serum.freezer.subdivision_3_position)
+#             fill_value(csv_final_headers,start_line_list,'Subdivision4Position',serum.freezer.subdivision_4_position)
+#
+#         except ObjectDoesNotExist:
+#             fill_value(csv_final_headers,start_line_list,'StudyCode',None)
+#             fill_value(csv_final_headers,start_line_list,'SampleType',None)
+#             fill_value(csv_final_headers,start_line_list,'AliquotNo',None)
+#             fill_value(csv_final_headers,start_line_list,'Volume',None)
+#             fill_value(csv_final_headers,start_line_list,'FreezerSectionName',None)
+#             fill_value(csv_final_headers,start_line_list,'Subdivision1Position',None)
+#             fill_value(csv_final_headers,start_line_list,'Subdivision2Position',None)
+#             fill_value(csv_final_headers,start_line_list,'Subdivision3Position',None)
+#             fill_value(csv_final_headers,start_line_list,'Subdivision4Position',None)
+#
+#         # output_list =[]
+#         # output_list.extend(start_line_list)
+#         elisa_queryset = Elisa.objects.filter(sample_id=s)
+#         chik_elisa_count = elisa_queryset.filter(pathogen="chikungunya").count()
+#         if chik_elisa_count >0:
+#             chik_elisa_count=1
+#         dengue_elisa_count = elisa_queryset.filter(pathogen="dengue").count()
+#         if dengue_elisa_count >0:
+#             dengue_elisa_count=1
+#         rickettsia_elisa_count = elisa_queryset.filter(pathogen="rickettsia").count()
+#         if rickettsia_elisa_count >0:
+#             rickettsia_elisa_count=1
+#         pma_count = Pma.objects.filter(sample_id=s).count()
+#         if pma_count >0:
+#             pma_count=1
+#         total_count = pma_count+chik_elisa_count+dengue_elisa_count+rickettsia_elisa_count
+#         cpt_result = 0
+#         while cpt_result != total_count:
+#             cpt_check=0
+#             chik_queryset = Elisa.objects.filter(sample=s).filter(pathogen='chikungunya')
+#             dengue_queryset = Elisa.objects.filter(sample=s).filter(pathogen='dengue')
+#             rickettsia_queryset = Elisa.objects.filter(sample=s).filter(pathogen='rickettsia')
+#             pma_queryset = Pma.objects.filter(sample=s)
+#             if chik_queryset:
+#                 output_array = csv_chik_result(output_array,chik_queryset,1,start_line_list,csv_final_headers)
+#                 output_array = csv_dengue_result(output_array,dengue_queryset,0,start_line_list,csv_final_headers)
+#                 output_array = csv_rickettsia_result(output_array,rickettsia_queryset,0,start_line_list,csv_final_headers)
+#                 output_array = csv_pma_result(output_array,pma_queryset,0,start_line_list,csv_final_headers)
+#                 cpt_result +=1
+#                 cpt_check +=1
+#             # else:
+#             #     output_array = csv_chik_result(output_array,chik_queryset,0,start_line_list,csv_final_headers)
+#             elif dengue_queryset and cpt_check==0:
+#                     output_array = csv_chik_result(output_array,chik_queryset,0,start_line_list,csv_final_headers)
+#                     output_array = csv_dengue_result(output_array,dengue_queryset,1,start_line_list,csv_final_headers)
+#                     output_array = csv_rickettsia_result(output_array,rickettsia_queryset,0,start_line_list,csv_final_headers)
+#                     output_array = csv_pma_result(output_array,pma_queryset,0,start_line_list,csv_final_headers)
+#                     cpt_result +=1
+#                     cpt_check +=1
+#                 # else:
+#                 #     output_array = csv_dengue_result(output_array,dengue_queryset,0,start_line_list,csv_final_headers)
+#
+#             elif rickettsia_queryset and cpt_check==0:
+#                     output_array = csv_chik_result(output_array,chik_queryset,0,start_line_list,csv_final_headers)
+#                     output_array = csv_dengue_result(output_array,dengue_queryset,0,start_line_list,csv_final_headers)
+#                     output_array = csv_rickettsia_result(output_array,rickettsia_queryset,1,start_line_list,csv_final_headers)
+#                     output_array = csv_pma_result(output_array,pma_queryset,0,start_line_list,csv_final_headers)
+#                     cpt_result +=1
+#                     cpt_check +=1
+#                 # else:
+#                 #     output_array = csv_rickettsia_result(output_array,rickettsia_queryset,0,start_line_list,csv_final_headers)
+#
+#             elif pma_queryset and cpt_check==0:
+#                     output_array = csv_chik_result(output_array,chik_queryset,0,start_line_list,csv_final_headers)
+#                     output_array = csv_dengue_result(output_array,dengue_queryset,0,start_line_list,csv_final_headers)
+#                     output_array = csv_rickettsia_result(output_array,rickettsia_queryset,0,start_line_list,csv_final_headers)
+#                     output_array = csv_pma_result(output_array,pma_queryset,1,start_line_list,csv_final_headers)
+#                     cpt_result +=1
+#                     cpt_check +=1
+#             # else:
+#             #     output_array = csv_pma_result(output_array,pma_queryset,0,start_line_list,csv_final_headers)
+#
+#             # if not chik_queryset and not dengue_queryset and not rickettsia_queryset and not pma_queryset:
+#             else:
+#                 output_array = csv_chik_result(output_array,chik_queryset,0,start_line_list,csv_final_headers)
+#                 output_array = csv_dengue_result(output_array,dengue_queryset,0,start_line_list,csv_final_headers)
+#                 output_array = csv_rickettsia_result(output_array,rickettsia_queryset,0,start_line_list,csv_final_headers)
+#                 output_array = csv_pma_result(output_array,pma_queryset,0,start_line_list,csv_final_headers)
+#     return output_array
+
 def display_export(request):
     # Get queryset from sort_data function
-
-    ## LES HEADERS EN PASCAL CASE
 
     if request.method == "POST":
         display_form = DisplayDataForm(request.POST)
@@ -1285,8 +1829,8 @@ def display_export(request):
             sample_list = []
             for i in range(len(serum_list)):
                 sample_list.append(serum_list[i][0])
-            queryset = Serum.objects.filter(sample_id__in=sample_list)
-            queryset=queryset.values()
+
+            serum_queryset = Serum.objects.filter(sample_id__in=sample_list)
 
             serum_fields = display_form.cleaned_data['serum_fields']
             freezer_fields = display_form.cleaned_data['freezer_fields']
@@ -1297,83 +1841,96 @@ def display_export(request):
             file_type = display_form.cleaned_data.get('file_type')
 
             now = datetime.datetime.now()
-            if file_type == "csv":
-                export_file=excel.make_response_from_array(final_csv_array,'csv',status=200)
+
+            export_content = {}
+
+            csv_final_headers = []
+            csv_final_array = []
+
+            serum_freezer_array = []
+            freezer_headers_list = []
+            chik_elisa_array = []
+            dengue_elisa_array = []
+            rickettsia_elisa_array = []
+            pma_array = []
+
+            if serum_fields:
+                serum_headers_list=get_serum_headers(serum_fields)
+            else:
+                serum_headers_list=['SampleId','SiteId','CollNum','CollDate','WardId']
+            if freezer_fields:
+                freezer_headers_list=get_freezer_headers(freezer_fields)
+            serum_freezer_headers_list=(serum_headers_list+freezer_headers_list)
+            csv_final_headers.extend(serum_freezer_headers_list)
+            serum_freezer_array=get_serum_freezer_data(serum_freezer_headers_list,serum_queryset)
+            export_content['SerumFreezer'] = serum_freezer_array
+
+            if pathogen or elisa_general_fields:
+                if not elisa_general_fields:
+                    elisa_general_fields = []
+                if 'all' in pathogen:
+                    chik_elisa_headers_list = get_elisa_headers(elisa_general_fields,'chik')
+                    dengue_elisa_headers_list = get_elisa_headers(elisa_general_fields,'dengue')
+                    rickettsia_elisa_headers_list = get_elisa_headers(elisa_general_fields,'rickettsia')
+                    csv_final_headers.extend(chik_elisa_headers_list)
+                    csv_final_headers.extend(dengue_elisa_headers_list)
+                    csv_final_headers.extend(rickettsia_elisa_headers_list)
+                    chik_elisa_array=get_chik_elisa_data(chik_elisa_headers_list,sample_list)
+                    dengue_elisa_array=get_dengue_elisa_data(dengue_elisa_headers_list,sample_list)
+                    rickettsia_elisa_array=get_rickettsia_elisa_data(rickettsia_elisa_headers_list,sample_list)
+                    export_content['ChikElisa'] = chik_elisa_array
+                    export_content['DengueElisa'] = dengue_elisa_array
+                    export_content['RickettsiaElisa'] = rickettsia_elisa_array
+                else:
+                    if 'chikungunya' in pathogen:
+                        chik_elisa_headers_list = get_elisa_headers(elisa_general_fields,'chik')
+                        csv_final_headers.extend(chik_elisa_headers_list)
+                        chik_elisa_array=get_chik_elisa_data(chik_elisa_headers_list,sample_list)
+                        export_content['ChikElisa'] = chik_elisa_array
+
+                    if 'dengue' in pathogen:
+                        dengue_elisa_headers_list = get_elisa_headers(elisa_general_fields,'dengue')
+                        csv_final_headers.extend(dengue_elisa_headers_list)
+                        dengue_elisa_array=get_dengue_elisa_data(dengue_elisa_headers_list,sample_list)
+                        export_content['DengueElisa'] = dengue_elisa_array
+
+                    if 'rickettsia' in pathogen:
+                        rickettsia_elisa_headers_list = get_elisa_headers(elisa_general_fields,'rickettsia')
+                        csv_final_headers.extend(rickettsia_elisa_headers_list)
+                        rickettsia_elisa_array=get_rickettsia_elisa_data(rickettsia_elisa_headers_list,sample_list)
+                        export_content['RickettsiaElisa'] = rickettsia_elisa_array
+
+            if pma_general_fields or pma_results_fields:
+                pma_headers_list=get_pma_headers(pma_general_fields,pma_results_fields)
+                csv_final_headers.extend(pma_headers_list)
+                pma_array=get_pma_data(pma_headers_list,sample_list)
+                export_content['ProteinMicroArray'] = pma_array
+
+
+            # if file_type == "json": #DOESNT WORK
+            #     response = HttpResponse(export_content, content_type='application/json')
+            #     response['Content-Disposition'] = 'attachment; filename="download.json"'
+            #     return response
+
+            if file_type == "csv": #DOESNT WORK PROPERLY
+                # csv_final_array = get_csv_data(csv_final_headers, sample_list)
+                export_file=excel.make_response_from_book_dict(export_content,'csv',status=200)
+                # export_file=excel.make_response_from_array(csv_final_array,'csv',status=200)
                 filename ="attachement ; filename = serum_bank_export_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".csv"
                 export_file['Content-Disposition'] = filename
                 return export_file
-            else:
-                export_content = {}
-                serum_freezer_array = []
-                chik_elisa_array = []
-                dengue_elisa_array = []
-                rickettsia_elisa_array = []
-                pma_array = []
-                serum_headers_list = []
-                freezer_headers_list = []
 
-                if serum_fields:
-                    serum_headers_list=get_serum_headers(serum_fields)
-                    # print ("serum headers list : ", serum_headers_list)
-                if freezer_fields:
-                    freezer_headers_list=get_freezer_headers(freezer_fields)
-                    # print ("freezer headers list : ", freezer_headers_list)
-                serum_freezer_array.append(serum_headers_list+freezer_headers_list)
-                # print ("serum freezer array : ", serum_freezer_array)
-                export_content['SerumFreezer'] = serum_freezer_array
-                print ('pathogen : ',pathogen)
-                print('elisa_general_fields : ', elisa_general_fields)
-                if pathogen or elisa_general_fields:
-                    if not elisa_general_fields:
-                        elisa_general_fields = []
-                    if 'all' in pathogen:
-                        chik_elisa_headers_list = get_elisa_headers(elisa_general_fields,'chik')
-                        dengue_elisa_headers_list = get_elisa_headers(elisa_general_fields,'dengue')
-                        rickettsia_elisa_headers_list = get_elisa_headers(elisa_general_fields,'rickettsia')
-                        chik_elisa_array.append(chik_elisa_headers_list)
-                        dengue_elisa_array.append(dengue_elisa_headers_list)
-                        rickettsia_elisa_array.append(rickettsia_elisa_headers_list)
-                        export_content['ChikElisa'] = chik_elisa_array
-                        export_content['DengueElisa'] = dengue_elisa_array
-                        export_content['RickettsiaElisa'] = rickettsia_elisa_array
-                    else:
-                        if 'chikungunya' in pathogen:
-                            chik_elisa_headers_list = get_elisa_headers(elisa_general_fields,'chik')
-                            chik_elisa_array.append(chik_elisa_headers_list)
-                            export_content['ChikElisa'] = chik_elisa_array
+            elif file_type == "xls":
+                export_file=excel.make_response_from_book_dict(export_content,'xls',status=200)
+                filename ="attachement ; filename = serum_bank_export_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".xls"
+                export_file['Content-Disposition'] = filename
+                return export_file
 
-                        if 'dengue' in pathogen:
-                            dengue_elisa_headers_list = get_elisa_headers(elisa_general_fields,'dengue')
-                            dengue_elisa_array.append(dengue_elisa_headers_list)
-                            export_content['DengueElisa'] = dengue_elisa_array
-
-                        if 'rickettsia' in pathogen:
-                            rickettsia_elisa_headers_list = get_elisa_headers(elisa_general_fields,'rickettsia')
-                            rickettsia_elisa_array.append(rickettsia_elisa_headers_list)
-                            export_content['RickettsiaElisa'] = rickettsia_elisa_array
-
-                if pma_general_fields or pma_results_fields:
-                    pma_headers_list=get_pma_headers(pma_general_fields,pma_results_fields)
-                    pma_array.append(pma_headers_list)
-                    export_content['ProteinMicroArray'] = pma_array
-
-
-
-                if file_type == "xls":
-                    # filename = "serum_bank_export_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".xls"
-                    # book.save_as(filename)
-                    export_file=excel.make_response_from_book_dict(export_content,'xls',status=200) ### Use make response form array
-                    filename ="attachement ; filename = serum_bank_export_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".xls"
-                    export_file['Content-Disposition'] = filename
-                    return export_file
-
-                elif file_type == "xlsx":
-                    # filename = "serum_bank_export_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".xlsx"
-                    # book.save_as(filename)
-                    export_file=excel.make_response_from_book_dict(book,'xlsx',status=200)
-                    filename ="attachement ; filename = serum_bank_export_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".xlsx"
-                    export_file['Content-Disposition'] = filename
-                    return export_file
+            elif file_type == "xlsx":
+                export_file=excel.make_response_from_book_dict(export_content,'xlsx',status=200)
+                filename ="attachement ; filename = serum_bank_export_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".xlsx"
+                export_file['Content-Disposition'] = filename
+                return export_file
 
         else:
             display_form = DisplayDataForm()
@@ -1397,6 +1954,3 @@ def display_tables(request):
     args['serum_sample_list'] = serum_sample_list
     args['freezer_sample_list'] = freezer_sample_list
     return render (request, "sboapp/pages/display_tables.html", args)
-
-
-# WORK IN PROGRESS

@@ -1,6 +1,6 @@
 /* Fonts */
 @import url('https://fonts.googleapis.com/css?family=Open+Sans');
-
+{% load static %}
 /* Reset */
 
 * {
@@ -63,7 +63,12 @@ nav{
   justify-content: center;
   padding: 0.6em 0;
 }
-
+h4{
+  font-size: 16pt;
+  /* color: #fbb838; */
+  color: #fff;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
 a{
   text-decoration: none;
   color: #000;
@@ -98,37 +103,51 @@ a[href^="{% url 'sboapp:staff'%}"] {
   width:50px;
   height:50px;
   overflow:hidden;
-  border-radius: 20%;
+  border-radius: 5%;
   box-shadow: 6px 3px 4px #007cb6;
+}
 
+#icon{
+  width:30px;
+  height: 30px;
+  border-radius: 5%;
 }
 
 #banner{
   height:30px;
 }
 
-/* .alert {
-  padding: 0.75rem 1.25rem;
-  margin-bottom: 1rem;
-  border: 1px solid transparent;
-  border-radius: 0.25rem;
+.card-btn {
+  background: #fff;
+  opacity: 0.7;
+  position: absolute;
+  bottom: 33%;
+  /* right: 33%; */
+  padding: 10px;
+  display: inline-block;
+  outline: 0;
+  border: 0;
+  margin: 50px;
+  border-radius: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: black;
+  cursor: pointer;
+  width: 250px;
+}
+.card-btn:hover {
+  background: #15721f;
+  opacity: 0.8;
+}
+.card-btn img {
+  display: inline-block;
+  vertical-align: middle;
+  /* background: #f00; */
+  padding: 5px;
+  border-radius: 5px;
 }
 
-.alert-danger {
-  background-color: #f2dede;
-  border-color: #ebcccc;
-  color: #a94442;
-}
-
-.alert-danger hr {
-  border-top-color: #e4b9b9;
-}
-
-.alert-danger .alert-link {
-  color: #843534;
-} */
 /* Dashboard buttons */
-
 dashboard-buttons{
   /* width:25%; */
   border-radius: 5%;
@@ -207,10 +226,10 @@ dashboard-buttons:hover:before,dashboard-buttons:hover:after{
 			}
       /* Temporary box home page  */
       .box{
-    	width:200px;
-    	height:200px;
-      background:#f2f2f2;
-      opacity: 0.85;
+    	width:300px;
+    	height:250px;
+      /* background:#f2f2f2; */
+      opacity: 0.9;
       border: 2px solid grey;
       border-radius: 10%;
       position: fixed;
@@ -218,8 +237,4 @@ dashboard-buttons:hover:before,dashboard-buttons:hover:after{
       left: 50%;
       /* bring your own prefixes */
       transform: translate(-50%, -50%);
-      }
-      .box:hover {
-        opacity: 1; /* Fully shown on mouse-over */
-
       }

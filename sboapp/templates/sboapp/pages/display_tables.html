@@ -76,6 +76,9 @@
 				<th>month</th>
 				<th>year</th>
 				<th>ward_id</th>
+				<th>import_date</th>
+				<th>import_time</th>
+				<th>import_user</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -95,6 +98,9 @@
         <td>{{ serum.month_value}}</td>
         <td>{{ serum.year}}</td>
         <td>{{ serum.ward_id}}</td>
+        <td>{{ serum.import_date}}</td>
+        <td>{{ serum.import_time}}</td>
+        <td>{{ serum.import_user}}</td>
       </tr>
       {% endfor %}
 		</tbody>
@@ -117,6 +123,9 @@
       <th>rack</th>
       <th>box</th>
       <th>tube</th>
+      <th>import_date</th>
+      <th>import_time</th>
+      <th>import_user</th>
     </tr>
   </thead>
   <tbody>
@@ -132,6 +141,9 @@
       <td>{{ freezer.subdivision_2_position}}</td>
       <td>{{ freezer.subdivision_3_position}}</td>
       <td>{{ freezer.subdivision_4_position}}</td>
+      <td>{{ freezer.import_date}}</td>
+      <td>{{ freezer.import_time}}</td>
+      <td>{{ freezer.import_user}}</td>
     </tr>
     {% endfor %}
   </tbody>

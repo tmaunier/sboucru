@@ -6,6 +6,7 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from django.contrib.auth.models import User
 
 class Serum(models.Model):
     local_sample_id = models.SmallIntegerField()
@@ -24,6 +25,9 @@ class Serum(models.Model):
     month_value = models.IntegerField()
     year = models.IntegerField()
     ward = models.OneToOneField('Ward',on_delete=models.PROTECT)
+    import_date = models.DateField(auto_now_add=True) #setting auto_now_add to True will cause the field to have editable=False and blank=True set
+    import_time = models.TimeField(auto_now_add=True)
+    import_user = models.ForeignKey(User, null=True, blank=True, on_delete=models.PROTECT)
 
     class Meta:
         db_table = 'Serum'
@@ -31,7 +35,6 @@ class Serum(models.Model):
     def __str__ (self):
         #Method used to display a serum object
         return "{}".format(self.sample_id)
-
 
 
 class Site(models.Model):
@@ -66,6 +69,9 @@ class Freezer(models.Model):
     subdivision_2_position = models.IntegerField()
     subdivision_3_position = models.IntegerField()
     subdivision_4_position = models.IntegerField()
+    import_date = models.DateField(auto_now_add=True) #setting auto_now_add to True will cause the field to have editable=False and blank=True set
+    import_time = models.TimeField(auto_now_add=True)
+    import_user = models.ForeignKey(User, null=True, blank=True, on_delete=models.PROTECT)
 
     class Meta:
         db_table = 'Freezer'
@@ -81,6 +87,9 @@ class Elisa(models.Model):
     elisa_day = models.IntegerField()
     elisa_month = models.IntegerField()
     elisa_year = models.IntegerField()
+    import_date = models.DateField(auto_now_add=True) #setting auto_now_add to True will cause the field to have editable=False and blank=True set
+    import_time = models.TimeField(auto_now_add=True)
+    import_user = models.ForeignKey(User, null=True, blank=True, on_delete=models.PROTECT)
 
     class Meta:
         db_table = 'Elisa'
@@ -131,8 +140,8 @@ class Dengue_elisa(models.Model):
 
 class Rickettsia_elisa(models.Model):
     elisa = models.OneToOneField('Elisa',on_delete=models.CASCADE, primary_key=True, db_column='elisa' )
-    scrub_typhus = models.DecimalField(max_digits=5, decimal_places=3, null=True)
-    typhus = models.DecimalField(max_digits=5, decimal_places=3, null=True)
+    scrub_typhus = models.DecimalField(max_digits=6, decimal_places=3, null=True)
+    typhus = models.DecimalField(max_digits=6, decimal_places=3, null=True)
 
     class Meta:
         db_table = 'Rickettsia_elisa'
@@ -157,6 +166,9 @@ class Pma(models.Model):
     scanned_month= models.IntegerField(null=True)
     scanned_year = models.IntegerField(null=True)
     panbio_unit = models.DecimalField(max_digits=5, decimal_places=3, null=True)
+    import_date = models.DateField(auto_now_add=True) #setting auto_now_add to True will cause the field to have editable=False and blank=True set
+    import_time = models.TimeField(auto_now_add=True)
+    import_user = models.ForeignKey(User, null=True, blank=True, on_delete=models.PROTECT)
 
 
     class Meta:

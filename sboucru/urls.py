@@ -14,17 +14,20 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.contrib.auth import views as auth_views
+from django.urls import path, include, reverse_lazy
 from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls import handler404, handler500
 
 
 from . import views
+from sboapp.forms import CustomAuthForm
 
 urlpatterns = [
-    path('', views.home, name='home'),
-    path('about/', views.about, name='about'),
+        #Registration
+    path('', auth_views.login, kwargs={'template_name': 'pages/home.html', 'authentication_form':CustomAuthForm}, name='login'),
+    path('logout/', auth_views.logout, {'next_page': '/'}, name='logout'),
     path('sboapp/', include('sboapp.urls', namespace="sboapp")),
     path('admin/', admin.site.urls),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

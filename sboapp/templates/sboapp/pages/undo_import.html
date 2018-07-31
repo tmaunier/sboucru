@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+{%extends 'layouts/base_export.html'%}
+
+{% load widget_tweaks %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+
+{%block title%} Serum Bank OUCRU app {%endblock%}
+
+{% block head-javascript %}
+    {{ form.media }}
+{% endblock %}
+
+
+{% block page-header %}
+<h1>Undo Import</h1>
+{% endblock %}
+
+
+{% block content %}
+<div class="container-card">
+  <div class="text-center">
+  <h3>Undo Rules !</h3>
+  <br>
+  </div>
+<ul>
+  <div class="text-align">
+  <li>You can only erase data if YOU imported it </li>(If you try to you'll have a "no match" error)<br>
+  <br><li>You can only erase data that has been imported in the last 3 days</li><br>
+  <li>In order to delete data you have to fill the following form </li><br>
+  <li>In the case you can't respect those previous rules, please refer to an admin </li><br>
+  </div>
+</ul>
+</div>
+<br>
+{{ user_error }}
+<div class="row">
+  {% crispy form %}
+</div>
+{% endblock %}
+</body>

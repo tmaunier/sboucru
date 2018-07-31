@@ -1,14 +1,16 @@
 {% load staticfiles %}
 
 <nav>
-  <!-- <div class="wrapper"> -->
     <a href="{% url 'sboapp:staff' %}"  ><img class=grow src="{% static "images/OUCRU_rgb.png" %}" id="logo"></a>
     <a href='' disabled="disabled"><img src="{% static "images/oucru_banner.png" %}" id="banner"></a>
-    <!-- <ul class='navbar-right'>
-      <li><a href = "{% url 'home'%}">Home</a></li>
-      <li><a href = "{% url 'sboapp:staff'%}">Dashboard</a></li>
-    </ul> -->
-    <a href = "{% url 'home'%}">Log out</a>
-    <a href = "{% url 'sboapp:staff'%}">Dashboard</a>
-  <!-- </div> -->
+    {% if user.is_authenticated %}
+    <h4>{{ user.username }}</h4>
+    {% if user.is_staff %}
+    <a href = "{% url 'admin:index'%}">administration</a>
+    {% endif %}
+    <a href = "{% url 'logout'%}">log out</a>
+    {% else %}
+    <p>Welcome, new user. Please, log in.</p>
+    <a href = "{% url ''%}">Login page</a>
+    {% endif %}
 </nav>
