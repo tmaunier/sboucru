@@ -1,14 +1,6 @@
 /* Fonts */
 @import url('https://fonts.googleapis.com/css?family=Open+Sans');
 
-/* Reset */
-
-* {
-  /* margin: 0; */
-  /* padding: 0; */
-  /* height: 100%; */
-}
-
 /* Helpers */
 
 .wrapper {
@@ -39,11 +31,7 @@
 /* Main Styles */
 
 body {
-  height: 100%;
   background-color: #fff;
-  /* background: linear-gradient(to top, #8ac0ea 0%,#97c7ec 1%,#e5f1fa 50%,#fff 100%); */
-  /* background: linear-gradient(to bottom, #8ac0ea 0%,#97c7ec 1%,#e5f1fa 50%,#fff 100%); */
-  /* background: linear-gradient(to bottom, #8ac0ea 0%,#97c7ec 1%,#bedcf3 50%,#e5f1fa 100%); */
   background-repeat: no-repeat;
   background-size: cover;
   font-family: 'Open Sans', Helvetica, sans-serif;
@@ -51,16 +39,18 @@ body {
 
 nav{
   display: flex;
-  width: 100%;
-  height: 20%;
-  /* background: linear-gradient(to top, #30cfd0 0%, #330867 100%); */
-  /* background: linear-gradient(to bottom, #8ac0ea 0%,#97c7ec 1%,#e5f1fa 50%,#fff 100%); */
+  height: 80px;
   background: linear-gradient(to bottom, #6086a3 0%,#7cacd2 1%,#d0e5f6 50%,#fff 100%);
-  /* background: linear-gradient(to bottom, #8ac0ea 0%,#97c7ec 1%,#bedcf3 50%,#e5f1fa 100%); */
-  /* background: linear-gradient(to bottom, #1e5799 0%,#207cca 1%,#2989d8 50%,#7db9e8 100%); */
   align-items: center;
   justify-content: center;
-  padding: 0.6em 0;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+h4{
+  font-size: 16pt;
+  color: #fff;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 }
 
 a{
@@ -69,12 +59,10 @@ a{
   font-size: 1.2em;
   margin: 0 40px;
 }
-a[href^="{% url 'sboapp:staff'%}"] {
-  color: #fff;
-  font-size: 1.0em;
-  margin: 0 40px;
-  font-family: "Times New Roman", Times, serif;
-  font-style: normal;
+
+.label-user {
+  color:#a31919;
+  font-size: 18pt;
 }
 
 .grow {
@@ -97,10 +85,14 @@ a[href^="{% url 'sboapp:staff'%}"] {
   width:50px;
   height:50px;
   overflow:hidden;
-  border-radius: 20%;
+  border-radius: 5%;
   box-shadow: 6px 3px 4px #007cb6;
-
 }
+
+#banner{
+  height:30px;
+}
+
 .container-card {
   background: linear-gradient(to bottom, #fbb838 0%,#fbb838 1%,#fbbf4b 50%,#fccd73 100%);
   position: relative;
@@ -140,9 +132,7 @@ a[href^="{% url 'sboapp:staff'%}"] {
     background: #fff;
     opacity: 0.7;
     display: inline-block;
-    /* border-radius: 5%; */
     max-width: 300px;
-    /* margin: auto; */
     margin-top: 20px;
     margin-right: 20px;
     margin-left: 20px;
@@ -156,9 +146,7 @@ a[href^="{% url 'sboapp:staff'%}"] {
     opacity: 0.7;
     display: inline-block;
     vertical-align: middle;
-    /* border-radius: 5%; */
     max-width: 500px;
-    /* margin: auto; */
     margin-top: 20px;
     margin-right: 20px;
     margin-left: 20px;
@@ -184,113 +172,32 @@ a[href^="{% url 'sboapp:staff'%}"] {
   color: black;
   cursor: pointer;
   width: 25%;
-  /* width: 180px; */
 }
 .card-btn:hover {
   background: #15721f;
   opacity: 0.8;
 }
-#banner{
-  height:30px;
-}
-/* Dashboard buttons */
 
 btn {
   border-radius: 20%;
   float: left;
 }
 
-dashboard-buttons{
-  /* width:25%; */
-  border-radius: 5%;
-  background:#31698a;
-  opacity:0.7;
+.upload-button{
+  position: relative;
+  background:#6086a3;
+  opacity:0.95;
+  padding-top: 5px;
+  padding-bottom:5px;
+  padding-right:15px;
+  padding-left:15px;
+  border-radius: 10%;
   color:#fff;
-  border:none;
-  position:relative;
-  font-size:1em;
-  padding: 20px;
-  cursor:pointer;
-  transition:800ms ease all;
-  outline:none;
-  margin-top: auto;
-  margin-left: auto;
-  margin-right: auto;
+  height: 40px;
+  width: 80px;
 }
-dashboard-buttons:hover {
+.upload-button:hover {
   background:#fff;
   color:#31698a;
+  opacity:1;
 }
-dashboard-buttons:before,dashboard-buttons:after{
-  content:'';
-  position:absolute;
-  top:0;
-  right:0;
-  height:2px;
-  width:0;
-  background: #fbb838;
-  transition:400ms ease all;
-}
-dashboard-buttons:after{
-  right:inherit;
-  top:inherit;
-  left:0;
-  bottom:0;
-}
-dashboard-buttons:hover:before,dashboard-buttons:hover:after{
-  width:100%;
-  transition:800ms ease all;
-}
-
-/* FORMS  */
-.control:checked
-~ .conditional,
-			#serums:checked
-~ .conditional,
-			#location:checked
-~ .conditional
-			#results:checked
-~ .conditional {
-				clip: auto;
-				height: auto;
-				margin: 0;
-				overflow: visible;
-				position: static;
-				width: auto;
-			}
-
-      .control:not(:checked)
-~ .conditional,
-			#serums:not(:checked)
-~ .conditional,
-			#location:not(:checked)
-~ .conditional,
-			#results:not(:checked)
-~ .conditional {
-				border: 0;
-				clip: rect(0 0 0 0);
-				height: 1px;
-				margin: -1px;
-				overflow: hidden;
-				padding: 0;
-				position: absolute;
-				width: 1px;
-			}
-      /* Temporary box home page  */
-      .box{
-    	width:200px;
-    	height:200px;
-      background:#f2f2f2;
-      opacity: 0.85;
-      border: 2px solid grey;
-      border-radius: 10%;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      /* bring your own prefixes */
-      transform: translate(-50%, -50%);
-      }
-      .box:hover {
-        opacity: 1; /* Fully shown on mouse-over */
-
-      }

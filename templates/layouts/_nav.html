@@ -4,7 +4,7 @@
     <a href="{% url 'sboapp:staff' %}"  ><img class=grow src="{% static "images/OUCRU_rgb.png" %}" id="logo"></a>
     <a href='' disabled="disabled"><img src="{% static "images/oucru_banner.png" %}" id="banner"></a>
     {% if user.is_authenticated %}
-    <h4>{{ user.username }}</h4>
+    <a class="label-user">{{ user.username }}</a>
     {% if user.is_staff %}
     <a href = "{% url 'admin:index'%}">administration</a>
     {% endif %}

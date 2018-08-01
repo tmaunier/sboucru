@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-{%extends 'layouts/base_export.html'%}
+{%extends 'layouts/base_pages.html'%}
 
 {% load widget_tweaks %}
 {% load staticfiles %}
 {% load crispy_forms_tags %}
 
-<!-- {%block title%} Serum Bank OUCRU app {%endblock%} -->
+{%block title%} Serum Bank OUCRU app {%endblock%}
+
 {% block head-javascript %}
     {{ sort_form.media }}
 {% endblock %}
@@ -25,12 +26,12 @@
 {% block foot-javascript %}
 <script>
 $( document ).ready( function() {
-    // Afficher l'onglet suivant en cliquant sur le bouton suivant
+    // Display the next tab clicking on the next button
     $('.btnNext').click(function(){
         $('.nav-tabs > .active + li a').trigger('click');
         $(".nav-tabs + .tab-content").find(":input:visible:first").focus();
     });
-    // Afficher l'onglet précédent en cliquant sur le bouton précédent
+    // Display the previous tab clicking on the previous button
     $('.btnPrevious').click(function(){
         $('.nav-tabs > .active').prev('li').find('a').trigger('click');
         $(".nav-tabs + .tab-content").find(":input:visible:first").focus();

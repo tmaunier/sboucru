@@ -15,63 +15,40 @@
 </head>
 <body>
   {%block content%}
-<div class="sandbox sandbox-correct-pronounciation">
-  <h1 class="heading heading-correct-pronounciation">
-    <!-- Welcome to the -->
+  <div class="nav">
     <br>
-    <em>
-      <span style="color: #0e2f44">O</span>
-      <span style="color: #e46f30">U</span>
-      <span style="color: #31698a">C</span>
-      <span style="color: #fbb838">R</span>
-      <span style="color: #dd601d">U</span>
-    </em>
-   Serum bank manager
-  </h1>
-  <br>
-</div>
-
-{% if next %}
-    {% if user.is_authenticated %}
-    <p>Your account doesn't have access to this page. To proceed,
-    please login with an account that has access.</p>
-    {% else %}
-    <p>Please login to see this page.</p>
-    {% endif %}
-{% endif %}
-<div class="box">
-
-<form method="post" action="{% url 'login' %}">
-{% csrf_token %}
-
-<table>
-<tr>
-    <td>{{ form.username }}</td>
-</tr>
-<tr>
-    <td>{{ form.password }}</td>
-</tr>
-</table>
-<input class="btn btn-primary" type="submit" value="login" />
-<input type="hidden" name="next" value="{{ next }}" />
-</div>
-</form>
-<div class="wrapper">
-  <a class='navbar-logo' href='http://www.ox.ac.uk/'><img src="https://armacad.info/images/2017/04/UniversityofOxfordPre-MastersCourse2017--hlEg2iy5PYQGFjURZE_yoZAn7-un0YIT.png" id="oxfordLogo"></a>
-  <a class='navbar-logo' href='http://www.oucru.org/'><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRICA1c-zKr1CMGPddMK7rchPy2_DW5JfxXUNENTvtsLkcoc8nl" id="oucruLogo"></a>
-</div>
+      <a  href='http://www.ox.ac.uk/'><img src="https://armacad.info/images/2017/04/UniversityofOxfordPre-MastersCourse2017--hlEg2iy5PYQGFjURZE_yoZAn7-un0YIT.png" id="oxfordLogo"></a>
+      <a href='' disabled="disabled"><img src="{% static "images/oucru_banner.png" %}" id="banner"></a>
+      <a  href='http://www.oucru.org/'><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRICA1c-zKr1CMGPddMK7rchPy2_DW5JfxXUNENTvtsLkcoc8nl" id="oucruLogo"></a>
+  </div>
+  <div class="sandbox sandbox-correct-pronounciation">
+    <h1 class="heading heading-correct-pronounciation">
+      <br>
+      <em>
+        <span style="color: #0e2f44">O</span>
+        <span style="color: #e46f30">U</span>
+        <span style="color: #31698a">C</span>
+        <span style="color: #fbb838">R</span>
+        <span style="color: #dd601d">U</span>
+      </em>
+     Serum bank manager
+    </h1>
+    <br>
+  </div>
+  <div class="box">
+  <form method="post" action="{% url 'login' %}">
+  {% csrf_token %}
+  <table>
+  <tr>
+      <td>{{ form.username }}</td>
+  </tr>
+  <tr>
+      <td>{{ form.password }}</td>
+  </tr>
+  </table>
+  <input class="log-button" type="submit" value="login" />
+  <input type="hidden" name="next" value="{{ next }}" />
+  </form>
+  </div>
   {%endblock content%}
 </body>
-
-
-
-<!-- <div class="text-center">
-<form method="post">
-{% csrf_token %}
-{{ form.as_p }}
-<br>
-<p> </p>
-<br>
-<input class="btn btn-success" type="submit" value="Login">
-</form>
-</div> -->

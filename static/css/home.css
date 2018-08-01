@@ -2,63 +2,12 @@
 {% load static %}
 
 body {
-  /* background-color: #416475; */
-  /* background: url("{% static 'images/mountain.jpeg' %}"); */
-  /* background-image: url("https://www.goodfreephotos.com/cache/vietnam/saigon/skyline-and-cityscape-in-saigon-vietnam_800.jpg"); */
   background-image: url("https://cdn.theculturetrip.com/wp-content/uploads/2017/01/hcmc.jpg");
   background-repeat: no-repeat;
   background-size: cover;
-  /* margin-bottom: 50px; */
-}
-.navbar{
-  border-top: 2px solid #000;
-  border-bottom: 2px solid #000;
-  padding: 0.8em 0;
-}
-.navbar .navbar-logo {
-  margin-right: 0.1em;
-}
-#oucruLogo{
-  height:60px;
-  margin-right: 0.2em;
-  border-radius: 20%;
-}
-#oxfordLogo{
-  height:60px;
-  position: relative;
-  right:10px;
-  border-radius: 10%;
-}
-#aboutLogo{
-  height:40px;
-  position:relative;
-  left:75%;
-}
-.wrapper {
-  width: 1400px;
-  max-width: 100%;
-  margin: 0 auto;
-}
-
-.sandbox-correct-pronounciation {
-  padding: 7em 0 5em 0;
-}
-
-.heading-correct-pronounciation {
-  margin: 0 ;
-  text-align: center;
-  position: relative;
-  top:-100px;
-}
-
-labelhome {
-  color: #000;
-  font-family: 'Times';
-  font-size: 20pt;
 }
 a {
   font-size: 10pt;
-  /* color: #000; */
   color: #d05f01;
   text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
   font-style: oblique;
@@ -66,7 +15,6 @@ a {
 }
 h1 {
   color: #000;
-  /* color: #fff; */
   font-family: 'Cardo', serif;
   font-weight: normal;
   letter-spacing: 0.1em;
@@ -84,48 +32,65 @@ em {
   padding-bottom: 0.1em;
   text-shadow: 0.07em 0.07em 0 rgba(0, 0, 0, 0.1);
 }
-
-.container {
-    position: relative;
-    text-align: center;
-    color: white;
+.nav{
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  height: 50px;
+  text-align: center;
+  margin-top: 20px;
+  margin-right: 1%;
+  margin-left: 1%;
+}
+#oucruLogo{
+  position: relative;
+  height:60px;
+  border-radius: 20%;
+}
+#oxfordLogo{
+  position: relative;
+  height:60px;
+  border-radius: 10%;
+}
+#banner{
+  position: relative;
+  height:45px;
 }
 
-.text-block {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    background-color: black;
-    color: white;
-    padding-left: 20px;
-    padding-right: 20px;
+.sandbox-correct-pronounciation {
+  padding: 50px 0px 20px;
 }
 
-.bottom {
-  font-size: 1.5em;
-  letter-spacing: 0.07em;
-  font-size: 1em;
-  display: block;
+.heading-correct-pronounciation {
+  text-align: center;
+  position: relative;
+  top:-100px;
 }
 
-/* Temporary box home page  */
 .box{
-
-position: relative;
-top: 50%;
-left: 50%;
-opacity: 0.9;
-border: None;
-transform: translate(-50%, -50%);
+  position: relative;
+  text-align: center;
+  height: 120px;
+  width: 230px;
+  margin-top: -50px;
+  margin-left: 50%;
+  padding: 15px 15px 15px 15px;
+  opacity: 0.9;
+  transform: translate(-50%, -50%);
 }
-
-log-button{
-  border-radius: 5%;
+.log-button{
+  position: relative;
   background:#31698a;
-  opacity:0.7;
-  color:#000;
+  opacity:0.95;
+  padding-top: 5px;
+  padding-bottom:5px;
+  padding-right:15px;
+  padding-left:15px;
+  border-radius: 10%;
+  color:#fff;
 }
-log-button:hover {
+.log-button:hover {
   background:#fff;
   color:#31698a;
+  opacity:1;
 }

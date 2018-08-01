@@ -1119,10 +1119,10 @@ def undo_import(request):
                     args['user_error'] = "Time error. Please refer to the undo rules !"
                     return render(request, "sboapp/pages/undo_import.html", args)
 
+                q = queryset[0]
                 if cln_import_type == "elisa_chik" or cln_import_type == "elisa_dengue" or cln_import_type == "elisa_rickettsia":
                     args['pathogen'] = q.pathogen
                 args['quantity'] = queryset.count()
-                q = queryset[0]
                 args['date'] = q.import_date
                 args['time'] = q.import_time
                 request.session['undo_queryset'] = list(queryset.values_list('sample_id').distinct())

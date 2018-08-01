@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{%extends 'layouts/base_export.html'%}
+{%extends 'layouts/base_pages.html'%}
 {%block title%} Serum Bank OUCRU app {%endblock%}
 
 <html>
@@ -17,14 +17,8 @@
     <h1>Queryset Validation</h1>
     {% endblock %}
     {%block content%}
-      <!-- <p>This is the validate_query page</p><br>
-      <p>Query result = Serum count + HighCharts (Serum = f (Year x Site))</p><br>
-      <p>buttons : modify query (return to sort_data page) + export (go to display_export page)</p><br>
-      <h1>{{valid_error}}</h1><br> -->
-      <!-- <h1>{{sample_id}}</h1><br><h1>{{changed_list}}</h1><br><h1>{{queryset_error}}</h1><br> -->
       <div class="text-center">
         <h1>Serums found : {{queryset_count}}</h1>
-        <!-- <h1>Serums found : {{queryset}}</h1> -->
       <br>
       <div class="wrapper">
       <div id="container"></div>
@@ -79,19 +73,8 @@
       <a href="sort_data/check_status" class="btn btn-warning ">Check Serums Status</a>
       <a href="sort_data/count_results" class="btn btn-warning ">Count Serums Tests</a><br>
       <br>
-  </div>
-<!-- col-md-offset-1 -->
-      <!-- {% for serum in queryset %}
-      <ul>
-        <li>{{serum}}</li>
-      </ul>
-      {% endfor %} -->
+    </div>
 
-      <!-- <p>
-      {% for arg in args %}
-        {{ arg }}<br>
-      {% endfor %}
-    </p> -->
     {%endblock content%}
     </body>
 </html>

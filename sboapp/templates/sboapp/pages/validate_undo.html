@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{%extends 'layouts/base_export.html'%}
+{%extends 'layouts/base_pages.html'%}
 
 {% load widget_tweaks %}
 {% load staticfiles %}
@@ -64,17 +64,4 @@
 <div class="row">
   {% crispy validate_undo_form %}
 </div>
-<!-- <p>display recap en fonction du type de data</p>
-<br>
-<p>confirm button + alert (are you sure its definitif)</p>
-<p> YES or NO form ? </p>
-<p> red danger button to submit </p>
-<ul>
-{% for x in undo_queryset %}
-  <li>
-    {{ x }}
-  </li>
-{% endfor %}
-</ul> -->
 {% endblock %}
-</body>

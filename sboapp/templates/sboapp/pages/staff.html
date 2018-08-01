@@ -11,10 +11,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
 body {
-  font-family: "Lato", sans-serif;
-  height: 100%;
-  /* background-image: url("https://images.pexels.com/photos/325185/pexels-photo-325185.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"); */
-  /* background-image: url("https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"); */
   background: url("{% static 'images/sky_hcmc.jpeg' %}");
   background-repeat: no-repeat;
   background-size: cover;
@@ -28,18 +24,14 @@ body {
 .data-table th,
 .data-table td {
   border: 0;
-  /* border: 1px solid #e1edff; */
   padding: 7px 7px;
 }
 .data-table thead th {
-  /* background-color: #508abb; */
   background: linear-gradient(to bottom, #2d5932 0%,#2d5932 1%,#4a727e 50%,#8ea7ae 100%);
   color: #FFFFFF;
-  /* border-color: #6ea1cc !important; */
   text-align: center;
 }
 .data-table tbody tr:nth-child(odd) td {
-  /* background-color: #abbcad */
   background-color: #d5ddd6
 }
 .data-table tbody td {
@@ -61,7 +53,12 @@ body {
     width:40%;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6);
 }
-
+.label-ct {
+  color:#2d5932;
+}
+.label-cc {
+  color:#000;
+}
 .container-chart {
     background: url("{% static 'images/rice.jpeg' %}");
     background-size: cover;
@@ -80,9 +77,7 @@ body {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6);
     background: #fff;
     opacity: 0.7;
-    /* border-radius: 5%; */
     max-width: 300px;
-    /* margin: auto; */
     margin-top: 20px;
     text-align: center;
     position: relative;
@@ -130,17 +125,9 @@ body {
 
 /* Style the tab content */
 .tabcontent {
-    float: left;
-    padding: 0px 25px;
-    width: 100%;
-    height: 100%;
     border-top: none;
-    /* height: 500px; */
 }
 
-.tabcontent .tabcontent-welcome {
-  background:#fff;
-}
 </style>
 {% endblock %}
 {% block javascript %}
@@ -167,7 +154,7 @@ body {
 
   <div class="card">
     {% if user.is_authenticated %}
-      <h1>{{user.first_name}}'s profile</h1>
+      <h2>{{user.first_name}}'s profile</h2>
       <p>First name : {{ user.first_name}}</p>
       <p>Last name : {{ user.last_name}}</p>
       <p>Username : {{ user.username}}</p>
@@ -180,14 +167,13 @@ body {
   </button>
 </div>
 <div class="container-card">
-  <h1>Latest import</h1>
+  <h2 class=label-ct >Latest import</h2>
   <table class="data-table">
     <thead>
       <tr>
         <th>Type of data</th>
         <th>Quantity</th>
         <th>Import Date</th>
-        <!-- <th>Import Time</th> -->
         <th>Import User</th>
       </tr>
     </thead>
@@ -209,7 +195,7 @@ body {
 
 
   <div class="text-center">
-  <h1>Total amount of Serums in the database :   {{count_serum}}</h1>
+  <h1 class="label-ct">Total amount of Serums : {{count_serum}}</h1>
   <br>
   <div class="wrapper">
   <div id="container"></div>
@@ -259,7 +245,6 @@ body {
   </script>
   </div>
 </div>
-  <!-- <p>Note : add an update button to avoid loading of the query each time you go through the welcome page</p> -->
 </div>
   </div>
 <div id="Import" class="tabcontent">
@@ -283,6 +268,7 @@ body {
 </div>
 
 <div id="Tables" class="tabcontent">
+  <br>
   <div class="center-screen">
     <dashboard-buttons onclick="window.location.href='tables'">Display Tables</dashboard-buttons>
   </div>

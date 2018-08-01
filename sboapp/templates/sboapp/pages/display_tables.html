@@ -1,114 +1,106 @@
 <!DOCTYPE html>
-{%extends 'layouts/base.html'%}
+{%extends 'layouts/base_pages.html'%}
 {% load static %}
 
 {%block title%} Serum Bank OUCRU app {%endblock%}
-<head>
-  {% block styles %}
-      <link rel="stylesheet" href="{% static 'css/table.css' %}">
-      <style media="screen">
-      body{
-        /* background: linear-gradient(to top, #8ac0ea 0%,#97c7ec 1%,#bedcf3 50%,#e5f1fa 100%); */
-        background: linear-gradient(to top, #8ac0ea 0%,#97c7ec 1%,#e5f1fa 50%,#fff 100%);
-      }
-      </style>
-  {% endblock %}
-</head>
-<body>
+
+{% block page-header %}
+<h1>Database Tables </h1>
+{% endblock %}
+
 {%block content%}
-<div class="text-center">
 
-    <h5>Site Table </h5>
-  <br>
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>site id</th>
-        <th>site name</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for site in site_nb %}
-      <tr>
-        <td>{{ site.site_id}}</td>
-        <td>{{ site.site_name}}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<ul class="nav nav-tabs">
+  <h2>Site Table </h2>
+</ul>
+<br>
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>site id</th>
+      <th>site name</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for site in site_nb %}
+    <tr>
+      <td>{{ site.site_id}}</td>
+      <td>{{ site.site_name}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
-  <br>
-  <h5>Ward Table</h5>
-  <br>
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>ward id</th>
-        <th>ward name</th>
-        <th>khoa</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for ward in ward_nb %}
-      <tr>
-        <td>{{ ward.ward_id}}</td>
-        <td>{{ ward.ward_name}}</td>
-        <td>{{ ward.khoa}}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <h5>Serum Table</h5>
+<ul class="nav nav-tabs">
+  <h2>Ward Table </h2>
+</ul>
 <br>
-	<table class="data-table">
-		<thead>
-			  <th>local_sample_id</th>
-				<th>site_id</th>
-				<th>coll_num</th>
-				<th>sample_id</th>
-        <th>status</th>
-				<th>original_age</th>
-				<th>age_min</th>
-				<th>age_max</th>
-				<th>gender</th>
-				<th>coll_date</th>
-				<th>day</th>
-				<th>month</th>
-				<th>year</th>
-				<th>ward_id</th>
-				<th>import_date</th>
-				<th>import_time</th>
-				<th>import_user</th>
-			</tr>
-		</thead>
-		<tbody>
-      {% for serum in serum_sample_list %}
-		  <tr>
-        <td>{{ serum.local_sample_id}}</td>
-        <td>{{ serum.site_id}}</td>
-        <td>{{ serum.coll_num}}</td>
-        <td>{{ serum.sample_id}}</td>
-        <td>{{ serum.status}}</td>
-        <td>{{ serum.original_age}}</td>
-        <td>{{ serum.age_min}}</td>
-        <td>{{ serum.age_max}}</td>
-        <td>{{ serum.gender_1ismale_value}}</td>
-        <td>{{ serum.coll_date}}</td>
-        <td>{{ serum.day_value}}</td>
-        <td>{{ serum.month_value}}</td>
-        <td>{{ serum.year}}</td>
-        <td>{{ serum.ward_id}}</td>
-        <td>{{ serum.import_date}}</td>
-        <td>{{ serum.import_time}}</td>
-        <td>{{ serum.import_user}}</td>
-      </tr>
-      {% endfor %}
-		</tbody>
-	</table>
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>ward id</th>
+      <th>ward name</th>
+      <th>khoa</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for ward in ward_nb %}
+    <tr>
+      <td>{{ ward.ward_id}}</td>
+      <td>{{ ward.ward_name}}</td>
+      <td>{{ ward.khoa}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
+<ul class="nav nav-tabs">
+  <h2>Serum Table (20 random)</h2>
+</ul>
 <br>
-<br>
-<h5>Freezer Table</h5>
+<table class="data-table">
+	<thead>
+		  <th>local_sample_id</th>
+			<th>site_id</th>
+			<th>coll_num</th>
+			<th>sample_id</th>
+      <th>status</th>
+			<th>original_age</th>
+			<th>age_min</th>
+			<th>age_max</th>
+			<th>gender</th>
+			<th>coll_date</th>
+			<th>day</th>
+			<th>month</th>
+			<th>year</th>
+			<th>ward_id</th>
+		</tr>
+	</thead>
+	<tbody>
+    {% for serum in serum_sample_list %}
+	  <tr>
+      <td>{{ serum.local_sample_id}}</td>
+      <td>{{ serum.site_id}}</td>
+      <td>{{ serum.coll_num}}</td>
+      <td>{{ serum.sample_id}}</td>
+      <td>{{ serum.status}}</td>
+      <td>{{ serum.original_age}}</td>
+      <td>{{ serum.age_min}}</td>
+      <td>{{ serum.age_max}}</td>
+      <td>{{ serum.gender_1ismale_value}}</td>
+      <td>{{ serum.coll_date}}</td>
+      <td>{{ serum.day_value}}</td>
+      <td>{{ serum.month_value}}</td>
+      <td>{{ serum.year}}</td>
+      <td>{{ serum.ward_id}}</td>
+    </tr>
+    {% endfor %}
+	</tbody>
+</table>
+
+<ul class="nav nav-tabs">
+  <h2>Freezer Table </h2>
+</ul>
 <br>
 <table class="data-table">
   <thead>
@@ -123,9 +115,6 @@
       <th>rack</th>
       <th>box</th>
       <th>tube</th>
-      <th>import_date</th>
-      <th>import_time</th>
-      <th>import_user</th>
     </tr>
   </thead>
   <tbody>
@@ -141,14 +130,11 @@
       <td>{{ freezer.subdivision_2_position}}</td>
       <td>{{ freezer.subdivision_3_position}}</td>
       <td>{{ freezer.subdivision_4_position}}</td>
-      <td>{{ freezer.import_date}}</td>
-      <td>{{ freezer.import_time}}</td>
-      <td>{{ freezer.import_user}}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
 <br>
 </div>
+
 {% endblock %}
-</body>

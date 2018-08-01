@@ -1,35 +1,23 @@
 <!DOCTYPE html>
-{%extends 'layouts/base.html'%}
+{%extends 'layouts/base_pages.html'%}
 {% load static %}
 {%block title%} Serum Bank OUCRU app {%endblock%}
 
-<html>
-    <head>
-      {% block javascript %}
-      <script type="text/javascript" src="{% static 'bootstrap/js/bootstrap.js' %}"></script>
-      <script type="text/javascript" src="{% static 'js/import_data.js' %}"></script>
-      <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-      <link rel="stylesheet" href="{% static 'css/import.css' %}">
-      <link rel="stylesheet" href="{% static 'css/table.css' %}">
-      {% endblock %}
-        <title>
-          Pathogen choice -  Import Elisa results
-        </title>
-    </head>
-    <body>
-      {%block content%}
-      <div class=text-center>  <h2>Elisa results Import page</h2> <br>
-        <h1>Please choose the pathogen corresponding to the file you want to import</h1>
-        {{error_note}}
-        <br>
-      </div>
-      <div class="text-center">
-      <form action="import_elisa_choices" method="post">
-        {% csrf_token %}
-        {{ form }}
-        <input type="submit" value="Submit" />
-      </form>
-    </div>
-      {% endblock %}
-    </body>
-</html>
+{% block page-header %}
+<h1>Pathogen choice -  Import Elisa results </h1>
+{% endblock %}
+
+{%block content%}
+<div class=text-center>
+  <h3>Please choose the pathogen corresponding to the file you want to import</h3>
+  {{error_note}}
+  <br>
+</div>
+<div class="text-center">
+<form action="import_elisa_choices" method="post">
+  {% csrf_token %}
+  {{ form }}
+  <input class="upload-button" type="submit" value="Submit" />
+</form>
+</div>
+{% endblock %}
