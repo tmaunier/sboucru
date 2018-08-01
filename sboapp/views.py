@@ -9,7 +9,7 @@ from django.views.generic.edit import FormView
 from django.db.models import Count
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.forms import PasswordChangeForm, UserChangeForm
 import openpyxl
 import pyexcel #module to read Excel files in Django
 import django_excel as excel
@@ -135,9 +135,6 @@ def staff(request):
     args['import_array']= import_array
     return render (request, "sboapp/pages/staff.html", args)
 
-def edit_profile(request):
-    args={}
-    return render(request, 'sboapp/pages/edit_profile.html', args)
 
 def change_password(request):
     if request.method == 'POST':
@@ -152,22 +149,6 @@ def change_password(request):
         form = PasswordChangeForm(request.user)
     return render(request, 'sboapp/pages/change_password.html', {'form': form})
 
-def change_profile(request):
-    if request.method == 'POST':
-        return render(request, 'sboapp/pages/change_profile_done.html')
-    # if request.method == 'POST':
-    #     form = PasswordChangeForm(request.user, request.POST)
-    #     if form.is_valid():
-    #         user = form.save()
-    #         update_session_auth_hash(request, user)  # Important!
-    #         return render(request, 'sboapp/pages/change_profile_done.html')
-    #     else:
-    #         messages.error(request, 'Please correct the error below.')
-    # else:
-    #     form = PasswordChangeForm(request.user)
-    # return render(request, 'sboapp/pages/change_profile.html', {'form': form})
-    else:
-        return render(request, 'sboapp/pages/change_profile.html')
 
 #---IMPORT DATA FROM FILE TO DATABASE
 def sample_id_exists(sample_test_id): #Check if the serum_id exists in the Serum table, return Boolean

@@ -59,15 +59,12 @@ body {
     margin-top: 15px;
     padding: 20px;
     width:40%;
-    /* padding-top: 1px; */
-    /* padding-bottom: : 10px; */
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6);
 }
 
 .container-chart {
     background: url("{% static 'images/rice.jpeg' %}");
     background-size: cover;
-    /* background: linear-gradient(to bottom, #2d5932 0%,#2d5932 1%,#4a727e 50%,#8ea7ae 100%); */
     position: relative;
     text-align: center;
     margin-left: 1%;
@@ -177,9 +174,9 @@ body {
       <p>Email : {{ user.email}} </p>
     {% endif %}
   </div>
-  <button class="card-btn" onclick="window.location.href='edit_profile'">
+  <button class="card-btn" onclick="window.location.href='change_password'">
       <img  src="{% static 'images/edit.png' %}" width="30" height="30"/><br>
-      <span>Edit profile</span>
+      <span>Edit password</span>
   </button>
 </div>
 <div class="container-card">

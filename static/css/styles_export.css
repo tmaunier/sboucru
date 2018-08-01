@@ -150,6 +150,22 @@ a[href^="{% url 'sboapp:staff'%}"] {
     position: relative;
     padding: 20px;
 }
+.card-password {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6);
+    background: #fff;
+    opacity: 0.7;
+    display: inline-block;
+    vertical-align: middle;
+    /* border-radius: 5%; */
+    max-width: 500px;
+    /* margin: auto; */
+    margin-top: 20px;
+    margin-right: 20px;
+    margin-left: 20px;
+    text-align: left;
+    position: relative;
+    padding: 20px;
+}
 .card-btn {
   background: #fff;
   opacity: 0.7;

@@ -10,11 +10,7 @@ app_name = "sboapp"
 urlpatterns = [
         #Staff dashboard
     path('staff/', views.staff, name='staff'),
-    path('staff/edit_profile',views.edit_profile, name='edit_profile'),
-    path('staff/edit_profile/change_password',views.change_password, name='change_password'),
-    path('staff/edit_profile/change_profile',views.change_profile, name='change_profile'),
-    # path('staff/password_change/',auth_views.PasswordChangeView.as_view(success_url='sboapp/staff/password_change_done'), name='password_change'),
-    # path('staff/password_change/',auth_views.PasswordChangeView.as_view(success_url=reverse_lazy('sboapp:staff/password_change_done')), name='password_change'),
+    path('staff/change_password',views.change_password, name='change_password'),
         #Import data
     path('staff/import_serum/',views.import_serum, name='import_serum'),
     path('staff/import_location/',views.import_location, name='import_location'),
