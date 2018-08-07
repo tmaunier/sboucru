@@ -1,4 +1,14 @@
-from django.shortcuts import get_object_or_404, render, redirect #render is mainly used with templates while HttpResponse is used for data (for example)
+"""
+Oxford University Clinical Research Unit
+Serum bank manager
+MIT License
+Copyright (c) 2018 tmaunier
+link : https://github.com/tmaunier/sboucru
+Written by Tristan Maunier
+Bioinformatics Master Degree - University of Bordeaux, France
+"""
+
+from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
@@ -11,22 +21,19 @@ from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm, UserChangeForm
 import openpyxl
-import pyexcel #module to read Excel files in Django
+import pyexcel 
 import django_excel as excel
 from IPython.display import IFrame
-import re #Regular expression python module
+import re
 import random
 import pickle
 import datetime
 from datetime import date
 
-# ERRORS 404 & 500
+# ERRORS 404
 
 def error_404_view(request, exception):
     return render(request,'sboapp/pages/error_404.html')
-
-#def error_500_view(request, exception):
-#    return render(request,'sboapp/pages/error_500.html')
 
 # DATA
 def get_data(request):
@@ -1659,299 +1666,6 @@ def get_pma_data(pma_headers_list,sample_list):
             output_array.append(output_list)
     return output_array
 
-# def csv_chik_result(output_array,chik_queryset,check_value,start_line_list,csv_final_headers):
-#     if check_value == 1:
-#         for elisa in chik_queryset:
-#             output_list = []
-#             output_list.extend(start_line_list)
-#             fill_value(csv_final_headers,output_list,'SampleId',elisa.sample.sample_id)
-#             fill_value(csv_final_headers,output_list,'ResultId',elisa.result_id)
-#             fill_value(csv_final_headers,output_list,'Pathogen',elisa.pathogen)
-#             fill_value(csv_final_headers,output_list,'ProcessedDay',elisa.elisa_day)
-#             fill_value(csv_final_headers,output_list,'ProcessedMonth',elisa.elisa_month)
-#             fill_value(csv_final_headers,output_list,'ProcessedYear',elisa.elisa_year)
-#             fill_value(csv_final_headers,output_list,'SampleAbsorbance',elisa.chik_elisa.sample_absorbance)
-#             fill_value(csv_final_headers,output_list,'NegativeAbsorbance',elisa.chik_elisa.negative_absorbance)
-#             fill_value(csv_final_headers,output_list,'CutOff1Absorbance',elisa.chik_elisa.cut_off_1_absorbance)
-#             fill_value(csv_final_headers,output_list,'CutOff2Absorbance',elisa.chik_elisa.cut_off_2_absorbance)
-#             fill_value(csv_final_headers,output_list,'PositiveAbsorbance',elisa.chik_elisa.positive_absorbance)
-#             fill_value(csv_final_headers,output_list,'CutOff',elisa.chik_elisa.cut_off)
-#             fill_value(csv_final_headers,output_list,'NovatecUnits',elisa.chik_elisa.novatech_units)
-#             fill_value(csv_final_headers,output_list,'ResultChik',elisa.chik_elisa.result_chik)
-#             output_array.append(output_list)
-#     else:
-#         output_list = []
-#         output_list.extend(start_line_list)
-#         fill_value(csv_final_headers,output_list,'SampleId',None)
-#         fill_value(csv_final_headers,output_list,'ResultId',None)
-#         fill_value(csv_final_headers,output_list,'Pathogen',None)
-#         fill_value(csv_final_headers,output_list,'ProcessedDay',None)
-#         fill_value(csv_final_headers,output_list,'ProcessedMonth',None)
-#         fill_value(csv_final_headers,output_list,'ProcessedYear',None)
-#         fill_value(csv_final_headers,output_list,'SampleAbsorbance',None)
-#         fill_value(csv_final_headers,output_list,'NegativeAbsorbance',None)
-#         fill_value(csv_final_headers,output_list,'CutOff1Absorbance',None)
-#         fill_value(csv_final_headers,output_list,'CutOff2Absorbance',None)
-#         fill_value(csv_final_headers,output_list,'PositiveAbsorbance',None)
-#         fill_value(csv_final_headers,output_list,'CutOff',None)
-#         fill_value(csv_final_headers,output_list,'NovatecUnits',None)
-#         fill_value(csv_final_headers,output_list,'ResultChik',None)
-#         output_array.append(output_list)
-#     return output_array
-#
-# def csv_dengue_result(output_array,dengue_queryset,check_value,start_line_list,csv_final_headers):
-#     if check_value == 1:
-#         for elisa in dengue_queryset:
-#             output_list = []
-#             output_list.extend(start_line_list)
-#             fill_value(csv_final_headers,output_list,'SampleId',elisa.sample.sample_id)
-#             fill_value(csv_final_headers,output_list,'ResultId',elisa.result_id)
-#             fill_value(csv_final_headers,output_list,'Pathogen',elisa.pathogen)
-#             fill_value(csv_final_headers,output_list,'ProcessedDay',elisa.elisa_day)
-#             fill_value(csv_final_headers,output_list,'ProcessedMonth',elisa.elisa_month)
-#             fill_value(csv_final_headers,output_list,'ProcessedYear',elisa.elisa_year)
-#             fill_value(csv_final_headers,output_list,'SampleAbsorbance',elisa.dengue_elisa.sample_absorbance)
-#             fill_value(csv_final_headers,output_list,'NegativeAbsorbance',elisa.dengue_elisa.negative_absorbance)
-#             fill_value(csv_final_headers,output_list,'PositiveAbsorbance',elisa.dengue_elisa.positive_absorbance)
-#             fill_value(csv_final_headers,output_list,'Calibrator1Absorbance',elisa.dengue_elisa.calibrator_1_absorbance)
-#             fill_value(csv_final_headers,output_list,'Calibrator2Absorbance',elisa.dengue_elisa.calibrator_2_absorbance)
-#             fill_value(csv_final_headers,output_list,'Calibrator3Absorbance',elisa.dengue_elisa.calibrator_3_absorbance)
-#             fill_value(csv_final_headers,output_list,'CalFactor',elisa.dengue_elisa.cal_factor)
-#             fill_value(csv_final_headers,output_list,'CutOff',elisa.dengue_elisa.cut_off)
-#             fill_value(csv_final_headers,output_list,'PositiveCutOffRatio',elisa.dengue_elisa.positive_cut_off_ratio)
-#             fill_value(csv_final_headers,output_list,'DengueIndex',elisa.dengue_elisa.dengue_index)
-#             fill_value(csv_final_headers,output_list,'PanbioUnit',elisa.dengue_elisa.panbio_unit)
-#             fill_value(csv_final_headers,output_list,'ResultDengue',elisa.dengue_elisa.result_dengue)
-#             output_array.append(output_list)
-#     else:
-#         output_list = []
-#         output_list.extend(start_line_list)
-#         fill_value(csv_final_headers,output_list,'SampleId',None)
-#         fill_value(csv_final_headers,output_list,'ResultId',None)
-#         fill_value(csv_final_headers,output_list,'Pathogen',None)
-#         fill_value(csv_final_headers,output_list,'ProcessedDay',None)
-#         fill_value(csv_final_headers,output_list,'ProcessedMonth',None)
-#         fill_value(csv_final_headers,output_list,'ProcessedYear',None)
-#         fill_value(csv_final_headers,output_list,'SampleAbsorbance',None)
-#         fill_value(csv_final_headers,output_list,'NegativeAbsorbance',None)
-#         fill_value(csv_final_headers,output_list,'PositiveAbsorbance',None)
-#         fill_value(csv_final_headers,output_list,'Calibrator1Absorbance',None)
-#         fill_value(csv_final_headers,output_list,'Calibrator2Absorbance',None)
-#         fill_value(csv_final_headers,output_list,'Calibrator3Absorbance',None)
-#         fill_value(csv_final_headers,output_list,'CalFactor',None)
-#         fill_value(csv_final_headers,output_list,'CutOff',None)
-#         fill_value(csv_final_headers,output_list,'PositiveCutOffRatio',None)
-#         fill_value(csv_final_headers,output_list,'DengueIndex',None)
-#         fill_value(csv_final_headers,output_list,'PanbioUnit',None)
-#         fill_value(csv_final_headers,output_list,'ResultDengue',None)
-#         output_array.append(output_list)
-#     return output_array
-#
-# def csv_rickettsia_result(output_array,rickettsia_queryset,check_value,start_line_list,csv_final_headers):
-#     if check_value == 1:
-#         for elisa in rickettsia_queryset:
-#             output_list = []
-#             output_list.extend(start_line_list)
-#             fill_value(csv_final_headers,output_list,'SampleId',elisa.sample.sample_id)
-#             fill_value(csv_final_headers,output_list,'ResultId',elisa.result_id)
-#             fill_value(csv_final_headers,output_list,'Pathogen',elisa.pathogen)
-#             fill_value(csv_final_headers,output_list,'ProcessedDay',elisa.elisa_day)
-#             fill_value(csv_final_headers,output_list,'ProcessedMonth',elisa.elisa_month)
-#             fill_value(csv_final_headers,output_list,'ProcessedYear',elisa.elisa_year)
-#             fill_value(csv_final_headers,output_list,'ScrubTyphus',elisa.rickettsia_elisa.scrub_typhus)
-#             fill_value(csv_final_headers,output_list,'Typhus',elisa.rickettsia_elisa.typhus)
-#             output_array.append(output_list)
-#     else:
-#         output_list = []
-#         output_list.extend(start_line_list)
-#         fill_value(csv_final_headers,output_list,'SampleId',None)
-#         fill_value(csv_final_headers,output_list,'ResultId',None)
-#         fill_value(csv_final_headers,output_list,'Pathogen',None)
-#         fill_value(csv_final_headers,output_list,'ProcessedDay',None)
-#         fill_value(csv_final_headers,output_list,'ProcessedMonth',None)
-#         fill_value(csv_final_headers,output_list,'ProcessedYear',None)
-#         fill_value(csv_final_headers,output_list,'ScrubTyphus',None)
-#         fill_value(csv_final_headers,output_list,'Typhus',None)
-#         output_array.append(output_list)
-#     return output_array
-#
-# def csv_pma_result(output_array,pma_queryset,check_value,start_line_list,csv_final_headers):
-#     if check_value == 1:
-#         for pma in pma_queryset:
-#             output_list = []
-#             output_list.extend(start_line_list)
-#             fill_value(csv_final_headers,output_list,'SampleId',pma.sample.sample_id)
-#             fill_value(csv_final_headers,output_list,'ResultId',pma.result_id)
-#             fill_value(csv_final_headers,output_list,'AgArrayId',pma.ag_array_id)
-#             fill_value(csv_final_headers,output_list,'Tray',pma.tray)
-#             fill_value(csv_final_headers,output_list,'BatchId',pma.batch_id)
-#             fill_value(csv_final_headers,output_list,'StartDilution',pma.start_dilution)
-#             fill_value(csv_final_headers,output_list,'FileName',pma.file_name)
-#             fill_value(csv_final_headers,output_list,'ProcessedDay',pma.processed_day)
-#             fill_value(csv_final_headers,output_list,'ProcessedMonth',pma.processed_month)
-#             fill_value(csv_final_headers,output_list,'ProcessedYear',pma.processed_year)
-#             fill_value(csv_final_headers,output_list,'BatchSentId',pma.batch_sent_id)
-#             fill_value(csv_final_headers,output_list,'ScannedDay',pma.scanned_day)
-#             fill_value(csv_final_headers,output_list,'ScannedMonth',pma.scanned_month)
-#             fill_value(csv_final_headers,output_list,'ScannedYear',pma.scanned_year)
-#             fill_value(csv_final_headers,output_list,'PanbioUnit',pma.panbio_unit)
-#             fill_value(csv_final_headers,output_list,'ChikvE1Mutant',pma.pma_result.chikv_e1_mutant)
-#             fill_value(csv_final_headers,output_list,'ChikvE2',pma.pma_result.chikv_e2)
-#             fill_value(csv_final_headers,output_list,'Dv1Ns1',pma.pma_result.dv1_ns1)
-#             fill_value(csv_final_headers,output_list,'Dv2Ns1',pma.pma_result.dv2_ns1)
-#             fill_value(csv_final_headers,output_list,'Dv3Ns1',pma.pma_result.dv3_ns1)
-#             fill_value(csv_final_headers,output_list,'Dv4Ns1',pma.pma_result.dv4_ns1)
-#             fill_value(csv_final_headers,output_list,'JevNs1',pma.pma_result.jev_ns1)
-#             fill_value(csv_final_headers,output_list,'SlevNs1',pma.pma_result.slev_ns1)
-#             fill_value(csv_final_headers,output_list,'TbevNs1',pma.pma_result.tbev_ns1)
-#             fill_value(csv_final_headers,output_list,'WnvNs1',pma.pma_result.wnv_ns1)
-#             fill_value(csv_final_headers,output_list,'YfvNs1',pma.pma_result.yfv_ns1)
-#             fill_value(csv_final_headers,output_list,'ZikvBrasilNs1',pma.pma_result.zikv_brasil_ns1)
-#             fill_value(csv_final_headers,output_list,'ZikvNs1',pma.pma_result.zikv_ns1)
-#             output_array.append(output_list)
-#     else:
-#         output_list = []
-#         output_list.extend(start_line_list)
-#         fill_value(csv_final_headers,output_list,'SampleId',None)
-#         fill_value(csv_final_headers,output_list,'ResultId',None)
-#         fill_value(csv_final_headers,output_list,'AgArrayId',None)
-#         fill_value(csv_final_headers,output_list,'Tray',None)
-#         fill_value(csv_final_headers,output_list,'BatchId',None)
-#         fill_value(csv_final_headers,output_list,'StartDilution',None)
-#         fill_value(csv_final_headers,output_list,'FileName',None)
-#         fill_value(csv_final_headers,output_list,'ProcessedDay',None)
-#         fill_value(csv_final_headers,output_list,'ProcessedMonth',None)
-#         fill_value(csv_final_headers,output_list,'ProcessedYear',None)
-#         fill_value(csv_final_headers,output_list,'BatchSentId',None)
-#         fill_value(csv_final_headers,output_list,'ScannedDay',None)
-#         fill_value(csv_final_headers,output_list,'ScannedMonth',None)
-#         fill_value(csv_final_headers,output_list,'ScannedYear',None)
-#         fill_value(csv_final_headers,output_list,'PanbioUnit',None)
-#         fill_value(csv_final_headers,output_list,'ChikvE1Mutant',None)
-#         fill_value(csv_final_headers,output_list,'ChikvE2',None)
-#         fill_value(csv_final_headers,output_list,'Dv1Ns1',None)
-#         fill_value(csv_final_headers,output_list,'Dv2Ns1',None)
-#         fill_value(csv_final_headers,output_list,'Dv3Ns1',None)
-#         fill_value(csv_final_headers,output_list,'Dv4Ns1',None)
-#         fill_value(csv_final_headers,output_list,'JevNs1',None)
-#         fill_value(csv_final_headers,output_list,'SlevNs1',None)
-#         fill_value(csv_final_headers,output_list,'TbevNs1',None)
-#         fill_value(csv_final_headers,output_list,'WnvNs1',None)
-#         fill_value(csv_final_headers,output_list,'YfvNs1',None)
-#         fill_value(csv_final_headers,output_list,'ZikvBrasilNs1',None)
-#         fill_value(csv_final_headers,output_list,'ZikvNs1',None)
-#         output_array.append(output_list)
-#     return output_array
-#
-# def get_csv_data(csv_final_headers, sample_list):
-#     output_array=[csv_final_headers]
-#     for s in sample_list:
-#         serum=Serum.objects.get(sample_id=s)
-#         start_line_list=[]
-#         start_line_list.extend([serum.sample_id,serum.site.site_id,serum.coll_num,serum.coll_date,serum.ward.ward_id])
-#         fill_value(csv_final_headers,start_line_list,'LocalSampleId',serum.local_sample_id)
-#         fill_value(csv_final_headers,start_line_list,'Status',serum.status)
-#         fill_value(csv_final_headers,start_line_list,'OriginalAge',serum.original_age)
-#         fill_value(csv_final_headers,start_line_list,'AgeMin',serum.age_min)
-#         fill_value(csv_final_headers,start_line_list,'AgeMax',serum.age_max)
-#         fill_value(csv_final_headers,start_line_list,'Gender1isMaleValue',serum.gender_1ismale_value)
-#         fill_value(csv_final_headers,start_line_list,'Day',serum.day_value)
-#         fill_value(csv_final_headers,start_line_list,'Month',serum.month_value)
-#         fill_value(csv_final_headers,start_line_list,'Year',serum.year)
-#
-#         try:
-#             freezer_valid = serum.freezer
-#             fill_value(csv_final_headers,start_line_list,'StudyCode',serum.freezer.study_code)
-#             fill_value(csv_final_headers,start_line_list,'SampleType',serum.freezer.sample_type)
-#             fill_value(csv_final_headers,start_line_list,'AliquotNo',serum.freezer.aliquot_no)
-#             fill_value(csv_final_headers,start_line_list,'Volume',serum.freezer.volume)
-#             fill_value(csv_final_headers,start_line_list,'FreezerSectionName',serum.freezer.freezer_section_name)
-#             fill_value(csv_final_headers,start_line_list,'Subdivision1Position',serum.freezer.subdivision_1_position)
-#             fill_value(csv_final_headers,start_line_list,'Subdivision2Position',serum.freezer.subdivision_2_position)
-#             fill_value(csv_final_headers,start_line_list,'Subdivision3Position',serum.freezer.subdivision_3_position)
-#             fill_value(csv_final_headers,start_line_list,'Subdivision4Position',serum.freezer.subdivision_4_position)
-#
-#         except ObjectDoesNotExist:
-#             fill_value(csv_final_headers,start_line_list,'StudyCode',None)
-#             fill_value(csv_final_headers,start_line_list,'SampleType',None)
-#             fill_value(csv_final_headers,start_line_list,'AliquotNo',None)
-#             fill_value(csv_final_headers,start_line_list,'Volume',None)
-#             fill_value(csv_final_headers,start_line_list,'FreezerSectionName',None)
-#             fill_value(csv_final_headers,start_line_list,'Subdivision1Position',None)
-#             fill_value(csv_final_headers,start_line_list,'Subdivision2Position',None)
-#             fill_value(csv_final_headers,start_line_list,'Subdivision3Position',None)
-#             fill_value(csv_final_headers,start_line_list,'Subdivision4Position',None)
-#
-#         # output_list =[]
-#         # output_list.extend(start_line_list)
-#         elisa_queryset = Elisa.objects.filter(sample_id=s)
-#         chik_elisa_count = elisa_queryset.filter(pathogen="chikungunya").count()
-#         if chik_elisa_count >0:
-#             chik_elisa_count=1
-#         dengue_elisa_count = elisa_queryset.filter(pathogen="dengue").count()
-#         if dengue_elisa_count >0:
-#             dengue_elisa_count=1
-#         rickettsia_elisa_count = elisa_queryset.filter(pathogen="rickettsia").count()
-#         if rickettsia_elisa_count >0:
-#             rickettsia_elisa_count=1
-#         pma_count = Pma.objects.filter(sample_id=s).count()
-#         if pma_count >0:
-#             pma_count=1
-#         total_count = pma_count+chik_elisa_count+dengue_elisa_count+rickettsia_elisa_count
-#         cpt_result = 0
-#         while cpt_result != total_count:
-#             cpt_check=0
-#             chik_queryset = Elisa.objects.filter(sample=s).filter(pathogen='chikungunya')
-#             dengue_queryset = Elisa.objects.filter(sample=s).filter(pathogen='dengue')
-#             rickettsia_queryset = Elisa.objects.filter(sample=s).filter(pathogen='rickettsia')
-#             pma_queryset = Pma.objects.filter(sample=s)
-#             if chik_queryset:
-#                 output_array = csv_chik_result(output_array,chik_queryset,1,start_line_list,csv_final_headers)
-#                 output_array = csv_dengue_result(output_array,dengue_queryset,0,start_line_list,csv_final_headers)
-#                 output_array = csv_rickettsia_result(output_array,rickettsia_queryset,0,start_line_list,csv_final_headers)
-#                 output_array = csv_pma_result(output_array,pma_queryset,0,start_line_list,csv_final_headers)
-#                 cpt_result +=1
-#                 cpt_check +=1
-#             # else:
-#             #     output_array = csv_chik_result(output_array,chik_queryset,0,start_line_list,csv_final_headers)
-#             elif dengue_queryset and cpt_check==0:
-#                     output_array = csv_chik_result(output_array,chik_queryset,0,start_line_list,csv_final_headers)
-#                     output_array = csv_dengue_result(output_array,dengue_queryset,1,start_line_list,csv_final_headers)
-#                     output_array = csv_rickettsia_result(output_array,rickettsia_queryset,0,start_line_list,csv_final_headers)
-#                     output_array = csv_pma_result(output_array,pma_queryset,0,start_line_list,csv_final_headers)
-#                     cpt_result +=1
-#                     cpt_check +=1
-#                 # else:
-#                 #     output_array = csv_dengue_result(output_array,dengue_queryset,0,start_line_list,csv_final_headers)
-#
-#             elif rickettsia_queryset and cpt_check==0:
-#                     output_array = csv_chik_result(output_array,chik_queryset,0,start_line_list,csv_final_headers)
-#                     output_array = csv_dengue_result(output_array,dengue_queryset,0,start_line_list,csv_final_headers)
-#                     output_array = csv_rickettsia_result(output_array,rickettsia_queryset,1,start_line_list,csv_final_headers)
-#                     output_array = csv_pma_result(output_array,pma_queryset,0,start_line_list,csv_final_headers)
-#                     cpt_result +=1
-#                     cpt_check +=1
-#                 # else:
-#                 #     output_array = csv_rickettsia_result(output_array,rickettsia_queryset,0,start_line_list,csv_final_headers)
-#
-#             elif pma_queryset and cpt_check==0:
-#                     output_array = csv_chik_result(output_array,chik_queryset,0,start_line_list,csv_final_headers)
-#                     output_array = csv_dengue_result(output_array,dengue_queryset,0,start_line_list,csv_final_headers)
-#                     output_array = csv_rickettsia_result(output_array,rickettsia_queryset,0,start_line_list,csv_final_headers)
-#                     output_array = csv_pma_result(output_array,pma_queryset,1,start_line_list,csv_final_headers)
-#                     cpt_result +=1
-#                     cpt_check +=1
-#             # else:
-#             #     output_array = csv_pma_result(output_array,pma_queryset,0,start_line_list,csv_final_headers)
-#
-#             # if not chik_queryset and not dengue_queryset and not rickettsia_queryset and not pma_queryset:
-#             else:
-#                 output_array = csv_chik_result(output_array,chik_queryset,0,start_line_list,csv_final_headers)
-#                 output_array = csv_dengue_result(output_array,dengue_queryset,0,start_line_list,csv_final_headers)
-#                 output_array = csv_rickettsia_result(output_array,rickettsia_queryset,0,start_line_list,csv_final_headers)
-#                 output_array = csv_pma_result(output_array,pma_queryset,0,start_line_list,csv_final_headers)
-#     return output_array
-
 def display_export(request):
     # Get queryset from sort_data function
 
@@ -2041,15 +1755,8 @@ def display_export(request):
                 export_content['ProteinMicroArray'] = pma_array
 
 
-            # if file_type == "json": #DOESNT WORK
-            #     response = HttpResponse(export_content, content_type='application/json')
-            #     response['Content-Disposition'] = 'attachment; filename="download.json"'
-            #     return response
-
-            if file_type == "csv": #DOESNT WORK PROPERLY
-                # csv_final_array = get_csv_data(csv_final_headers, sample_list)
+            if file_type == "csv": #include pyexcel tags
                 export_file=excel.make_response_from_book_dict(export_content,'csv',status=200)
-                # export_file=excel.make_response_from_array(csv_final_array,'csv',status=200)
                 filename ="attachement ; filename = serum_bank_export_"+str(now.year)+"-"+str(now.month)+"-"+str(now.day)+".csv"
                 export_file['Content-Disposition'] = filename
                 return export_file

@@ -1,3 +1,11 @@
+<!-- Oxford University Clinical Research Unit
+Serum bank manager
+MIT License
+Copyright (c) 2018 tmaunier
+link : https://github.com/tmaunier/sboucru
+Written by Tristan Maunier
+Bioinformatics Master Degree - University of Bordeaux, France  -->
+
 {%extends 'layouts/base.html'%}
 {% load static %}
 
@@ -9,6 +17,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="{% static 'css/table.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<!-- Specific style to this page -->
 <style>
 body {
   background: url("{% static 'images/sky_hcmc.jpeg' %}");
@@ -54,10 +64,17 @@ body {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6);
 }
 .label-ct {
+  color:#fff;
+  font-size: 26pt;
+  font-weight: bold;
+}
+.label-ct:before {
   color:#2d5932;
+  content: "Total amount of Serums in the database : ";
+  font-size: 20pt;
 }
 .label-cc {
-  color:#000;
+  color:#2d5932;
 }
 .container-chart {
     background: url("{% static 'images/rice.jpeg' %}");
@@ -127,7 +144,6 @@ body {
 .tabcontent {
     border-top: none;
 }
-
 </style>
 {% endblock %}
 {% block javascript %}
@@ -167,7 +183,7 @@ body {
   </button>
 </div>
 <div class="container-card">
-  <h2 class=label-ct >Latest import</h2>
+  <h2 class=label-cc >Latest import</h2>
   <table class="data-table">
     <thead>
       <tr>
@@ -195,7 +211,7 @@ body {
 
 
   <div class="text-center">
-  <h1 class="label-ct">Total amount of Serums : {{count_serum}}</h1>
+  <h1 class="label-ct">{{count_serum}}</h1>
   <br>
   <div class="wrapper">
   <div id="container"></div>

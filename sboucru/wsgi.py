@@ -1,4 +1,14 @@
 """
+Oxford University Clinical Research Unit
+Serum bank manager
+MIT License
+Copyright (c) 2018 tmaunier
+link : https://github.com/tmaunier/sboucru
+Written by Tristan Maunier
+Bioinformatics Master Degree - University of Bordeaux, France
+"""
+
+"""
 WSGI config for sboucru project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.

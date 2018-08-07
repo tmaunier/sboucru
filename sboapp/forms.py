@@ -1,3 +1,13 @@
+"""
+Oxford University Clinical Research Unit
+Serum bank manager
+MIT License
+Copyright (c) 2018 tmaunier
+link : https://github.com/tmaunier/sboucru
+Written by Tristan Maunier
+Bioinformatics Master Degree - University of Bordeaux, France
+"""
+
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.core import validators
@@ -109,21 +119,12 @@ def get_years():
     year_list.sort()
     return year_list
 
-# def get_import_years():
-#     queryset=Serum.objects.dates('import_date','year')
-#     year_list = []
-#     for q in queryset:
-#         year_list.append(q.year)
-#     year_list.sort()
-#     return year_list
-
 def get_last_three_days():
     datetoday = datetime.date.today()
     dayminusone = datetoday + datetime.timedelta(days=-1)
     dayminustwo = datetoday + datetime.timedelta(days=-2)
     dayminusthree = datetoday + datetime.timedelta(days=-3)
     days_list = [(None,'----'),(datetoday,datetoday),(dayminusone,dayminusone),(dayminustwo,dayminustwo),(dayminusthree,dayminusthree)]
-    # days_list = [("J-0",datetoday),("J-1",dayminusone),("J-2",dayminustwo),("J-3",dayminusthree)]
     return days_list
 
 def get_wards():
@@ -145,16 +146,10 @@ class UploadFileForm(forms.Form):
 class YesNoForm(forms.Form):
     answer = forms.ChoiceField(label='',widget=forms.RadioSelect,choices=((0,'Yes'),(1,'No')), initial=1, help_text='Warning ! Are you sure about it ? This action is definitive')
     def __init__(self, *args, **kwargs):
-        """
-        Surcharge de l'initialisation du formulaire
-        """
         super().__init__(*args, **kwargs)
-        # Tu utilises FormHelper pour customiser ton formulaire
         self.helper = FormHelper()
-        # Tu définis l'id et la classe bootstrap de ton formulaire
         self.helper.form_class = 'form-horizontal'
         self.helper.form_id = 'validate_undo_form'
-        # Tu définis la taille des labels et des champs sur la grille
         self.helper.label_class = 'col-md-4'
         self.helper.field_class = 'col-md-8'
         self.helper.layout = Layout(
@@ -179,7 +174,6 @@ class UndoForm(forms.Form):
     ("pma","PMA"),
     ), help_text='.')
     import_date = forms.ChoiceField(widget=forms.Select(attrs={"class":"form-control", "id":"exampleFormControlSelect1"}),choices=get_last_three_days(),label='', help_text='.')
-    # import_date = forms.DateField(widget=forms.SelectDateWidget(years=get_import_years()),label='', help_text='.')
     import_time = forms.ChoiceField(widget=forms.Select(attrs={"class":"form-control", "id":"exampleFormControlSelect1"}),label='', choices=((None,'----'),
     ("0-2","00:00 -> 01:59"),
     ("2-4","02:00 -> 03:59"),
@@ -196,16 +190,10 @@ class UndoForm(forms.Form):
     ), help_text='.')
 
     def __init__(self, *args, **kwargs):
-        """
-        Surcharge de l'initialisation du formulaire
-        """
         super().__init__(*args, **kwargs)
-        # Tu utilises FormHelper pour customiser ton formulaire
         self.helper = FormHelper()
-        # Tu définis l'id et la classe bootstrap de ton formulaire
         self.helper.form_class = 'form-horizontal'
         self.helper.form_id = 'undo_form'
-        # Tu définis la taille des labels et des champs sur la grille
         self.helper.label_class = 'col-md-4'
         self.helper.field_class = 'col-md-8'
         self.helper.layout = Layout(
@@ -228,12 +216,6 @@ class UndoForm(forms.Form):
         css_class='btn-success col-md-offset-10'
         ),)
 
-# class NameForm(forms.Form):
-#     # error_css_class = 'error'
-#     # required_css_class = 'required'
-#     # user_name = forms.CharField(label='User name',widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Username'}))
-#     user_id = forms.CharField(label='User id',widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Userid'})) #a remplacer par le vrai password
-#     user_password = forms.PasswordInput()
 
 class CustomAuthForm(AuthenticationForm):
     username = forms.CharField(widget=TextInput(attrs={'class':'validate','placeholder': 'Username'}))
@@ -248,17 +230,12 @@ class FileTypeForm(forms.Form):
     file_type = forms.ChoiceField(widget=forms.Select,required=True,choices=(('csv','csv'),('xls','xls'),('xlsx','xlsx'),))
 
 class SortDataForm(forms.Form):
-    # sample_id = forms.CharField(label='Sample_id',validators=[sample_validator], required=False,widget=forms.TextInput(attrs={
-    #         "class":"form-control",
-    #         'placeholder': 'Ex : AG020015'}))
     sample_id = forms.CharField(label='Sample_id',validators=[validators.MaxLengthValidator(8,message=None)], required=False,widget=forms.TextInput(attrs={
             "class":"form-control",
             'placeholder': 'Ex : AG020015'}))
     status = forms.MultipleChoiceField(required=False, label='Status', widget=forms.CheckboxSelectMultiple, choices=(('Available','Available'),('Unavailable','Unavailable')))
     site_id = forms.MultipleChoiceField(required=False,label='Site_id',widget=forms.CheckboxSelectMultiple,choices=get_choices(Site,'site_id'))
     coll_num = forms.ChoiceField(widget=forms.Select(attrs={"class":"form-control", "id":"exampleFormControlSelect1"}), choices=get_choices(Serum,'coll_num'),label='Collection number', required=False)
-    # birth_year = forms.ChoiceField(widget=forms.Select(attrs={"class":"form-control", "id":"exampleFormControlSelect2"}),choices=get_choices(Serum,'birth_year'),label='Birth year', required=False)
-    # age = forms.ChoiceField(widget=forms.Select(attrs={"class":"form-control", "id":"exampleFormControlSelect3"}), choices=get_choices(Serum,'age'),label='Exact age', required=False)
     age_min = forms.ChoiceField(widget=forms.Select(attrs={"class":"form-control", "id":"exampleFormControlSelect4"}), choices=get_choices(Serum,'age_min'),label='Age min', required=False)
     age_max = forms.ChoiceField(widget=forms.Select(attrs={"class":"form-control", "id":"exampleFormControlSelect5"}), choices=get_choices(Serum,'age_max'),label='Age max', required=False, help_text='Note : Age max must be greater than age min !')
     gender = forms.MultipleChoiceField(required=False,label='Gender',widget=forms.CheckboxSelectMultiple,choices=((0,'F'),(1,'M')))
@@ -277,27 +254,16 @@ class SortDataForm(forms.Form):
     serum_file = forms.FileField(required=False, label='Serum list', help_text='Note : If you don\'t import your serums set, the initial serums set will contain every serums in the database')
 
     def __init__(self, *args, **kwargs):
-        """
-        Surcharge de l'initialisation du formulaire
-        """
         super().__init__(*args, **kwargs)
-        # Tu utilises FormHelper pour customiser ton formulaire
         self.helper = FormHelper()
-        # Tu définis l'id et la classe bootstrap de ton formulaire
         self.helper.form_class = 'form-horizontal'
         self.helper.form_id = 'sort-form'
-        # Tu définis la taille des labels et des champs sur la grille
         self.helper.label_class = 'col-md-4'
         self.helper.field_class = 'col-md-8'
-        # Tu crées l'affichage de ton formulaire
         self.helper.layout = Layout(
-            # Le formulaire va contenir 3 onglets
             TabHolder(
-                # Premier onglet
                 Tab(
-                    # Label de l'onglet
                     'Step 1 - Initial Serums Set',
-                    # Liste des champs du modèle à afficher dans l'onglet
                     StrictButton(
                         '<span class="glyphicon glyphicon-arrow-right" \
                         aria-hidden="true"></span> %s' % "Next",
@@ -310,9 +276,7 @@ class SortDataForm(forms.Form):
                     )
                 ),
                 Tab(
-                    # Label de l'onglet
                     'Step 2 - Serum',
-                    # Liste des champs du modèle à afficher dans l'onglet
                     StrictButton(
                         '<span class="glyphicon glyphicon-arrow-right" \
                         aria-hidden="true"></span> %s' % "Next",
@@ -322,12 +286,9 @@ class SortDataForm(forms.Form):
                     Fieldset(
                     'Serum fields',
                     'sample_id',
-                    # InlineCheckboxes('site_id'),
                     'status',
                     'site_id',
                     'coll_num',
-                    # 'birth_year',
-                    # 'age',
                     'age_min',
                     'age_max',
                     'gender',
@@ -335,20 +296,9 @@ class SortDataForm(forms.Form):
                     'year',
                     'ward_id',
                     )
-                    # Tu rajoutes un bouton "Suivant"
-                    # StrictButton(
-                    #     '<span class="glyphicon glyphicon-arrow-right" \
-                    #     aria-hidden="true"></span> %s' % "Next",
-                    #     type='button',
-                    #     css_class='btn-warning col-md-offset-11 btnNext',
-                    # )
-
                 ),
-                # Deuxième onglet
                 Tab(
-                    # Label de l'onglet
                     'Step 3 - Freezer',
-                    # Liste des champs à afficher
                     StrictButton(
                     '<span class="glyphicon glyphicon-arrow-left" \
                     aria-hidden="true"></span> %s' % 'Previous',
@@ -360,7 +310,6 @@ class SortDataForm(forms.Form):
                     aria-hidden="true"></span> %s' % "Submit",
                     type='submit', color='green',
                     css_class='btn-success col-md-offset-10'
-                    # css_class='btn-default col-md-offset-8'
                     ),
                     Fieldset(
                     'Freezer fields',
@@ -374,19 +323,6 @@ class SortDataForm(forms.Form):
                     'subdivision_3_position',
                     'subdivision_4_position',
                     )
-                    # Tu rajoutes des boutons "Précédent" et "Suivant"
-                #     StrictButton(
-                #         '<span class="glyphicon glyphicon-arrow-left" \
-                #         aria-hidden="true"></span> %s' % 'Previous',
-                #         type='button',
-                #         css_class='btn-danger btnPrevious',
-                #     ),
-                #     StrictButton(
-                #         '<span class="glyphicon glyphicon-ok" \
-                #         aria-hidden="true"></span> %s' % "Submit",
-                #         type='submit',
-                #         css_class='btn-success col-md-offset-10'
-                #     )
                 ),
             ),
         )
@@ -394,16 +330,10 @@ class SortDataForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         sample_id = cleaned_data.get("sample_id")
-        # age = cleaned_data.get("age")
         age_min = cleaned_data.get("age_min")
         age_max = cleaned_data.get("age_max")
         coll_date = cleaned_data.get("coll_date")
         year = cleaned_data.get("year")
-        # serum_file = cleaned_data.get("serum_file")
-        #
-        # if serum_file:
-        #     sheet = request.FILES['serum_file'].get_sheet(sheet_name=None, name_columns_by_row=0)
-        #     serum_file = sheet.get_array()
 
         if sample_id:
             if Serum.objects.filter(sample_id=sample_id).exists() is False:
@@ -418,8 +348,6 @@ class SortDataForm(forms.Form):
                 msg = "Warning ! Age_min must be lower than Age_max "
                 self.add_error('age_min', msg) #link an error to a specific field
                 self.add_error('age_max', msg)
-                # raise forms.ValidationError(msg)
-
 
         return cleaned_data
 
@@ -441,27 +369,16 @@ class DisplayDataForm(forms.Form):
     file_type = forms.ChoiceField(widget=forms.Select,required=True, label='',choices=(('csv','csv'),('xls','xls'),('xlsx','xlsx'),))
 
     def __init__(self, *args, **kwargs):
-        """
-        Surcharge de l'initialisation du formulaire
-        """
         super().__init__(*args, **kwargs)
-        # Tu utilises FormHelper pour customiser ton formulaire
         self.helper = FormHelper()
-        # Tu définis l'id et la classe bootstrap de ton formulaire
         self.helper.form_class = 'form-horizontal'
         self.helper.form_id = 'sort-form'
-        # Tu définis la taille des labels et des champs sur la grille
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-8'
-        # Tu crées l'affichage de ton formulaire
         self.helper.layout = Layout(
-            # Le formulaire va contenir 3 onglets
             TabHolder(
-                # Premier onglet
                 Tab(
-                    # Label de l'onglet
                     'Step 1 - Serum',
-                    # Liste des champs du modèle à afficher dans l'onglet
                     StrictButton(
                         '<span class="glyphicon glyphicon-arrow-right" \
                         aria-hidden="true"></span> %s' % "Next",
@@ -472,19 +389,9 @@ class DisplayDataForm(forms.Form):
                     'Serum Fields',
                     'serum_fields',
                     )
-                    # Tu rajoutes un bouton "Suivant"
-                    # StrictButton(
-                    #     '<span class="glyphicon glyphicon-arrow-right" \
-                    #     aria-hidden="true"></span> %s' % "Next",
-                    #     type='button',
-                    #     css_class='btn-warning col-md-offset-11 btnNext',
-                    # )
-
                 ),
                 Tab(
-                    # Label de l'onglet
                     'Step 2 - Freezer',
-                    # Liste des champs du modèle à afficher dans l'onglet
                     StrictButton(
                         '<span class="glyphicon glyphicon-arrow-left" \
                         aria-hidden="true"></span> %s' % 'Previous',
@@ -501,25 +408,9 @@ class DisplayDataForm(forms.Form):
                     'Freezer Fields',
                     'freezer_fields',
                     )
-                    # StrictButton(
-                    #     '<span class="glyphicon glyphicon-arrow-left" \
-                    #     aria-hidden="true"></span> %s' % 'Previous',
-                    #     type='button',
-                    #     css_class='btn-danger btnPrevious',
-                    # ),
-                    # # Tu rajoutes un bouton "Suivant"
-                    # StrictButton(
-                    #     '<span class="glyphicon glyphicon-arrow-right" \
-                    #     aria-hidden="true"></span> %s' % "Next",
-                    #     type='button',
-                    #     css_class='btn-warning col-md-offset-11 btnNext',
-                    # )
-
                 ),
                 Tab(
-                    # Label de l'onglet
                     'Step 3 - Results',
-                    # Liste des champs du modèle à afficher dans l'onglet
                     StrictButton(
                         '<span class="glyphicon glyphicon-arrow-left" \
                         aria-hidden="true"></span> %s' % 'Previous',
@@ -532,16 +423,6 @@ class DisplayDataForm(forms.Form):
                         type='button',
                         css_class='btn-warning col-md-offset-10 btnNext',
                     ),
-                    # Accordion(
-                    # AccordionGroup('Elisa',
-                    # Field('pathogen', css_class="extra")
-                    # ),
-                    # AccordionGroup('Protein MicroArray',
-                    # # 'pma_info',
-                    # 'pma_fields',
-                    # 'pma_results_fields',
-                    # ),
-                    # ),
                     Fieldset(
                     'Elisa',
                     Fieldset(
@@ -564,26 +445,9 @@ class DisplayDataForm(forms.Form):
                     'pma_results_fields',
                     ),
                     ),
-                    # StrictButton(
-                    #     '<span class="glyphicon glyphicon-arrow-left" \
-                    #     aria-hidden="true"></span> %s' % 'Previous',
-                    #     type='button',
-                    #     css_class='btn-danger btnPrevious',
-                    # ),
-                    # # Tu rajoutes un bouton "Suivant"
-                    # StrictButton(
-                    #     '<span class="glyphicon glyphicon-arrow-right" \
-                    #     aria-hidden="true"></span> %s' % "Next",
-                    #     type='button',
-                    #     css_class='btn-warning col-md-offset-11 btnNext',
-                    # )
-
                 ),
-                # Deuxième onglet
                 Tab(
-                    # Label de l'onglet
                     'Step 4 - Export',
-                    # Liste des champs à afficher
                     StrictButton(
                         '<span class="glyphicon glyphicon-arrow-left" \
                         aria-hidden="true"></span> %s' % 'Previous',
@@ -600,7 +464,6 @@ class DisplayDataForm(forms.Form):
                     'Select a type of file',
                     'file_type',
                     )
-                    # Tu rajoutes des boutons "Précédent" et "Suivant"
                 ),
             ),
         )

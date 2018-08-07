@@ -1,6 +1,9 @@
 # sboucru
 Serum bank manager - Web application - Oxford University Clinical Research Unit Vietnam
 
+MIT License
+Copyright (c) 2018 tmaunier
+
 Django : Version 2.0.3
 
 Virtualenv :

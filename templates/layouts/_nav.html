@@ -1,10 +1,18 @@
+<!-- Oxford University Clinical Research Unit
+Serum bank manager
+MIT License
+Copyright (c) 2018 tmaunier
+link : https://github.com/tmaunier/sboucru
+Written by Tristan Maunier
+Bioinformatics Master Degree - University of Bordeaux, France  -->
+
 {% load staticfiles %}
 
 <nav>
     <a href="{% url 'sboapp:staff' %}"  ><img class=grow src="{% static "images/OUCRU_rgb.png" %}" id="logo"></a>
     <a href='' disabled="disabled"><img src="{% static "images/oucru_banner.png" %}" id="banner"></a>
     {% if user.is_authenticated %}
-    <a class="label-user">{{ user.username }}</a>
+    <p class="label-user">{{ user.username }}</p>
     {% if user.is_staff %}
     <a href = "{% url 'admin:index'%}">administration</a>
     {% endif %}

@@ -1,3 +1,13 @@
+"""
+Oxford University Clinical Research Unit
+Serum bank manager
+MIT License
+Copyright (c) 2018 tmaunier
+link : https://github.com/tmaunier/sboucru
+Written by Tristan Maunier
+Bioinformatics Master Degree - University of Bordeaux, France
+"""
+
 """sboucru URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -25,7 +35,6 @@ from . import views
 from sboapp.forms import CustomAuthForm
 
 urlpatterns = [
-        #Registration
     path('', auth_views.login, kwargs={'template_name': 'pages/home.html', 'authentication_form':CustomAuthForm}, name='login'),
     path('logout/', auth_views.logout, {'next_page': '/'}, name='logout'),
     path('sboapp/', include('sboapp.urls', namespace="sboapp")),
@@ -34,4 +43,3 @@ urlpatterns = [
 
 
 handler404 = 'sboapp.views.error_404_view'
-#handler500 = 'sboapp.views.error_500_view'
