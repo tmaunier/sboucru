@@ -14,14 +14,14 @@ from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from sboapp.models import Serum, Site, Ward, Freezer, Elisa, Chik_elisa, Dengue_elisa, Rickettsia_elisa, Pma, Pma_result
 from django import forms
-from .forms import UploadFileForm, PathogenForm, DisplayDataForm, SortDataForm, FileTypeForm, UndoForm, YesNoForm
+from .forms import UploadFileForm, PathogenForm, DisplayDataForm, SortDataForm, FileTypeForm, UndoForm, YesNoForm, DownloadTemplateForm
 from django.views.generic.edit import FormView
 from django.db.models import Count
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm, UserChangeForm
 import openpyxl
-import pyexcel 
+import pyexcel
 import django_excel as excel
 from IPython.display import IFrame
 import re
@@ -359,6 +359,54 @@ def check_status(request):
     args['file_type_form'] = file_type_form
 
     return render (request, "sboapp/pages/check_status.html",args)
+
+def download_template(request):
+    # serum = [['local_sample_id','site','coll_num','sample_id','original_age','age_min','age_max','gender_1ismale_value','coll_date','day_value','month_value','year','ward']]
+    # modif_status and import list of serum = sample_id
+    # location and modif location = [['study_code','sample','sample_type','aliquot_no','volume','freezer_section_name','subdivision_1_position','subdivision_2_position','subdivision_3_position','subdivision_4_position']]
+    args = {}
+    if request.method == "POST":
+        dt_form = DownloadTemplateForm(request.POST)
+        if dt_form.is_valid():
+            file_type = dt_form.cleaned_data.get('file_type')
+            template = dt_form.cleaned_data.get('template')
+
+            if template == "import_serum":
+                final_array = [['local_sample_id','site','coll_num','sample_id','original_age','age_min','age_max','gender_1ismale_value','coll_date','day_value','month_value','year','ward']]
+            elif template == "location":
+                final_array = [['study_code','sample','sample_type','aliquot_no','volume','freezer_section_name','subdivision_1_position','subdivision_2_position','subdivision_3_position','subdivision_4_position']]
+            elif template == "elisa_chik":
+                final_array = [['sample_id','elisa_day','elisa_month','elisa_year','sample_absorbance','negative_absorbance','cut_off_1_absorbance','cut_off_2_absorbance','positive_absorbance','cut_off','novatech_units','result']]
+            elif template == "elisa_dengue":
+                final_array = [['sample_id','elisa_day','elisa_month','elisa_year','sample_absorbance','negative_absorbance','positive_absorbance','calibrator_1_absorbance','calibrator_2_absorbance','calibrator_3_absorbance','cal_factor','cut_off','positive_cut_off_ratio','dengue_index','panbio_unit','result']]
+            elif template == "elisa_rickettsia":
+                final_array = [['sample_id','elisa_day','elisa_month','elisa_year','scrub_typhus','typhus']]
+            elif template == "pma":
+                final_array = [['ag_array_id','tray','batch_id','sample_id','start_dilution','file_name','processed_day','processed_month','processed_year','batch_sent_id','scanned_day','scanned_month','scanned_year','panbio_unit','chikv_e1_mutant','chikv_e2','dv1_ns1','dv2_ns1','dv3_ns1','dv4_ns1','jev_ns1','slev_ns1','tbev_ns1','wnv_ns1','yfv_ns1','zikv_brasil_ns1','zikv_ns1']]
+            elif template == "status_and_sort":
+                final_array = [['sample_id']]
+
+            if file_type == "xls":
+                export_file=excel.make_response_from_array(final_array,'xls',status=200) ### Use make response form array
+                filename ="attachement ; filename = serum_bank_template.xls"
+                export_file['Content-Disposition'] = filename
+                return export_file
+
+            elif file_type == "xlsx":
+                export_file=excel.make_response_from_array(final_array,'xlsx',status=200)
+                filename ="attachement ; filename = serum_bank_template.xlsx"
+                export_file['Content-Disposition'] = filename
+                return export_file
+
+            elif file_type == "csv":
+                export_file=excel.make_response_from_array(final_array,'csv',status=200)
+                filename ="attachement ; filename = serum_bank_template.csv"
+                export_file['Content-Disposition'] = filename
+                return export_file
+    else:
+        dt_form = DownloadTemplateForm()
+        args['dt_form'] = dt_form
+    return render (request, "sboapp/pages/download_template.html", args)
 
 def import_serum(request):
     if request.method == "POST":
@@ -718,11 +766,8 @@ def import_chik_elisa(request):
             if len(chik_import_list) !=0 :
                 for k in range(len(chik_import_list)):
                     elisa_obj = Elisa.objects.get(result_id=chik_import_list[k])
-                    print("elisa obj : ", elisa_obj)
                     for j in range(1,len(sheet_array)):
-                        print("pre test : - ", elisa_obj.sample, "sheet array : - ",sheet_array[j][sample_id_index])
                         if str(sheet_array[j][sample_id_index]) == str(elisa_obj.sample): #comparaison avec le sample_id correspondant au result_id stocke dans chik_import_list
-                            print("post test elisa obj sample")
                             tmp_chik_elisa=[]
                             elisa = elisa_obj
                             tmp_chik_elisa.append(elisa)
@@ -1218,6 +1263,26 @@ def sort_data(request):
                 subdivision_2_position = sort_form.cleaned_data['subdivision_2_position']
                 subdivision_3_position = sort_form.cleaned_data['subdivision_3_position']
                 subdivision_4_position = sort_form.cleaned_data['subdivision_4_position']
+                all_test = sort_form.cleaned_data['all_test']
+                elisa_chik_test = sort_form.cleaned_data['elisa_chik_test']
+                elisa_dengue_test = sort_form.cleaned_data['elisa_dengue_test']
+                elisa_rickettsia_test = sort_form.cleaned_data['elisa_rickettsia_test']
+                pma_test = sort_form.cleaned_data['pma_test']
+                serum_file = request.FILES['serum_file'].get_sheet(sheet_name=None, name_columns_by_row=0)
+
+                if serum_file:
+                    sheet_array = serum_file.get_array()
+                    serum_list = []
+                    sample_id_index = index_finder(sheet_array[0], [r'sample_id', r'sampleid'])
+                    if sample_id_index is not None:
+                        for j in range(1,len(sheet_array)):
+                            if sample_id_exists(sheet_array[j][sample_id_index]) == True:
+                                serum_list.append(sheet_array[j][sample_id_index])
+                        queryset=Serum.objects.filter(sample_id__in=serum_list)
+                    else:
+                        sort_form = SortDataForm()
+                        args = {'sort_form':sort_form}
+                        return render (request, "sboapp/pages/sort_data.html", args)
 
                 if sample_id:
                     if Serum.objects.filter(sample_id=sort_form.cleaned_data['sample_id']).exists() is True:
@@ -1276,6 +1341,42 @@ def sort_data(request):
 
                 if subdivision_4_position:
                     queryset = queryset.filter(freezer__subdivision_4_position=subdivision_4_position)
+
+                if all_test:
+                    if '0' in all_test:
+                        queryset = queryset.filter(elisa__in=Elisa.objects.filter(pathogen="chikungunya"))
+                        queryset = queryset.filter(elisa__in=Elisa.objects.filter(pathogen="dengue"))
+                        queryset = queryset.filter(elisa__in=Elisa.objects.filter(pathogen="rickettsia"))
+                        queryset = queryset.filter(pma__in=Pma.objects.all())
+                    elif '1' in all_test:
+                        queryset = queryset.exclude(elisa__in=Elisa.objects.filter(pathogen="chikungunya"))
+                        queryset = queryset.exclude(elisa__in=Elisa.objects.filter(pathogen="dengue"))
+                        queryset = queryset.exclude(elisa__in=Elisa.objects.filter(pathogen="rickettsia"))
+                        queryset = queryset.exclude(pma__in=Pma.objects.all())
+
+                if elisa_chik_test:
+                    if '0' in elisa_chik_test:
+                        queryset = queryset.filter(elisa__in=Elisa.objects.filter(pathogen="chikungunya"))
+                    elif '1' in elisa_chik_test:
+                        queryset = queryset.exclude(elisa__in=Elisa.objects.filter(pathogen="chikungunya"))
+
+                if elisa_dengue_test:
+                    if '0' in elisa_dengue_test:
+                        queryset = queryset.filter(elisa__in=Elisa.objects.filter(pathogen="dengue"))
+                    elif '1' in elisa_dengue_test:
+                        queryset = queryset.exclude(elisa__in=Elisa.objects.filter(pathogen="dengue"))
+
+                if elisa_rickettsia_test:
+                    if '0' in elisa_rickettsia_test:
+                        queryset = queryset.filter(elisa__in=Elisa.objects.filter(pathogen="rickettsia"))
+                    elif '1' in elisa_rickettsia_test:
+                        queryset = queryset.exclude(elisa__in=Elisa.objects.filter(pathogen="rickettsia"))
+
+                if pma_test:
+                    if '0' in pma_test:
+                        queryset = queryset.filter(pma__in=Pma.objects.all())
+                    elif '1' in pma_test:
+                        queryset = queryset.exclude(pma__in=Pma.objects.all())
 
                 args['queryset']=queryset
                 args['queryset_count']=queryset.count()

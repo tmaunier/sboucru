@@ -32,6 +32,8 @@ urlpatterns = [
         #Undo Import
     path('staff/undo_import',views.undo_import, name='undo_import'),
     path('staff/undo_import/delete_import',views.delete_import, name='delete_import'),
+        #Download Import Templates
+    path('staff/download_template', views.download_template, name='download_template'),
         #Modify Location
     path('staff/modify_location',views.modify_location, name='modify_location'),
         #Modify Status

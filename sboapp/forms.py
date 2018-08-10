@@ -229,6 +229,38 @@ class PathogenForm(forms.Form):
 class FileTypeForm(forms.Form):
     file_type = forms.ChoiceField(widget=forms.Select,required=True,choices=(('csv','csv'),('xls','xls'),('xlsx','xlsx'),))
 
+class DownloadTemplateForm(forms.Form):
+    file_type = forms.ChoiceField(widget=forms.Select,required=True,choices=(('csv','csv'),('xls','xls'),('xlsx','xlsx'),))
+    template = forms.ChoiceField(label='',widget=forms.RadioSelect,choices=(('import_serum','Import Serum'),
+    ('location','Import or Modify Serum\'s location'),
+    ('elisa_chik','Import Elisa Chikungunya results'),
+    ('elisa_dengue','Import Elisa Dengue results'),
+    ('elisa_rickettsia','Import Elisa Rickettsia results'),
+    ('pma','Import PMA results'),
+    ('status_and_sort','Switch Serum Status or Import list of Sera (Sort_data)'),), help_text='.')
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_class = 'form-horizontal'
+        self.helper.form_id = 'download_template_form'
+        self.helper.label_class = 'col-md-4'
+        self.helper.field_class = 'col-md-8'
+        self.helper.layout = Layout(
+        Fieldset(
+        'Files Templates',
+        'template',
+        ),
+        Fieldset(
+        'File type',
+        'file_type',
+        ),
+        StrictButton(
+        '<span class="glyphicon glyphicon-download-alt" \
+        aria-hidden="true"></span> %s' % "Download",
+        type='submit', color='blue',
+        css_class='btn-primary col-md-offset-10'
+        ),)
+
 class SortDataForm(forms.Form):
     sample_id = forms.CharField(label='Sample_id',validators=[validators.MaxLengthValidator(8,message=None)], required=False,widget=forms.TextInput(attrs={
             "class":"form-control",
@@ -252,6 +284,11 @@ class SortDataForm(forms.Form):
     subdivision_3_position = forms.ChoiceField(widget=forms.Select(attrs={"class":"form-control", "id":"exampleFormControlSelect14"}), choices=get_choices(Freezer, 'subdivision_3_position'), label='Box', required=False)
     subdivision_4_position = forms.ChoiceField(widget=forms.Select(attrs={"class":"form-control", "id":"exampleFormControlSelect15"}), choices=get_choices(Freezer, 'subdivision_4_position'), label='Tube', required=False, help_text='.')
     serum_file = forms.FileField(required=False, label='Serum list', help_text='Note : If you don\'t import your serums set, the initial serums set will contain every serums in the database')
+    all_test = forms.MultipleChoiceField(required=False,label='All tests',widget=forms.CheckboxSelectMultiple,choices=((0,'Yes'),(1,'No')), help_text='Check YES on all tests fields means that you\'ll select the sera on which ones ALL TESTS have been performed, Check NO means that you\'ll select the sera on which ones NO test has been performed')
+    elisa_chik_test = forms.MultipleChoiceField(required=False,label='Elisa Chikungunya',widget=forms.CheckboxSelectMultiple,choices=((0,'Yes'),(1,'No')), help_text='.')
+    elisa_dengue_test = forms.MultipleChoiceField(required=False,label='Elisa Dengue',widget=forms.CheckboxSelectMultiple,choices=((0,'Yes'),(1,'No')), help_text='.')
+    elisa_rickettsia_test = forms.MultipleChoiceField(required=False,label='Elisa Rickettsia',widget=forms.CheckboxSelectMultiple,choices=((0,'Yes'),(1,'No')), help_text='.')
+    pma_test = forms.MultipleChoiceField(required=False,label='PMA',widget=forms.CheckboxSelectMultiple,choices=((0,'Yes'),(1,'No')), help_text='Check YES means that you\'ll select the sera on which ones the test has been performed, Check NO means that you\'ll select the sera on which ones the test has not been performed')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -300,16 +337,10 @@ class SortDataForm(forms.Form):
                 Tab(
                     'Step 3 - Freezer',
                     StrictButton(
-                    '<span class="glyphicon glyphicon-arrow-left" \
-                    aria-hidden="true"></span> %s' % 'Previous',
-                    type='button',
-                    css_class='btn-danger btnPrevious',
-                    ),
-                    StrictButton(
-                    '<span class="glyphicon glyphicon-ok" \
-                    aria-hidden="true"></span> %s' % "Submit",
-                    type='submit', color='green',
-                    css_class='btn-success col-md-offset-10'
+                        '<span class="glyphicon glyphicon-arrow-right" \
+                        aria-hidden="true"></span> %s' % "Next",
+                        type='button',
+                        css_class='btn-warning col-md-offset-11 btnNext',
                     ),
                     Fieldset(
                     'Freezer fields',
@@ -322,6 +353,29 @@ class SortDataForm(forms.Form):
                     'subdivision_2_position',
                     'subdivision_3_position',
                     'subdivision_4_position',
+                    )
+                ),
+                Tab(
+                    'Step 4 - Tests',
+                    StrictButton(
+                    '<span class="glyphicon glyphicon-arrow-left" \
+                    aria-hidden="true"></span> %s' % 'Previous',
+                    type='button',
+                    css_class='btn-danger btnPrevious',
+                    ),
+                    StrictButton(
+                    '<span class="glyphicon glyphicon-ok" \
+                    aria-hidden="true"></span> %s' % "Submit",
+                    type='submit', color='green',
+                    css_class='btn-success col-md-offset-10'
+                    ),
+                    Fieldset(
+                    'Select Serum based on the tests performed',
+                    'all_test',
+                    'elisa_chik_test',
+                    'elisa_dengue_test',
+                    'elisa_rickettsia_test',
+                    'pma_test',
                     )
                 ),
             ),

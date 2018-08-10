@@ -1,0 +1,31 @@
+<!-- Oxford University Clinical Research Unit
+Serum bank manager
+MIT License
+Copyright (c) 2018 tmaunier
+link : https://github.com/tmaunier/sboucru
+Written by Tristan Maunier
+Bioinformatics Master Degree - University of Bordeaux, France  -->
+
+<!DOCTYPE html>
+{%extends 'layouts/base_pages.html'%}
+
+{% load widget_tweaks %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+
+{%block title%} Serum Bank OUCRU app {%endblock%}
+
+{% block head-javascript %}
+    {{ form.media }}
+{% endblock %}
+
+{% block page-header %}
+<h1>Download templates page </h1>
+{% endblock %}
+{%block content%}
+<br>
+<div class="row">
+  {% crispy dt_form %}
+</div>
+
+{%endblock content%}
