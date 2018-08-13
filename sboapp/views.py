@@ -1268,8 +1268,10 @@ def sort_data(request):
                 elisa_dengue_test = sort_form.cleaned_data['elisa_dengue_test']
                 elisa_rickettsia_test = sort_form.cleaned_data['elisa_rickettsia_test']
                 pma_test = sort_form.cleaned_data['pma_test']
-                serum_file = request.FILES['serum_file'].get_sheet(sheet_name=None, name_columns_by_row=0)
-
+                try:
+                    serum_file = request.FILES['serum_file'].get_sheet(sheet_name=None, name_columns_by_row=0)
+                except:
+                    serum_file = None
                 if serum_file:
                     sheet_array = serum_file.get_array()
                     serum_list = []
@@ -1283,7 +1285,6 @@ def sort_data(request):
                         sort_form = SortDataForm()
                         args = {'sort_form':sort_form}
                         return render (request, "sboapp/pages/sort_data.html", args)
-
                 if sample_id:
                     if Serum.objects.filter(sample_id=sort_form.cleaned_data['sample_id']).exists() is True:
                         queryset=queryset.filter(sample_id=sort_form.cleaned_data.get('sample_id'))
