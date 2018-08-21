@@ -93,10 +93,10 @@ WSGI_APPLICATION = 'sboucru.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'sbo',
-        'USER':'tmaunier',
-        'PASSWORD':'9KN!PrM74',
-        'PORT':'8080',
+        'NAME': 'database_name',
+        'USER':'username',
+        'PASSWORD':'*****',
+        'PORT':'', #example : 8080
         'HOST': 'localhost',
     }
 }
