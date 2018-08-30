@@ -372,7 +372,7 @@ def download_template(request):
             template = dt_form.cleaned_data.get('template')
 
             if template == "import_serum":
-                final_array = [['local_sample_id','site','coll_num','sample_id','original_age','age_min','age_max','gender_1ismale_value','coll_date','day_value','month_value','year','ward']]
+                final_array = [['local_sample_id','site_id','coll_num','sample_id','original_age','age_min','age_max','gender_1ismale_value','coll_date','day_value','month_value','year','ward_id']]
             elif template == "location":
                 final_array = [['study_code','sample','sample_type','aliquot_no','volume','freezer_section_name','subdivision_1_position','subdivision_2_position','subdivision_3_position','subdivision_4_position']]
             elif template == "elisa_chik":
@@ -419,8 +419,8 @@ def import_serum(request):
             no_match_ward = []
             db_list = [['local_sample_id','site','coll_num','sample_id','original_age','age_min','age_max','gender_1ismale_value','coll_date','day_value','month_value','year','ward']]
             sample_id_index = index_finder(sheet_array[0], [r'sample_id'])
-            site_id_index = index_finder(sheet_array[0], [r'site_id'])
-            ward_id_index = index_finder(sheet_array[0], [r'ward_id'])
+            site_id_index = index_finder(sheet_array[0], [r'site_id',r'site'])
+            ward_id_index = index_finder(sheet_array[0], [r'ward_id',r'ward'])
             if sample_id_index is not None and site_id_index is not None and ward_id_index is not None:
                 for j in range(1,len(sheet_array)):
                     if sample_id_exists(sheet_array[j][sample_id_index]) == True:
@@ -444,7 +444,7 @@ def import_serum(request):
                         site_instance_converter(sheet_array[j],tmp,site_id_index) #Need to convert in Site instance
                         extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'coll_num']))
                         extract_value(sheet_array[j],tmp,sample_id_index)
-                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'birth year', r'original age',r'age_original', r'age_value']))#special regex
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'birth year',r'original_age', r'original age',r'age_original', r'age_value']))#special regex
                         extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'age_min']))
                         extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'age_max']))
                         extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'gender_1ismale_value']))
@@ -531,7 +531,7 @@ def import_location(request):
             sample_doesnt_exist_list = []
             sample_exist_in_freezer_list = []
             db_list = [['study_code','sample','sample_type','aliquot_no','volume','freezer_section_name','subdivision_1_position','subdivision_2_position','subdivision_3_position','subdivision_4_position']]
-            sample_id_index = index_finder(sheet_array[0], [r'ParticipantNo',r'sample_id'])
+            sample_id_index = index_finder(sheet_array[0], [r'ParticipantNo',r'sample_id',r'sample'])
             if sample_id_index is not None:
                 for j in range(1,len(sheet_array)):
                     if sample_id_exists(sheet_array[j][sample_id_index]) == False:
@@ -540,13 +540,13 @@ def import_location(request):
                         sample_exist_in_freezer_list.append(sheet_array[j][sample_id_index])
                     else:
                         tmp=[]
-                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'StudyCode']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'StudyCode',r'study_code']))
                         # extract_value(sheet_array[j],tmp,sample_id_index)
                         serum_instance_converter(sheet_array[j],tmp,sample_id_index) #Need to convert in Serum instance
-                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'SampleType']))
-                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'AliquotNo']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'SampleType',r'sample_type']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'AliquotNo',r'aliquot_no']))
                         extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'Volume']))
-                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'freezer section name']))
+                        extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'freezer section name',r'freezer_section_name']))
                         extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'subdivision_1_position']))
                         extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'subdivision_2_position']))
                         extract_value(sheet_array[j],tmp,index_finder(sheet_array[0],[r'subdivision_3_position']))
@@ -556,7 +556,7 @@ def import_location(request):
                 #save list to database
                 pyexcel.save_as(array=db_list,name_columns_by_row=0, dest_model=Freezer, dest_initializer=None, dest_mapdict=None, dest_batch_size=None)
                 for i in db_list[1:]: #avoid first row of the array --> contains the headers
-                    obj = Freezer.objects.get(sample_id=i[2])
+                    obj = Freezer.objects.get(sample_id=i[1])
                     obj.import_user = request.user
                     obj.save()
             else:

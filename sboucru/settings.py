@@ -60,7 +60,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+  'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -93,11 +93,11 @@ WSGI_APPLICATION = 'sboucru.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'database_name',
-        'USER':'username',
-        'PASSWORD':'*****',
-        'PORT':'', #example : 8080
-        'HOST': 'localhost',
+       'NAME': 'sbank',
+        'USER':'oucru_staff',
+        'PASSWORD':'sHe8LqyQ',
+        'PORT':'8080', #example : 8080
+        'HOST': '',
     }
 }
 
