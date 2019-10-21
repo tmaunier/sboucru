@@ -15,7 +15,7 @@ django-excel==0.0.10
 django-extensions==2.0.6
 django-filter==1.1.0
 django-widget-tweaks==1.4.2
-djangorestframework==3.7.7
+djangorestframework==3.9.1
 et-xmlfile==1.0.1
 html-json-forms==1.0.0
 idna==2.6
